@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.TierMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.Tier">
+    <id column="tier_id" jdbcType="INTEGER" property="id" />
+    <result column="tier_name" jdbcType="VARCHAR" property="name" />
+    <result column="tier_brand_id" jdbcType="INTEGER" property="brandId" />
+    <result column="tier_created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="tier_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <association property="brand" javaType="com.harmoni.pos.menu.model.Brand">
+      <id column="brand_id" jdbcType="INTEGER" property="id" />
+      <result column="brand_name" jdbcType="VARCHAR" property="name" />
+    </association>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    tier.id as tier_id,
+    tier.name as tier_name,
+    tier.brand_id as tier_brand_id,
+    tier.created_at as tier_created_at,
+    tier.updated_at as tier_updated_at
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.BrandMapper.Base_Column_List"/>
+    from tiers tier
+    left join brands brand on tier.brand_id = brand.id
+    where tier.id = #{id,jdbcType=INTEGER}
+  </select>
+
+    <select id="selectByNameAndBrandId" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List" />
+      from tiers tier
+      where tier.name = #{name,jdbcType=VARCHAR} and tier.brand_id = #{brandId,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List" />,
+      <include refid="com.harmoni.pos.menu.mapper.BrandMapper.Base_Column_List"/>
+      from tiers tier
+      left join brands brand on tier.brand_id = brand.id
+    </select>
+
+    <select id="selectByBrandId" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List" />
+      from tiers tier
+      where tier.brand_id = #{brandId,jdbcType=INTEGER}
+    </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from tiers
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.Tier">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into tiers (name, brand_id, created_at, 
+      updated_at)
+    values (#{name,jdbcType=VARCHAR}, #{brandId,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP}, 
+      #{updatedAt,jdbcType=TIMESTAMP})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Tier">
+    update tiers
+    set name = #{name,jdbcType=VARCHAR},
+      brand_id = #{brandId,jdbcType=INTEGER},
+      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

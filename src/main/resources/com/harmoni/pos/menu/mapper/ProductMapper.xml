@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.ProductMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.Product">
+    <id column="product_id" jdbcType="INTEGER" property="id" />
+    <result column="product_name" jdbcType="VARCHAR" property="name" />
+    <result column="product_category_id" jdbcType="INTEGER" property="categoryId" />
+    <result column="product_created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="product_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="product_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
+
+    <association property="category" javaType="com.harmoni.pos.menu.model.Category">
+      <id column="category_id" jdbcType="INTEGER" property="id" />
+      <result column="category_name" jdbcType="VARCHAR" property="name" />
+    </association>
+
+    <collection property="skus" ofType="com.harmoni.pos.menu.model.Sku">
+      <id column="sku_id" jdbcType="INTEGER" property="id" />
+      <result column="sku_name" jdbcType="VARCHAR" property="name" />
+    </collection>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    product.id as product_id,
+    product.name as product_name,
+    product.category_id as product_category_id,
+    product.created_at as product_created_at,
+    product.updated_at as product_updated_at,
+    product.deleted_at as product_deleted_at
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.SkuMapper.Base_Column_List"/>
+    from products product
+          left join categories category on category.id = product.category_id
+          right join skus sku on sku.product_id = product.id
+    where product.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByNameCategoryId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from products product
+    where product.name = #{name,jdbcType=VARCHAR} and product.category_id = #{categoryId,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.SkuMapper.Base_Column_List"/>
+    from products product
+        left join categories category on category.id = product.category_id
+        left join skus sku on sku.product_id = product.id
+  </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from products
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.Product">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into products (name, category_id, created_at, 
+      updated_at, deleted_at)
+    values (#{name,jdbcType=VARCHAR}, #{categoryId,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP}, 
+      #{updatedAt,jdbcType=TIMESTAMP}, #{deletedAt,jdbcType=TIMESTAMP})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Product">
+    update products
+    set name = #{name,jdbcType=VARCHAR},
+      category_id = #{categoryId,jdbcType=INTEGER},
+      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      deleted_at = #{deletedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

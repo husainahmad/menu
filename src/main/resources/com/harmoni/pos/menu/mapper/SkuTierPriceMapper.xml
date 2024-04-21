@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.SkuTierPriceMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.SkuTierPrice">
+    <id column="stp_id" jdbcType="INTEGER" property="id" />
+    <result column="stp_sku_id" jdbcType="INTEGER" property="skuId" />
+    <result column="stp_tier_id" jdbcType="INTEGER" property="tierId" />
+    <result column="stp_price" jdbcType="DECIMAL" property="price" />
+    <result column="stp_created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="stp_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <association property="tier" javaType="com.harmoni.pos.menu.model.Tier">
+      <id column="tier_id" jdbcType="INTEGER" property="id" />
+      <result column="tier_name" jdbcType="VARCHAR" property="name" />
+    </association>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    stp.id as stp_id,
+    stp.sku_id as stp_sku_id,
+    stp.tier_id as stp_tier_id,
+    stp.price as stp_price,
+    stp.created_at as stp_created_at,
+    stp.updated_at as stp_updated_at
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List"/>
+    from sku_tier_prices stp
+        left join tiers tier on tier.id = stp.tier_id
+    where stp.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectBySkusTierId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List"/>
+    from sku_tier_prices stp
+    left join tiers tier on tier.id = stp.tier_id
+    where
+        stp.id > 0
+        <if test="skuIds!=null">
+          and stp.sku_id in
+          <foreach item="skuId" index="index" collection="skuIds"
+                   open="(" separator="," close=")" nullable="true">
+            #{skuId}
+          </foreach>
+        </if>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from sku_tier_prices
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.SkuTierPrice">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into sku_tier_prices (sku_id, tier_id, price, 
+      created_at, updated_at)
+    values (#{skuId,jdbcType=INTEGER}, #{tierId,jdbcType=INTEGER}, #{price,jdbcType=DECIMAL}, 
+      #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.SkuTierPrice">
+    update sku_tier_prices
+    set sku_id = #{skuId,jdbcType=INTEGER},
+      tier_id = #{tierId,jdbcType=INTEGER},
+      price = #{price,jdbcType=DECIMAL},
+      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

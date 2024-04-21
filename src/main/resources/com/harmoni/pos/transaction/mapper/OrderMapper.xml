@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.transaction.mapper.OrderMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.transaction.model.Order">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="order_no" jdbcType="VARCHAR" property="orderNo" />
+    <result column="sub_total" jdbcType="DOUBLE" property="subTotal" />
+    <result column="discount_total" jdbcType="DOUBLE" property="discountTotal" />
+    <result column="grand_total" jdbcType="DOUBLE" property="grandTotal" />
+    <result column="tax_total" jdbcType="DOUBLE" property="taxTotal" />
+    <result column="store_id" jdbcType="INTEGER" property="storeId" />
+    <result column="store_service_types_id" jdbcType="INTEGER" property="storeServiceTypesId" />
+    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, order_no, sub_total, discount_total, grand_total, tax_total, store_id, store_service_types_id, 
+    created_at, updated_at
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from orders
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from orders
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.harmoni.pos.transaction.model.Order">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into orders (order_no, sub_total, discount_total, 
+      grand_total, tax_total, store_id, 
+      store_service_types_id, created_at, updated_at
+      )
+    values (#{orderNo,jdbcType=VARCHAR}, #{subTotal,jdbcType=DOUBLE}, #{discountTotal,jdbcType=DOUBLE}, 
+      #{grandTotal,jdbcType=DOUBLE}, #{taxTotal,jdbcType=DOUBLE}, #{storeId,jdbcType=INTEGER}, 
+      #{storeServiceTypesId,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}
+      )
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.transaction.model.Order">
+    update orders
+    set order_no = #{orderNo,jdbcType=VARCHAR},
+      sub_total = #{subTotal,jdbcType=DOUBLE},
+      discount_total = #{discountTotal,jdbcType=DOUBLE},
+      grand_total = #{grandTotal,jdbcType=DOUBLE},
+      tax_total = #{taxTotal,jdbcType=DOUBLE},
+      store_id = #{storeId,jdbcType=INTEGER},
+      store_service_types_id = #{storeServiceTypesId,jdbcType=INTEGER},
+      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
