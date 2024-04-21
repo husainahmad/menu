@@ -35,9 +35,10 @@ public class SkuTierPriceController {
     }
 
     @GetMapping("/skutier")
-    public ResponseEntity<RestAPIResponse> listBySku(@RequestParam List<Integer> skuIds) {
+    public ResponseEntity<RestAPIResponse> listBySku(@RequestParam List<Integer> skuIds,
+                                                     @RequestParam Integer tierId) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .data(skuTierPriceService.selectBySkusTierId(skuIds))
+                .data(skuTierPriceService.selectBySkusTierId(skuIds, tierId))
                 .httpStatus(HttpStatus.OK.value())
                 .error(null)
                 .build();

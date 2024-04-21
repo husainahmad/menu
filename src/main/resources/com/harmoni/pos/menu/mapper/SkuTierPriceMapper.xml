@@ -48,6 +48,7 @@
             #{skuId}
           </foreach>
         </if>
+        and stp.tier_id =  #{tierId,jdbcType=INTEGER}
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">

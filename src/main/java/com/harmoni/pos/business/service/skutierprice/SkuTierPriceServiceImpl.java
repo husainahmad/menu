@@ -25,7 +25,7 @@ public class SkuTierPriceServiceImpl implements SkuTierPriceService {
     }
 
     @Override
-    public List<SkuTierPrice> selectBySkusTierId(List<Integer> skuIds) {
-        return skuTierPriceMapper.selectBySkusTierId(skuIds);
+    public List<SkuTierPrice> selectBySkusTierId(List<Integer> skuIds, Integer tierId) {
+        return skuTierPriceMapper.selectBySkusTierId(skuIds, tierId);
     }
 }

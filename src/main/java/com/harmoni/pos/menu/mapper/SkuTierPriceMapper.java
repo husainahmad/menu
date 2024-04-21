@@ -12,7 +12,7 @@ public interface SkuTierPriceMapper {
     int deleteByPrimaryKey(Integer id);
     int insert(SkuTierPrice row);
     SkuTierPrice selectByPrimaryKey(Integer id);
-    List<SkuTierPrice> selectBySkusTierId(List<Integer> skuIds);
+    List<SkuTierPrice> selectBySkusTierId(List<Integer> skuIds, Integer tierId);
     int updateByPrimaryKey(SkuTierPrice row);
 
 }
