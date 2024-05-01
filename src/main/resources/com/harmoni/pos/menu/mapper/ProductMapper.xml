@@ -58,6 +58,37 @@
         left join skus sku on sku.product_id = product.id
   </select>
 
+  <select id="selectByCategoryId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.SkuMapper.Base_Column_List"/>
+    from products product
+      left join categories category on category.id = product.category_id
+      left join skus sku on sku.product_id = product.id
+    where 1=1
+    <if test="categoryId != -1">
+      and product.category_id = #{categoryId,jdbcType=INTEGER}
+    </if>
+  </select>
+
+  <select id="selectByCategoryIdBrandId" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List" />,
+      <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List"/>,
+      <include refid="com.harmoni.pos.menu.mapper.SkuMapper.Base_Column_List"/>
+      from products product
+      left join categories category on category.id = product.category_id
+      left join skus sku on sku.product_id = product.id
+      where 1=1
+      <if test="categoryId != -1">
+        and product.category_id = #{categoryId,jdbcType=INTEGER}
+      </if>
+      <if test="brandId != -1">
+        and category.brand_id = #{brandId,jdbcType=INTEGER}
+      </if>
+  </select>
+
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from products
     where id = #{id,jdbcType=INTEGER}

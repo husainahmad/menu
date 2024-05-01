@@ -40,11 +40,23 @@ public class CategoryController {
     }
 
     @GetMapping("/category/{id}")
-    public ResponseEntity<RestAPIResponse> get(@PathVariable Long id) {
+    public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(this.categoryService.get(id))
+                .error(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/category/brand/{brandId}")
+    public ResponseEntity<RestAPIResponse> getByBrandId(@PathVariable Integer brandId) {
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(this.categoryService.selectByBrandId(brandId))
                 .error(null)
                 .build();
 

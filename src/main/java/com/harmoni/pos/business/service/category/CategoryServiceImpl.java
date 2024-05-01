@@ -41,7 +41,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category get(Long id) {
+    public List<Category> selectByBrandId(Integer brandId) {
+        return categoryMapper.selectByBrandId(brandId);
+    }
+
+
+    @Override
+    public Category get(Integer id) {
         Category category = categoryMapper.selectByPrimaryKey(id.intValue());
         if (ObjectUtils.isEmpty(category)) {
             throw new BusinessBadRequestException("exception.category.id.badRequest.notFound", null);

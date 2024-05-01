@@ -31,7 +31,7 @@ public class ProductController {
     }
 
     @GetMapping("/product/{id}")
-    public ResponseEntity<RestAPIResponse> get(@PathVariable Long id) {
+    public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -48,6 +48,31 @@ public class ProductController {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(this.productService.seelctAll())
+                .error(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/product/category/{id}")
+    public ResponseEntity<RestAPIResponse> getByCategory(@PathVariable Integer id) {
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(this.productService.selectByCategory(id))
+                .error(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/product/category/{categoryId}/{brandId}")
+    public ResponseEntity<RestAPIResponse> getByCategoryBrand(@PathVariable Integer categoryId,
+                                                              @PathVariable Integer brandId) {
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(this.productService.selectByCategoryBrand(categoryId, brandId))
                 .error(null)
                 .build();
 

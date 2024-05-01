@@ -41,7 +41,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product get(Long id) {
+    public List<Product> selectByCategory(Integer categoryId) {
+        return productMapper.selectByCategoryId(categoryId);
+    }
+
+    @Override
+    public List<Product> selectByCategoryBrand(Integer categoryId, Integer brandId) {
+        return productMapper.selectByCategoryIdBrandId(categoryId, brandId);
+    }
+
+    @Override
+    public Product get(Integer id) {
 
         Product product = productMapper.selectByPrimaryKey(id.intValue());
         if (ObjectUtils.isEmpty(product)) {

@@ -9,9 +9,9 @@ public interface TierService {
 
     int create(TierDto tierDto);
 
-    Tier get(Long id);
+    Tier get(Integer id);
 
-    List<Tier> getByBrandId(Long id);
+    List<Tier> getByBrandId(Integer id);
     List<Tier> list();
 
 }

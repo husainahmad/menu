@@ -9,7 +9,8 @@ public interface ProductService {
 
     int create(ProductDto productDto);
     List<Product> seelctAll();
-
-    Product get(Long id);
+    List<Product> selectByCategory(Integer categoryId);
+    List<Product> selectByCategoryBrand(Integer categoryId, Integer brandId);
+    Product get(Integer id);
 
 }

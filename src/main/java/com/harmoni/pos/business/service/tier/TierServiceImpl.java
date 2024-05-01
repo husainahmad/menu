@@ -38,7 +38,7 @@ public class TierServiceImpl implements TierService {
     }
 
     @Override
-    public Tier get(Long id) {
+    public Tier get(Integer id) {
         Tier tier = tierMapper.selectByPrimaryKey(id.intValue());
         if (ObjectUtils.isEmpty(tier)) {
             throw new BusinessBadRequestException("exception.tier.id.badRequest.notFound", null);
@@ -47,8 +47,8 @@ public class TierServiceImpl implements TierService {
     }
 
     @Override
-    public List<Tier> getByBrandId(Long id) {
-        List<Tier> tiers = tierMapper.selectByBrandId(id.intValue());
+    public List<Tier> getByBrandId(Integer id) {
+        List<Tier> tiers = tierMapper.selectByBrandId(id);
         if (ObjectUtils.isEmpty(tiers)) {
             throw new BusinessBadRequestException("exception.tier.id.badRequest.notFound", null);
         }

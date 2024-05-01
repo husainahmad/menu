@@ -9,6 +9,8 @@ public interface CategoryService {
     int create(CategoryDto categoryDto);
     List<Category> list();
 
-    Category get(Long id);
+    List<Category> selectByBrandId(Integer brandId);
+
+    Category get(Integer id);
 
 }
