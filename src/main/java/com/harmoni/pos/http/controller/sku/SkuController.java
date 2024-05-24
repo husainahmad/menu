@@ -30,16 +30,4 @@ public class SkuController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
     }
 
-    @GetMapping("/sku")
-    public ResponseEntity<RestAPIResponse> list() {
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .data(skuService.selectAll())
-                .httpStatus(HttpStatus.OK.value())
-                .error(null)
-                .build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
-    }
-
-
 }

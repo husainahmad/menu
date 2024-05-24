@@ -21,14 +21,14 @@
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
     <settings>
-        <setting name="jdbcTypeForNull" value="NULL"/>
+        <setting name="jdbcTypeForNull" value="NULL" />
+        <setting name="defaultExecutorType" value="BATCH" />
     </settings>
     <typeAliases>
         <package name="com.harmoni.pos.menu.model"/>
     </typeAliases>
-
     <mappers>
 
-        <mapper resource="pos/menu/dao/menu/mapper/BrandMapper.xml"/>
+        <mapper resource="pos/menu/dao/menu/mapper/BrandMapper.xml" />
     </mappers>
 </configuration>

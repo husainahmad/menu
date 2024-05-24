@@ -1,16 +1,24 @@
 package com.harmoni.pos.business.service.product;
 
+import com.harmoni.pos.business.service.category.CategoryService;
+import com.harmoni.pos.business.service.sku.SkuService;
+import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
+import com.harmoni.pos.business.service.tier.TierService;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
-import com.harmoni.pos.menu.mapper.ProductMapper;
-import com.harmoni.pos.menu.model.Product;
+import com.harmoni.pos.menu.mapper.*;
+import com.harmoni.pos.menu.model.*;
 import com.harmoni.pos.menu.model.dto.ProductDto;
+import com.harmoni.pos.menu.model.dto.ProductSkuDto;
+import com.harmoni.pos.menu.model.dto.ProductSkuTierDto;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -18,14 +26,14 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
     private final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
     private final ProductMapper productMapper;
-
+    private final SkuService skuService;
+    private final TierService tierService;
+    private final SkuTierPriceService skuTierPriceService;
+    private final CategoryService categoryService;
     @Override
     public int create(ProductDto productDto) {
 
-        if (!ObjectUtils.isEmpty(productMapper.selectByNameCategoryId(productDto.getName(),
-                productDto.getCategoryId()))) {
-            throw new BusinessBadRequestException("exception.product.badRequest.duplicate", null);
-        }
+        this.selectByNameCategoryId(productDto.getName(), productDto.getCategoryId());
 
         int record = productMapper.insert(productDto.toProduct());
         if (record<1) {
@@ -33,11 +41,6 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return record;
-    }
-
-    @Override
-    public List<Product> seelctAll() {
-        return productMapper.selectAll();
     }
 
     @Override
@@ -53,11 +56,71 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product get(Integer id) {
 
-        Product product = productMapper.selectByPrimaryKey(id.intValue());
+        Product product = productMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(product)) {
             throw new BusinessBadRequestException("exception.product.id.badRequest.notFound", null);
         }
 
         return product;
     }
+
+    @Override
+    public void selectByNameCategoryId(String name, Integer categoryId) {
+        Product product = productMapper.selectByNameCategoryId(name, categoryId);
+        if (!ObjectUtils.isEmpty(product)) {
+            throw new BusinessBadRequestException("exception.product.badRequest.duplicate", null);
+        }
+    }
+
+    @Override
+    public void updateProductSku(Integer productId, ProductSkuDto productSkuDto) {
+        Product product = this.get(productId);
+        boolean isIgnoreUpdateProduct = false;
+
+        Category category = this.categoryService.get(productSkuDto.getCategoryId());
+
+        if (product.getName().equals(productSkuDto.getName()) &&
+            product.getCategoryId().equals(productSkuDto.getCategoryId())) {
+            isIgnoreUpdateProduct = true;
+        }
+
+        if (!isIgnoreUpdateProduct) {
+            product.setName(productSkuDto.getName());
+            product.setCategoryId(category.getId());
+            this.productMapper.updateByPrimaryKey(product);
+        }
+
+        List<Integer> skuIds = new ArrayList<>();
+        List<Sku> skus = new ArrayList<>();
+        List<Integer> tierIds = new ArrayList<>();
+        List<SkuTierPrice> skuTierPrices = new ArrayList<>();
+
+        Sku sku = null;
+        SkuTierPrice skuTierPrice = null;
+        for (ProductSkuTierDto skuDto : productSkuDto.getSkus()) {
+            skuIds.add(skuDto.getId());
+            sku = new Sku();
+            sku.setId(skuDto.getId());
+            sku.setName(skuDto.getName());
+            sku.setProductId(productSkuDto.getId());
+            sku.setUpdatedAt(new Date(System.currentTimeMillis()));
+            skus.add(sku);
+            tierIds.add(skuDto.getTierPrice().getId());
+            skuTierPrice = new SkuTierPrice();
+            skuTierPrice.setSkuId(sku.getId());
+            skuTierPrice.setTierId(skuDto.getTierPrice().getId());
+            skuTierPrice.setPrice(skuDto.getTierPrice().getPrice());
+            skuTierPrices.add(skuTierPrice);
+        }
+
+        this.skuService.compareListSkus(skus, skuIds);
+        this.skuService.validateSkuName(
+                this.skuService.selectByProductId(product.getId()), skus);
+
+        this.skuService.updateBulk(skus);
+        this.tierService.validateTierByIds(tierIds);
+        this.skuTierPriceService.insetOrUpdateBulk(skuTierPrices);
+
+    }
+
 }

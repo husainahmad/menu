@@ -66,12 +66,19 @@
       #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
   </insert>
 
+  <insert id="insertOrUpdate" >
+    insert into sku_tier_prices (sku_id, tier_id, price,
+        created_at, updated_at)
+    values (#{skuId,jdbcType=INTEGER}, #{tierId,jdbcType=INTEGER}, #{price,jdbcType=DECIMAL},
+    #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
+    on duplicate key update price = #{price,jdbcType=DECIMAL}
+  </insert>
+
   <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.SkuTierPrice">
     update sku_tier_prices
     set sku_id = #{skuId,jdbcType=INTEGER},
       tier_id = #{tierId,jdbcType=INTEGER},
       price = #{price,jdbcType=DECIMAL},
-      created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>

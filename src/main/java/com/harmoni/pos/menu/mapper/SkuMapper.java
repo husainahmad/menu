@@ -15,5 +15,6 @@ public interface SkuMapper {
     List<Sku> selectAll();
     int updateByPrimaryKey(Sku row);
     List<Sku> selectByProductId(Integer productId);
+    List<Sku> selectByIds(List<Integer> ids);
 
 }

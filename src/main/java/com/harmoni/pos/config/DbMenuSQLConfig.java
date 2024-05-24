@@ -1,8 +1,12 @@
 package com.harmoni.pos.config;
 
+import com.harmoni.pos.menu.mapper.SkuMapper;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
+import org.mybatis.spring.mapper.MapperFactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -17,6 +21,7 @@ import javax.sql.DataSource;
 @MapperScan(value = "com.harmoni.pos.menu.mapper")
 @Configuration
 public class DbMenuSQLConfig {
+    public final static String BATCH_SKU_MAPPER = "skuMapper";
 
     @Primary
     @Bean(name = "menuSQLDataSource")
@@ -44,4 +49,5 @@ public class DbMenuSQLConfig {
             @Qualifier("menuSQLDataSource") DataSource menuSqlDatasource) {
         return new DataSourceTransactionManager(menuSqlDatasource);
     }
+
 }

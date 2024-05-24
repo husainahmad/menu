@@ -38,22 +38,29 @@
       where tier.name = #{name,jdbcType=VARCHAR} and tier.brand_id = #{brandId,jdbcType=INTEGER}
     </select>
 
-    <select id="selectAll" resultMap="BaseResultMap">
+    <select id="selectByBrandId" resultMap="BaseResultMap">
       select
       <include refid="Base_Column_List" />,
       <include refid="com.harmoni.pos.menu.mapper.BrandMapper.Base_Column_List"/>
       from tiers tier
       left join brands brand on tier.brand_id = brand.id
-    </select>
-
-    <select id="selectByBrandId" resultMap="BaseResultMap">
-      select
-      <include refid="Base_Column_List" />
-      from tiers tier
       where tier.brand_id = #{brandId,jdbcType=INTEGER}
     </select>
 
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <select id="selectByIds" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List" />,
+      <include refid="com.harmoni.pos.menu.mapper.BrandMapper.Base_Column_List"/>
+      from tiers tier
+      left join brands brand on tier.brand_id = brand.id
+      where tier.id in
+        <foreach item="id" index="index" collection="ids"
+               open="(" separator="," close=")" nullable="true">
+          #{id}
+        </foreach>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from tiers
     where id = #{id,jdbcType=INTEGER}
   </delete>

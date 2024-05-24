@@ -29,17 +29,6 @@ public class TierController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
     }
 
-    @GetMapping("/tier")
-    public ResponseEntity<RestAPIResponse> list() {
-
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .data(tierService.list())
-                .httpStatus(HttpStatus.OK.value())
-                .build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
-    }
-
     @GetMapping("/tier/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 

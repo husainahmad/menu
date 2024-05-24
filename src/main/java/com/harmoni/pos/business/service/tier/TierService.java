@@ -12,6 +12,7 @@ public interface TierService {
     Tier get(Integer id);
 
     List<Tier> getByBrandId(Integer id);
-    List<Tier> list();
+
+    List<Tier> validateTierByIds(List<Integer> ids);
 
 }

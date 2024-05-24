@@ -42,18 +42,6 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/product")
-    public ResponseEntity<RestAPIResponse> list() {
-
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .httpStatus(HttpStatus.OK.value())
-                .data(this.productService.seelctAll())
-                .error(null)
-                .build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
-    }
-
     @GetMapping("/product/category/{id}")
     public ResponseEntity<RestAPIResponse> getByCategory(@PathVariable Integer id) {
 

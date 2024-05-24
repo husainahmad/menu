@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @RequiredArgsConstructor
 @Service("tierService")
@@ -56,7 +57,23 @@ public class TierServiceImpl implements TierService {
     }
 
     @Override
-    public List<Tier> list() {
-        return tierMapper.selectAll();
+    public List<Tier> validateTierByIds(List<Integer> ids) {
+        List<Tier> tiers = this.tierMapper.selectByIds(ids);
+        if (ObjectUtils.isEmpty(tiers)) {
+            throw new BusinessBadRequestException("exception.tier.id.badRequest.notFound", null);
+        }
+        tiers.forEach(tier -> {
+            AtomicBoolean isFound = new AtomicBoolean(false);
+            ids.forEach(id -> {
+                if (tier.getId().equals(id)) {
+                    isFound.set(true);
+                }
+            });
+            if (!isFound.get()) {
+                throw new BusinessBadRequestException("exception.tier.id.badRequest.notFound", null);
+            }
+        });
+        return tiers;
     }
+
 }

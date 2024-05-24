@@ -56,6 +56,17 @@
     where sku.product_id = #{productId,jdbcType=INTEGER}
   </select>
 
+  <select id="selectByIds"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from skus sku
+    where sku.id in
+    <foreach item="id" index="index" collection="ids"
+             open="(" separator="," close=")" nullable="true">
+        #{id}
+    </foreach>
+  </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from skus
     where id = #{id,jdbcType=INTEGER}
@@ -75,9 +86,8 @@
     update skus
     set name = #{name,jdbcType=VARCHAR},
       product_id = #{productId,jdbcType=INTEGER},
-      created_at = #{createdAt,jdbcType=TIMESTAMP},
-      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
-      is_active = #{isActive,jdbcType=BIT}
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
 </mapper>
