@@ -96,7 +96,7 @@ public class ProductServiceImpl implements ProductService {
         List<SkuTierPrice> skuTierPrices = new ArrayList<>();
 
         Sku sku = null;
-        SkuTierPrice skuTierPrice = null;
+        SkuTierPrice skuTierPrice;
         for (ProductSkuTierDto skuDto : productSkuDto.getSkus()) {
             skuIds.add(skuDto.getId());
             sku = new Sku();

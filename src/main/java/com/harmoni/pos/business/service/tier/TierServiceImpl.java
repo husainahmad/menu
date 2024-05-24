@@ -40,7 +40,7 @@ public class TierServiceImpl implements TierService {
 
     @Override
     public Tier get(Integer id) {
-        Tier tier = tierMapper.selectByPrimaryKey(id.intValue());
+        Tier tier = tierMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(tier)) {
             throw new BusinessBadRequestException("exception.tier.id.badRequest.notFound", null);
         }

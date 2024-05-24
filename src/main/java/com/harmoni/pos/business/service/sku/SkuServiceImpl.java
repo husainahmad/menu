@@ -42,7 +42,7 @@ public class SkuServiceImpl implements SkuService {
 
     @Override
     public List<Sku> selectByProductId(Integer productId) {
-        return skuMapper.selectByProductId(productId.intValue());
+        return skuMapper.selectByProductId(productId);
     }
 
     @Override
