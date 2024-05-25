@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -96,21 +97,13 @@ public class ProductServiceImpl implements ProductService {
         List<SkuTierPrice> skuTierPrices = new ArrayList<>();
 
         Sku sku = null;
-        SkuTierPrice skuTierPrice;
         for (ProductSkuTierDto skuDto : productSkuDto.getSkus()) {
             skuIds.add(skuDto.getId());
-            sku = new Sku();
-            sku.setId(skuDto.getId());
-            sku.setName(skuDto.getName());
-            sku.setProductId(productSkuDto.getId());
-            sku.setUpdatedAt(new Date(System.currentTimeMillis()));
+            sku = setSku(skuDto.getId(), skuDto.getName(), productSkuDto.getId());
             skus.add(sku);
             tierIds.add(skuDto.getTierPrice().getId());
-            skuTierPrice = new SkuTierPrice();
-            skuTierPrice.setSkuId(sku.getId());
-            skuTierPrice.setTierId(skuDto.getTierPrice().getId());
-            skuTierPrice.setPrice(skuDto.getTierPrice().getPrice());
-            skuTierPrices.add(skuTierPrice);
+            skuTierPrices.add(setTierPrice(sku.getId(), skuDto.getTierPrice().getId(),
+                    skuDto.getTierPrice().getPrice()));
         }
 
         this.skuService.compareListSkus(skus, skuIds);
@@ -121,6 +114,23 @@ public class ProductServiceImpl implements ProductService {
         this.tierService.validateTierByIds(tierIds);
         this.skuTierPriceService.insetOrUpdateBulk(skuTierPrices);
 
+    }
+
+    private Sku setSku(Integer skuId, String skuName, Integer productId) {
+        Sku sku = new Sku();
+        sku.setId(skuId<=0 ? null : skuId);
+        sku.setName(skuName);
+        sku.setProductId(productId);
+        sku.setUpdatedAt(new Date(System.currentTimeMillis()));
+        return sku;
+    }
+
+    private SkuTierPrice setTierPrice(Integer skuId, Integer tierPriceId, BigDecimal price) {
+        SkuTierPrice skuTierPrice = new SkuTierPrice();
+        skuTierPrice.setSkuId(skuId);
+        skuTierPrice.setTierId(tierPriceId);
+        skuTierPrice.setPrice(price);
+        return skuTierPrice;
     }
 
 }

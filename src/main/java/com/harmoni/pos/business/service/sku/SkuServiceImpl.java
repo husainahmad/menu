@@ -58,11 +58,14 @@ public class SkuServiceImpl implements SkuService {
         List<Boolean> skusFound = new ArrayList<>(skus.size());
 
         skus.forEach(skuPayload -> {
-            skusByIdes.forEach(sku -> {
-                if (skuPayload.getId().equals(sku.getId())) {
-                    skusFound.add(record.get(), true);
-                }
-            });
+            if (!ObjectUtils.isEmpty(skuPayload.getId())) {
+                skusByIdes.forEach(sku -> {
+                    if (skuPayload.getId().equals(sku.getId())) {
+                        skusFound.add(record.get(), true);
+                    }
+                });
+            }
+
             record.getAndIncrement();
         });
 
@@ -78,7 +81,7 @@ public class SkuServiceImpl implements SkuService {
     public void updateBulk(List<Sku> skus) {
         try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
             SkuMapper mapper = sqlSession.getMapper(SkuMapper.class);
-            skus.forEach(mapper::updateByPrimaryKey);
+            skus.forEach(mapper::insertOrUpdate);
             sqlSession.commit();
         }
     }
@@ -88,7 +91,7 @@ public class SkuServiceImpl implements SkuService {
 
         skuDtos.forEach(sku -> {
             skuDtos.forEach(skuDto -> {
-                if (!sku.getId().equals(skuDto.getId())) {
+                if (!ObjectUtils.isEmpty(sku.getId()) && !sku.getId().equals(skuDto.getId())) {
                     if (sku.getProductId().equals(skuDto.getProductId()) &&
                          sku.getName().equals(skuDto.getName())) {
                             throw new BusinessNoContentRequestException("exception.noContent", null);
