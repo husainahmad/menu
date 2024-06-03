@@ -1,5 +1,6 @@
 package com.harmoni.pos.business.service.sku;
 
+import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
 import com.harmoni.pos.menu.mapper.SkuMapper;
@@ -24,6 +25,7 @@ public class SkuServiceImpl implements SkuService {
     private final Logger log = LoggerFactory.getLogger(SkuServiceImpl.class);
     private final SkuMapper skuMapper;
     private final SqlSessionFactory sqlSessionFactory;
+    private final SkuTierPriceService skuTierPriceService;
     @Override
     public int create(SkuDto skuDto) {
 
@@ -100,6 +102,16 @@ public class SkuServiceImpl implements SkuService {
             });
         });
 
+    }
+
+    @Override
+    public void deleteSku(Integer skuId) {
+        Sku sku = skuMapper.selectById(skuId);
+        if (ObjectUtils.isEmpty(sku)) {
+            throw new BusinessNoContentRequestException("exception.noContent", null);
+        }
+        skuTierPriceService.deleteBySkuId(skuId);
+        skuMapper.deleteById(skuId);
     }
 
 

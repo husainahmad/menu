@@ -1,6 +1,5 @@
 package com.harmoni.pos.http.filter;
 
-import com.harmoni.pos.http.controller.category.CategoryController;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,6 +1,5 @@
 package com.harmoni.pos.http.handler;
 
-
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import org.slf4j.Logger;

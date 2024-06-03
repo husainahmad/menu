@@ -56,7 +56,12 @@
     where id = #{id,jdbcType=INTEGER}
   </delete>
 
-  <insert id="insert" parameterType="com.harmoni.pos.menu.model.SkuTierPrice">
+  <delete id="deleteBySkuId" parameterType="java.lang.Integer">
+    delete from sku_tier_prices
+    where sku_id = #{skuId,jdbcType=INTEGER}
+  </delete>
+
+    <insert id="insert" parameterType="com.harmoni.pos.menu.model.SkuTierPrice">
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>

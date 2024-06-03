@@ -10,4 +10,6 @@ public interface SkuTierPriceService {
     int create(SkuTierPriceDto skuTierPriceDto);
     List<SkuTierPrice> selectBySkusTierId(List<Integer> skuIds, Integer tierId);
     void insetOrUpdateBulk(List<SkuTierPrice> skuTierPrices);
+    int deleteBySkuId(Integer skuId);
+
 }

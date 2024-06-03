@@ -1,9 +1,7 @@
 package com.harmoni.pos.http.controller.storeservicetype;
 
-import com.harmoni.pos.business.service.store.StoreService;
 import com.harmoni.pos.business.service.storeservicetype.StoreServiceTypeService;
 import com.harmoni.pos.http.response.RestAPIResponse;
-import com.harmoni.pos.menu.model.dto.StoreDto;
 import com.harmoni.pos.menu.model.dto.StoreServiceTypeDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

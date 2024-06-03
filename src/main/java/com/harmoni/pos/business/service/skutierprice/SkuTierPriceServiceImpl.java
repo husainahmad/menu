@@ -39,4 +39,9 @@ public class SkuTierPriceServiceImpl implements SkuTierPriceService {
             sqlSession.commit();
         }
     }
+
+    @Override
+    public int deleteBySkuId(Integer skuId) {
+        return skuTierPriceMapper.deleteBySkuId(skuId);
+    }
 }

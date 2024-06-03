@@ -9,6 +9,7 @@ import java.util.List;
 public interface SkuTierPriceMapper {
 
     int deleteByPrimaryKey(Integer id);
+    int deleteBySkuId(Integer skuId);
     int insert(SkuTierPrice row);
     SkuTierPrice selectByPrimaryKey(Integer id);
     List<SkuTierPrice> selectBySkusTierId(List<Integer> skuIds, Integer tierId);
