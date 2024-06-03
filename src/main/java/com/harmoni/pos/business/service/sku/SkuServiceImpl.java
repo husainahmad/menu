@@ -90,7 +90,6 @@ public class SkuServiceImpl implements SkuService {
 
     @Override
     public void validateSkuName(List<Sku> originalSkus, List<Sku> skuDtos) {
-
         skuDtos.forEach(sku -> {
             skuDtos.forEach(skuDto -> {
                 if (!ObjectUtils.isEmpty(sku.getId()) && !sku.getId().equals(skuDto.getId())) {
@@ -101,7 +100,6 @@ public class SkuServiceImpl implements SkuService {
                 }
             });
         });
-
     }
 
     @Override
@@ -113,6 +111,5 @@ public class SkuServiceImpl implements SkuService {
         skuTierPriceService.deleteBySkuId(skuId);
         skuMapper.deleteById(skuId);
     }
-
 
 }
