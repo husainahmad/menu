@@ -33,7 +33,7 @@ public class SkuController {
     }
 
     @DeleteMapping("/sku/{id}")
-    public ResponseEntity<RestAPIResponse> delete(@PathVariable(required = true) Integer id) {
+    public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         skuService.deleteSku(id);
 
         log.debug("Sku deleted {} ", id);
