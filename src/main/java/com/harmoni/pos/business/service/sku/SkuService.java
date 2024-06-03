@@ -1,7 +1,6 @@
 package com.harmoni.pos.business.service.sku;
 
 import com.harmoni.pos.menu.model.Sku;
-import com.harmoni.pos.menu.model.dto.ProductDto;
 import com.harmoni.pos.menu.model.dto.SkuDto;
 
 import java.util.List;
