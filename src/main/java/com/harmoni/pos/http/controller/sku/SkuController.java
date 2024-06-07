@@ -27,7 +27,8 @@ public class SkuController {
 
         log.debug("Sku created {} ", id);
 
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
+        RestAPIResponse restAPIResponse = RestAPIResponse
+                .builder().httpStatus(HttpStatus.CREATED.value()).build();
 
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
     }
@@ -38,8 +39,9 @@ public class SkuController {
 
         log.debug("Sku deleted {} ", id);
 
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.NO_CONTENT.value()).build();
 
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.NO_CONTENT);
     }
 }

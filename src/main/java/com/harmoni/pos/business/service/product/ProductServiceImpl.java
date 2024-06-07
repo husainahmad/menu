@@ -94,7 +94,6 @@ public class ProductServiceImpl implements ProductService {
         List<Integer> skuIds = new ArrayList<>();
         List<Sku> skus = new ArrayList<>();
         List<Integer> tierIds = new ArrayList<>();
-        List<SkuTierPrice> skuTierPrices = new ArrayList<>();
 
         Sku sku = null;
         for (ProductSkuTierDto skuDto : productSkuDto.getSkus()) {
@@ -102,8 +101,6 @@ public class ProductServiceImpl implements ProductService {
             sku = setSku(skuDto.getId(), skuDto.getName(), productSkuDto.getId());
             skus.add(sku);
             tierIds.add(skuDto.getTierPrice().getId());
-            skuTierPrices.add(setTierPrice(sku.getId(), skuDto.getTierPrice().getId(),
-                    skuDto.getTierPrice().getPrice()));
         }
 
         this.skuService.compareListSkus(skus, skuIds);
@@ -111,7 +108,18 @@ public class ProductServiceImpl implements ProductService {
                 this.skuService.selectByProductId(product.getId()), skus);
 
         this.skuService.updateBulk(skus);
+        this.skuService.setSkuIdInListSkus(skus, this.skuService.selectByProductId(productId));
         this.tierService.validateTierByIds(tierIds);
+
+        List<SkuTierPrice> skuTierPrices = new ArrayList<>();
+        for (ProductSkuTierDto skuDto : productSkuDto.getSkus()) {
+            sku = skus.stream().filter(s -> s.getName().equals(skuDto.getName())).findAny().orElse(null);
+            if (sku != null) {
+                skuTierPrices.add(setTierPrice(sku.getId(), skuDto.getTierPrice().getId(),
+                        skuDto.getTierPrice().getPrice()));
+            }
+        }
+
         this.skuTierPriceService.insetOrUpdateBulk(skuTierPrices);
 
     }

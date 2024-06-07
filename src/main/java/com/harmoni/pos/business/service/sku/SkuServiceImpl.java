@@ -7,11 +7,10 @@ import com.harmoni.pos.menu.mapper.SkuMapper;
 import com.harmoni.pos.menu.model.Sku;
 import com.harmoni.pos.menu.model.dto.SkuDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -21,8 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @RequiredArgsConstructor
 @Service("skuService")
+@Slf4j
 public class SkuServiceImpl implements SkuService {
-    private final Logger log = LoggerFactory.getLogger(SkuServiceImpl.class);
     private final SkuMapper skuMapper;
     private final SqlSessionFactory sqlSessionFactory;
     private final SkuTierPriceService skuTierPriceService;
@@ -110,6 +109,18 @@ public class SkuServiceImpl implements SkuService {
         }
         skuTierPriceService.deleteBySkuId(skuId);
         skuMapper.deleteById(skuId);
+    }
+
+    @Override
+    public List<Sku> setSkuIdInListSkus(List<Sku> skus, List<Sku> skusFromDB) {
+        skusFromDB.forEach(sku -> {
+            skus.forEach(s -> {
+                if (sku.getName().equals(s.getName())) {
+                    s.setId(sku.getId());
+                }
+            });
+        });
+        return skus;
     }
 
 }

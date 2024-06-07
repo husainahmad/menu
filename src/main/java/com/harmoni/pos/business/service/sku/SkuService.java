@@ -15,4 +15,6 @@ public interface SkuService {
     //TODO check if new update SKU name is exist in the same product and category
     void validateSkuName(List<Sku> originalSkus, List<Sku> skuDtos);
     void deleteSku(Integer skuId);
+
+    List<Sku> setSkuIdInListSkus(List<Sku> skus, List<Sku> skusFromDB);
 }
