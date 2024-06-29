@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class BusinessNoContentRequestException extends RuntimeException {
-    private String message;
-    private Object[] args;
+    public static final String NO_CONTENT = "exception.noContent";
+    private final String message;
+    private final transient Object[] args;
 }

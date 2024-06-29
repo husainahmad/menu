@@ -4,20 +4,19 @@ import com.harmoni.pos.menu.mapper.SkuTierPriceMapper;
 import com.harmoni.pos.menu.model.SkuTierPrice;
 import com.harmoni.pos.menu.model.dto.SkuTierPriceDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @Service("skuTierPriceService")
+@Slf4j
 public class SkuTierPriceServiceImpl implements SkuTierPriceService {
 
-    private final Logger log = LoggerFactory.getLogger(SkuTierPriceServiceImpl.class);
     private final SkuTierPriceMapper skuTierPriceMapper;
     private final SqlSessionFactory sqlSessionFactory;
 

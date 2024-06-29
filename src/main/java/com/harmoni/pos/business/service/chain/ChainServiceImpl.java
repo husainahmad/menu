@@ -27,12 +27,12 @@ public class ChainServiceImpl implements ChainService {
                     "exception.chain.name.badRequest.duplicate", null);
         }
 
-        int record = chainMapper.insert(chainDto.toChain());
-        if (record<1) {
+        int inserted = chainMapper.insert(chainDto.toChain());
+        if (inserted<1) {
             throw new BusinessNoContentRequestException("exception.noContent", null);
         }
 
-        return record;
+        return inserted;
     }
 
     @Override

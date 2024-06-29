@@ -12,8 +12,7 @@ import com.harmoni.pos.menu.model.dto.ProductDto;
 import com.harmoni.pos.menu.model.dto.ProductSkuDto;
 import com.harmoni.pos.menu.model.dto.ProductSkuTierDto;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -24,8 +23,8 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service("productService")
+@Slf4j
 public class ProductServiceImpl implements ProductService {
-    private final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
     private final ProductMapper productMapper;
     private final SkuService skuService;
     private final TierService tierService;
@@ -36,12 +35,12 @@ public class ProductServiceImpl implements ProductService {
 
         this.selectByNameCategoryId(productDto.getName(), productDto.getCategoryId());
 
-        int record = productMapper.insert(productDto.toProduct());
-        if (record<1) {
+        int inserted = productMapper.insert(productDto.toProduct());
+        if (inserted<1) {
             throw new BusinessNoContentRequestException("exception.noContent", null);
         }
 
-        return record;
+        return inserted;
     }
 
     @Override
@@ -95,7 +94,7 @@ public class ProductServiceImpl implements ProductService {
         List<Sku> skus = new ArrayList<>();
         List<Integer> tierIds = new ArrayList<>();
 
-        Sku sku = null;
+        Sku sku;
         for (ProductSkuTierDto skuDto : productSkuDto.getSkus()) {
             skuIds.add(skuDto.getId());
             sku = setSku(skuDto.getId(), skuDto.getName(), productSkuDto.getId());

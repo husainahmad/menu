@@ -1,22 +1,25 @@
 package com.harmoni.pos.http.handler;
 
 import com.harmoni.pos.http.response.RestAPIResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
+@Slf4j
 public class InternalServerExceptionHandler {
-
-    private final Logger log = LoggerFactory.getLogger(InternalServerExceptionHandler.class);
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RestAPIResponse> globalExceptionHandler(Exception exception,
                                                                   WebRequest request) {
+        log.error("FightBegun: {}", exception.getMessage());
+
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .timeStamp(System.currentTimeMillis())
@@ -24,8 +27,7 @@ public class InternalServerExceptionHandler {
                 .data(null)
                 .build();
 
-        log.error("FightBegun: {}", exception.getMessage());
-        return new ResponseEntity<RestAPIResponse>(restAPIResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
 

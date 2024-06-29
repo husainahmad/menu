@@ -6,8 +6,7 @@ import com.harmoni.pos.menu.mapper.TierMapper;
 import com.harmoni.pos.menu.model.Tier;
 import com.harmoni.pos.menu.model.dto.TierDto;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -16,9 +15,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @RequiredArgsConstructor
 @Service("tierService")
+@Slf4j
 public class TierServiceImpl implements TierService {
 
-    private final Logger log = LoggerFactory.getLogger(TierServiceImpl.class);
     private final TierMapper tierMapper;
 
     @Override
@@ -29,13 +28,14 @@ public class TierServiceImpl implements TierService {
             throw new BusinessBadRequestException("exception.tier.badRequest.duplicate", null);
         }
 
-        int record = tierMapper.insert(tierDto.toTear());
+        int inserted = tierMapper.insert(tierDto.toTear());
 
-        if (record<1) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+        if (inserted<1) {
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
 
-        return record;
+        return inserted;
     }
 
     @Override

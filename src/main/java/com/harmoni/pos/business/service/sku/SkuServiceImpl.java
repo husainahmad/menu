@@ -3,6 +3,7 @@ package com.harmoni.pos.business.service.sku;
 import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
+import com.harmoni.pos.http.utils.PosObjectUtils;
 import com.harmoni.pos.menu.mapper.SkuMapper;
 import com.harmoni.pos.menu.model.Sku;
 import com.harmoni.pos.menu.model.dto.SkuDto;
@@ -30,15 +31,17 @@ public class SkuServiceImpl implements SkuService {
 
         if (!ObjectUtils.isEmpty(skuMapper.selectByNameProductId(skuDto.getName(),
                 skuDto.getProductId()))) {
-            throw new BusinessBadRequestException("exception.sku.badRequest.duplicate", null);
+            throw new BusinessBadRequestException("exception.sku.badRequest.duplicate",
+                    PosObjectUtils.appendValue(new ArrayList<>().toArray(), skuDto.getName()));
         }
 
-        int record = skuMapper.insert(skuDto.toSku());
-        if (record<1) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+        int inserted = skuMapper.insert(skuDto.toSku());
+        if (inserted<1) {
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
 
-        return record;
+        return inserted;
     }
 
     @Override
@@ -55,24 +58,25 @@ public class SkuServiceImpl implements SkuService {
     public List<Sku> compareListSkus(List<Sku> skus, List<Integer> ids) {
 
         List<Sku> skusByIdes = this.selectByIds(ids);
-        AtomicInteger record = new AtomicInteger();
+        AtomicInteger atomicInteger = new AtomicInteger();
         List<Boolean> skusFound = new ArrayList<>(skus.size());
 
         skus.forEach(skuPayload -> {
             if (!ObjectUtils.isEmpty(skuPayload.getId())) {
                 skusByIdes.forEach(sku -> {
                     if (skuPayload.getId().equals(sku.getId())) {
-                        skusFound.add(record.get(), true);
+                        skusFound.add(atomicInteger.get(), true);
                     }
                 });
             }
 
-            record.getAndIncrement();
+            atomicInteger.getAndIncrement();
         });
 
         skusFound.forEach(aBoolean -> {
-            if (!aBoolean) {
-                throw new BusinessNoContentRequestException("exception.noContent", null);
+            if (Boolean.FALSE.equals(aBoolean)) {
+                throw new BusinessNoContentRequestException(
+                        BusinessNoContentRequestException.NO_CONTENT, null);
             }
         });
         return skusByIdes;
@@ -89,23 +93,20 @@ public class SkuServiceImpl implements SkuService {
 
     @Override
     public void validateSkuName(List<Sku> originalSkus, List<Sku> skuDtos) {
-        skuDtos.forEach(sku -> {
-            skuDtos.forEach(skuDto -> {
-                if (!ObjectUtils.isEmpty(sku.getId()) && !sku.getId().equals(skuDto.getId())) {
-                    if (sku.getProductId().equals(skuDto.getProductId()) &&
-                         sku.getName().equals(skuDto.getName())) {
-                            throw new BusinessNoContentRequestException("exception.noContent", null);
-                    }
-                }
-            });
-        });
+        skuDtos.forEach(sku -> skuDtos.forEach(skuDto -> {
+            if (!ObjectUtils.isEmpty(sku.getId()) && !sku.getId().equals(skuDto.getId()) && sku.getProductId().equals(skuDto.getProductId()) &&
+                    sku.getName().equals(skuDto.getName())) {
+                throw new BusinessNoContentRequestException(BusinessNoContentRequestException.NO_CONTENT, null);
+            }
+        }));
     }
 
     @Override
     public void deleteSku(Integer skuId) {
         Sku sku = skuMapper.selectById(skuId);
         if (ObjectUtils.isEmpty(sku)) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
         skuTierPriceService.deleteBySkuId(skuId);
         skuMapper.deleteById(skuId);
@@ -113,13 +114,11 @@ public class SkuServiceImpl implements SkuService {
 
     @Override
     public List<Sku> setSkuIdInListSkus(List<Sku> skus, List<Sku> skusFromDB) {
-        skusFromDB.forEach(sku -> {
-            skus.forEach(s -> {
-                if (sku.getName().equals(s.getName())) {
-                    s.setId(sku.getId());
-                }
-            });
-        });
+        skusFromDB.forEach(sku -> skus.forEach(s -> {
+            if (sku.getName().equals(s.getName())) {
+                s.setId(sku.getId());
+            }
+        }));
         return skus;
     }
 
