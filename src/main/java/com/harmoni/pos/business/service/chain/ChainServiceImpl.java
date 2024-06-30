@@ -28,7 +28,8 @@ public class ChainServiceImpl implements ChainService {
 
         int inserted = chainMapper.insert(chainDto.toChain());
         if (inserted<1) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
 
         return inserted;

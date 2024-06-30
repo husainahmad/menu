@@ -37,7 +37,8 @@ public class ProductServiceImpl implements ProductService {
 
         int inserted = productMapper.insert(productDto.toProduct());
         if (inserted<1) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
 
         return inserted;

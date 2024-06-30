@@ -25,7 +25,7 @@ public class TierServiceImpl implements TierService {
 
         if (!ObjectUtils.isEmpty(tierMapper.selectByNameAndBrandId(tierDto.getName(),
                 tierDto.getBrandId()))) {
-            throw new BusinessBadRequestException("exception.tier.badRequest.duplicate", null);
+            throw new BusinessBadRequestException(BusinessBadRequestException.DUPLICATION_TIER, null);
         }
 
         int inserted = tierMapper.insert(tierDto.toTear());
@@ -42,7 +42,7 @@ public class TierServiceImpl implements TierService {
     public Tier get(Integer id) {
         Tier tier = tierMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(tier)) {
-            throw new BusinessBadRequestException("exception.tier.id.badRequest.notFound", null);
+            throw new BusinessBadRequestException(BusinessBadRequestException.NOT_FOUND_TIER, null);
         }
         return tier;
     }
@@ -51,7 +51,7 @@ public class TierServiceImpl implements TierService {
     public List<Tier> getByBrandId(Integer id) {
         List<Tier> tiers = tierMapper.selectByBrandId(id);
         if (ObjectUtils.isEmpty(tiers)) {
-            throw new BusinessBadRequestException("exception.tier.id.badRequest.notFound", null);
+            throw new BusinessBadRequestException(BusinessBadRequestException.NOT_FOUND_TIER, null);
         }
         return tiers;
     }
@@ -60,7 +60,7 @@ public class TierServiceImpl implements TierService {
     public List<Tier> validateTierByIds(List<Integer> ids) {
         List<Tier> tiers = this.tierMapper.selectByIds(ids);
         if (ObjectUtils.isEmpty(tiers)) {
-            throw new BusinessBadRequestException("exception.tier.id.badRequest.notFound", null);
+            throw new BusinessBadRequestException(BusinessBadRequestException.NOT_FOUND_TIER, null);
         }
         tiers.forEach(tier -> {
             AtomicBoolean isFound = new AtomicBoolean(false);
@@ -70,7 +70,7 @@ public class TierServiceImpl implements TierService {
                 }
             });
             if (!isFound.get()) {
-                throw new BusinessBadRequestException("exception.tier.id.badRequest.notFound", null);
+                throw new BusinessBadRequestException(BusinessBadRequestException.NOT_FOUND_TIER, null);
             }
         });
         return tiers;

@@ -28,7 +28,8 @@ public class CategoryServiceImpl implements CategoryService {
 
         int inserted = categoryMapper.insert(categoryDto.toCategory());
         if (inserted<1) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
 
         return inserted;

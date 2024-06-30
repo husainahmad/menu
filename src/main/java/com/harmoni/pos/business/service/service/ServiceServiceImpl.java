@@ -29,7 +29,8 @@ public class ServiceServiceImpl implements ServiceService {
 
         int inserted = serviceMapper.insert(serviceDto.toService());
         if (inserted<1) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
         return inserted;
     }

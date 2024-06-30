@@ -31,7 +31,8 @@ public class StoreServiceImpl implements StoreService {
 
         int inserted = storeMapper.insert(storeDto.toStore());
         if (inserted<1) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
 
         return inserted;

@@ -30,7 +30,8 @@ public class BrandServiceImpl implements BrandService {
 
         int inserted = brandMapper.insert(brandDto.toBrand());
         if (inserted<1) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
 
         return inserted;
