@@ -6,7 +6,6 @@ import java.util.Arrays;
  public final class PosObjectUtils {
 
      private PosObjectUtils() {
-         throw new IllegalStateException("Utility class");
      }
 
      public static Object[] appendValue(Object[] obj, String value) {

@@ -5,8 +5,7 @@ import com.harmoni.pos.menu.model.dto.CategoryDto;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class CategoryController {
 
-    private final Logger log = LoggerFactory.getLogger(CategoryController.class);
     private final CategoryService categoryService;
 
     @PostMapping("/category")
-    public ResponseEntity<RestAPIResponse> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
+    public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody CategoryDto categoryDto) {
         int id = categoryService.create(categoryDto);
 
         log.debug("Category created {} ", id);

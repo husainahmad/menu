@@ -6,8 +6,7 @@ import com.harmoni.pos.menu.mapper.ChainMapper;
 import com.harmoni.pos.menu.model.Chain;
 import com.harmoni.pos.menu.model.dto.ChainDto;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -15,8 +14,8 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service("chainService")
+@Slf4j
 public class ChainServiceImpl implements ChainService {
-    private final Logger log = LoggerFactory.getLogger(ChainServiceImpl.class);
     private final ChainMapper chainMapper;
 
     @Override
