@@ -1,13 +1,10 @@
 package com.harmoni.pos.menu.model.dto;
 
 import com.harmoni.pos.menu.model.SkuTierPrice;
-import com.harmoni.pos.menu.model.Store;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 @Data
 public class SkuTierPriceDto {
