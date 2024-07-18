@@ -12,7 +12,6 @@ public interface SkuService {
     List<Sku> selectByIds(List<Integer> ids);
     List<Sku> compareListSkus(List<Sku> skus, List<Integer> ids);
     void updateBulk(List<Sku> skus);
-    //TODO check if new update SKU name is exist in the same product and category
     void validateSkuName(List<Sku> originalSkus, List<Sku> skuDtos);
     void deleteSku(Integer skuId);
 
