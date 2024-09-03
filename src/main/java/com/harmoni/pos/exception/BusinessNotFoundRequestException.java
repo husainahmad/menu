@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class BusinessNotFoundRequestException extends RuntimeException {
-    private String message;
-    private Object[] args;
+    private final String message;
+    private final transient Object[] args;
 }

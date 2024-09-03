@@ -1,6 +1,5 @@
 package com.harmoni.pos.transaction.mapper;
 
-
 import com.harmoni.pos.transaction.model.OrderDetail;
 import org.apache.ibatis.annotations.Mapper;
 

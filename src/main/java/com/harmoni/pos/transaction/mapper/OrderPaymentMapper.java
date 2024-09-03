@@ -3,7 +3,6 @@ package com.harmoni.pos.transaction.mapper;
 import com.harmoni.pos.transaction.model.OrderPayment;
 import org.apache.ibatis.annotations.Mapper;
 
-
 @Mapper
 public interface OrderPaymentMapper {
 

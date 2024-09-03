@@ -13,7 +13,7 @@ public interface TierMapper {
     Tier selectByPrimaryKey(Integer id);
     Tier selectByNameAndBrandId(String name, Integer brandId);
     List<Tier> selectByBrandId(Integer brandId);
-    List<Tier> selectAll();
+    List<Tier> selectByIds(List<Integer> ids);
     int updateByPrimaryKey(Tier row);
 
 }

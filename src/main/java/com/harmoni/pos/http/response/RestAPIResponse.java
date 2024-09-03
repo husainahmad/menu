@@ -2,7 +2,6 @@ package com.harmoni.pos.http.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 

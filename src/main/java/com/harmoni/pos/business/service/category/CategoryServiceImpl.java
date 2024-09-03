@@ -6,8 +6,7 @@ import com.harmoni.pos.menu.model.Category;
 import com.harmoni.pos.menu.model.dto.CategoryDto;
 import com.harmoni.pos.menu.mapper.CategoryMapper;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -15,9 +14,9 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service("categoryService")
+@Slf4j
 public class CategoryServiceImpl implements CategoryService {
 
-    private final Logger log = LoggerFactory.getLogger(CategoryServiceImpl.class);
     private final CategoryMapper categoryMapper;
 
     @Override
@@ -27,12 +26,13 @@ public class CategoryServiceImpl implements CategoryService {
             throw new BusinessBadRequestException("exception.category.badRequest.duplicate", null);
         }
 
-        int record = categoryMapper.insert(categoryDto.toCategory());
-        if (record<1) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+        int inserted = categoryMapper.insert(categoryDto.toCategory());
+        if (inserted<1) {
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
 
-        return record;
+        return inserted;
     }
 
     @Override
@@ -41,8 +41,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category get(Long id) {
-        Category category = categoryMapper.selectByPrimaryKey(id.intValue());
+    public List<Category> selectByBrandId(Integer brandId) {
+        return categoryMapper.selectByBrandId(brandId);
+    }
+
+    @Override
+    public Category get(Integer id) {
+        Category category = categoryMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(category)) {
             throw new BusinessBadRequestException("exception.category.id.badRequest.notFound", null);
         }

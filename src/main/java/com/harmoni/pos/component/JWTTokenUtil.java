@@ -1,30 +1,29 @@
 package com.harmoni.pos.component;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-@RequiredArgsConstructor
 @Component
+@Slf4j
 public class JWTTokenUtil  {
-    private static final Logger log = LoggerFactory.getLogger(JWTTokenUtil.class);
     @Value("${harmoni.menu.jwt.secret}")
-    private String secret;
+    private static String secret;
     private static final long TIME = TimeUnit.DAYS.toMillis(1);
 
     private static String staticSecret;
     @Value("${harmoni.menu.jwt.secret}")
-    public void setStaticSecret() {
+    public static void setStaticSecret() {
         JWTTokenUtil.staticSecret = secret;
+    }
+
+    private JWTTokenUtil() {
     }
 
     public static String generateToken(String username) {

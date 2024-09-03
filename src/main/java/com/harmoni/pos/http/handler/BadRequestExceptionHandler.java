@@ -1,12 +1,12 @@
 package com.harmoni.pos.http.handler;
 
-
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.http.response.RestAPIResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,16 +14,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Locale;
 
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
+@AllArgsConstructor
+@Slf4j
 public class BadRequestExceptionHandler {
-
-    private final Logger log = LoggerFactory.getLogger(BadRequestExceptionHandler.class);
     private final MessageSource messageSource;
-
-    @Autowired
-    public BadRequestExceptionHandler(MessageSource messageSource) {
-        this.messageSource = messageSource;
-    }
 
     @ExceptionHandler(BusinessBadRequestException.class)
     public ResponseEntity<RestAPIResponse>

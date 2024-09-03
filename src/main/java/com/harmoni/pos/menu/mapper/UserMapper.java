@@ -2,7 +2,6 @@ package com.harmoni.pos.menu.mapper;
 
 import com.harmoni.pos.menu.model.User;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface UserMapper {

@@ -1,8 +1,7 @@
 package com.harmoni.pos.http.handler;
 
 import com.harmoni.pos.http.response.RestAPIResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -15,19 +14,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
+@Slf4j
 public class ValidationExceptionHandler {
-
-    private final Logger log = LoggerFactory.getLogger(ValidationExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<RestAPIResponse>
-    handleValidationException(MethodArgumentNotValidException e, Locale locale) {
+    handleValidationException(MethodArgumentNotValidException e) {
 
-        List<String> errors = new ArrayList<String>();
+        List<String> errors = new ArrayList<>();
 
         for (FieldError fieldError: e.getBindingResult().getFieldErrors()) {
             errors.add(fieldError.getField() + ">" + fieldError.getDefaultMessage());

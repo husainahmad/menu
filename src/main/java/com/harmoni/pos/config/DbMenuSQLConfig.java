@@ -17,6 +17,7 @@ import javax.sql.DataSource;
 @MapperScan(value = "com.harmoni.pos.menu.mapper")
 @Configuration
 public class DbMenuSQLConfig {
+    public static final String BATCH_SKU_MAPPER = "skuMapper";
 
     @Primary
     @Bean(name = "menuSQLDataSource")
@@ -40,8 +41,9 @@ public class DbMenuSQLConfig {
 
     @Primary
     @Bean(name = "menuSQLTransactionManager")
-    public DataSourceTransactionManager PrimaryTransactionManager (
+    public DataSourceTransactionManager primaryTransactionManager (
             @Qualifier("menuSQLDataSource") DataSource menuSqlDatasource) {
         return new DataSourceTransactionManager(menuSqlDatasource);
     }
+
 }

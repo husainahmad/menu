@@ -10,16 +10,15 @@ import com.harmoni.pos.menu.model.dto.UserLoginDto;
 import io.github.weasleyj.mybatis.encrypt.config.MybatisEncryptProperties;
 import io.github.weasleyj.mybatis.encrypt.core.EncryptStrategy;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 @RequiredArgsConstructor
 @Service("userService")
+@Slf4j
 public class UserServiceImpl implements UserService {
 
-    private final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserMapper userMapper;
     private final MybatisEncryptProperties mybatisEncryptProperties;
 
@@ -44,11 +43,12 @@ public class UserServiceImpl implements UserService {
             throw new BusinessBadRequestException("exception.user.email.badRequest.duplicate", null);
         }
 
-        int record = userMapper.insert(userDto.toUser());
-        if (record<1) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+        int inserted = userMapper.insert(userDto.toUser());
+        if (inserted<1) {
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
 
-        return record;
+        return inserted;
     }
 }

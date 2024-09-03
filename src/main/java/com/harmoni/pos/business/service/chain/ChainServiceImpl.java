@@ -6,8 +6,7 @@ import com.harmoni.pos.menu.mapper.ChainMapper;
 import com.harmoni.pos.menu.model.Chain;
 import com.harmoni.pos.menu.model.dto.ChainDto;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -15,8 +14,8 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service("chainService")
+@Slf4j
 public class ChainServiceImpl implements ChainService {
-    private final Logger log = LoggerFactory.getLogger(ChainServiceImpl.class);
     private final ChainMapper chainMapper;
 
     @Override
@@ -27,12 +26,13 @@ public class ChainServiceImpl implements ChainService {
                     "exception.chain.name.badRequest.duplicate", null);
         }
 
-        int record = chainMapper.insert(chainDto.toChain());
-        if (record<1) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+        int inserted = chainMapper.insert(chainDto.toChain());
+        if (inserted<1) {
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
 
-        return record;
+        return inserted;
     }
 
     @Override

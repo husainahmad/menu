@@ -1,23 +1,24 @@
 package com.harmoni.pos.business.service.skutierprice;
 
-import com.harmoni.pos.business.service.sku.SkuServiceImpl;
-import com.harmoni.pos.menu.mapper.SkuMapper;
 import com.harmoni.pos.menu.mapper.SkuTierPriceMapper;
 import com.harmoni.pos.menu.model.SkuTierPrice;
 import com.harmoni.pos.menu.model.dto.SkuTierPriceDto;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @Service("skuTierPriceService")
+@Slf4j
 public class SkuTierPriceServiceImpl implements SkuTierPriceService {
 
-    private final Logger log = LoggerFactory.getLogger(SkuTierPriceServiceImpl.class);
     private final SkuTierPriceMapper skuTierPriceMapper;
+    private final SqlSessionFactory sqlSessionFactory;
 
     @Override
     public int create(SkuTierPriceDto skuTierPriceDto) {
@@ -25,7 +26,21 @@ public class SkuTierPriceServiceImpl implements SkuTierPriceService {
     }
 
     @Override
-    public List<SkuTierPrice> selectBySkusTierId(List<Integer> skuIds) {
-        return skuTierPriceMapper.selectBySkusTierId(skuIds);
+    public List<SkuTierPrice> selectBySkusTierId(List<Integer> skuIds, Integer tierId) {
+        return skuTierPriceMapper.selectBySkusTierId(skuIds, tierId);
+    }
+
+    @Override
+    public void insetOrUpdateBulk(List<SkuTierPrice> skuTierPrices) {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+            SkuTierPriceMapper mapper = sqlSession.getMapper(SkuTierPriceMapper.class);
+            skuTierPrices.forEach(mapper::insertOrUpdate);
+            sqlSession.commit();
+        }
+    }
+
+    @Override
+    public int deleteBySkuId(Integer skuId) {
+        return skuTierPriceMapper.deleteBySkuId(skuId);
     }
 }

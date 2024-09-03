@@ -6,18 +6,18 @@ import com.harmoni.pos.menu.mapper.TierMapper;
 import com.harmoni.pos.menu.model.Tier;
 import com.harmoni.pos.menu.model.dto.TierDto;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @RequiredArgsConstructor
 @Service("tierService")
+@Slf4j
 public class TierServiceImpl implements TierService {
 
-    private final Logger log = LoggerFactory.getLogger(TierServiceImpl.class);
     private final TierMapper tierMapper;
 
     @Override
@@ -25,38 +25,55 @@ public class TierServiceImpl implements TierService {
 
         if (!ObjectUtils.isEmpty(tierMapper.selectByNameAndBrandId(tierDto.getName(),
                 tierDto.getBrandId()))) {
-            throw new BusinessBadRequestException("exception.tier.badRequest.duplicate", null);
+            throw new BusinessBadRequestException(BusinessBadRequestException.DUPLICATION_TIER, null);
         }
 
-        int record = tierMapper.insert(tierDto.toTear());
+        int inserted = tierMapper.insert(tierDto.toTear());
 
-        if (record<1) {
-            throw new BusinessNoContentRequestException("exception.noContent", null);
+        if (inserted<1) {
+            throw new BusinessNoContentRequestException(
+                    BusinessNoContentRequestException.NO_CONTENT, null);
         }
 
-        return record;
+        return inserted;
     }
 
     @Override
-    public Tier get(Long id) {
-        Tier tier = tierMapper.selectByPrimaryKey(id.intValue());
+    public Tier get(Integer id) {
+        Tier tier = tierMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(tier)) {
-            throw new BusinessBadRequestException("exception.tier.id.badRequest.notFound", null);
+            throw new BusinessBadRequestException(BusinessBadRequestException.NOT_FOUND_TIER, null);
         }
         return tier;
     }
 
     @Override
-    public List<Tier> getByBrandId(Long id) {
-        List<Tier> tiers = tierMapper.selectByBrandId(id.intValue());
+    public List<Tier> getByBrandId(Integer id) {
+        List<Tier> tiers = tierMapper.selectByBrandId(id);
         if (ObjectUtils.isEmpty(tiers)) {
-            throw new BusinessBadRequestException("exception.tier.id.badRequest.notFound", null);
+            throw new BusinessBadRequestException(BusinessBadRequestException.NOT_FOUND_TIER, null);
         }
         return tiers;
     }
 
     @Override
-    public List<Tier> list() {
-        return tierMapper.selectAll();
+    public List<Tier> validateTierByIds(List<Integer> ids) {
+        List<Tier> tiers = this.tierMapper.selectByIds(ids);
+        if (ObjectUtils.isEmpty(tiers)) {
+            throw new BusinessBadRequestException(BusinessBadRequestException.NOT_FOUND_TIER, null);
+        }
+        tiers.forEach(tier -> {
+            AtomicBoolean isFound = new AtomicBoolean(false);
+            ids.forEach(id -> {
+                if (tier.getId().equals(id)) {
+                    isFound.set(true);
+                }
+            });
+            if (!isFound.get()) {
+                throw new BusinessBadRequestException(BusinessBadRequestException.NOT_FOUND_TIER, null);
+            }
+        });
+        return tiers;
     }
+
 }

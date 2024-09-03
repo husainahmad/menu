@@ -5,8 +5,7 @@ import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.ProductDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +13,9 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class ProductController {
 
-    private final Logger log = LoggerFactory.getLogger(ProductController.class);
     private final ProductService productService;
 
     @PostMapping("/product")
@@ -31,7 +30,7 @@ public class ProductController {
     }
 
     @GetMapping("/product/{id}")
-    public ResponseEntity<RestAPIResponse> get(@PathVariable Long id) {
+    public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -42,12 +41,25 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/product")
-    public ResponseEntity<RestAPIResponse> list() {
+    @GetMapping("/product/category/{id}")
+    public ResponseEntity<RestAPIResponse> getByCategory(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(this.productService.seelctAll())
+                .data(this.productService.selectByCategory(id))
+                .error(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/product/category/{categoryId}/{brandId}")
+    public ResponseEntity<RestAPIResponse> getByCategoryBrand(@PathVariable Integer categoryId,
+                                                              @PathVariable Integer brandId) {
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(this.productService.selectByCategoryBrand(categoryId, brandId))
                 .error(null)
                 .build();
 

@@ -10,7 +10,7 @@ public class UserDto {
     @NotBlank(message = "{validation.user.email.NotBlank}")
     @Size(min = 2, max = 125)
     @Email(message = "{validation.user.email.NotValid}",
-            regexp = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$",
+            regexp = "{application.menu.regex}",
     flags = Pattern.Flag.CASE_INSENSITIVE) //RFC 5322 for Email Validation
     private String email;
     @NotBlank(message = "{validation.user.name.NotBlank}")
