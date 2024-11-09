@@ -2,6 +2,7 @@ package com.harmoni.pos.business.service.brand;
 
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
+import com.harmoni.pos.exception.BusinessNotFoundRequestException;
 import com.harmoni.pos.menu.mapper.BrandMapper;
 import com.harmoni.pos.menu.model.Brand;
 import com.harmoni.pos.menu.model.dto.BrandDto;
@@ -22,8 +23,7 @@ public class BrandServiceImpl implements BrandService {
     @Override
     public int create(BrandDto brandDto) {
 
-        if (!ObjectUtils.isEmpty(brandMapper.selectByNameAndChainId(brandDto.getChainId(),
-                brandDto.getName()))) {
+        if (!ObjectUtils.isEmpty(brandMapper.selectByName(brandDto.getName()))) {
             throw new BusinessBadRequestException(
                     "exception.brand.name.badRequest.duplicate", null);
         }
@@ -38,10 +38,16 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
+    public void delete(Long id) {
+        Brand brand = this.get(id);
+        brandMapper.deleteByPrimaryKey(brand.getId());
+    }
+
+    @Override
     public Brand get(Long id) {
         Brand brand = brandMapper.selectByPrimaryKey(id.intValue());
         if (ObjectUtils.isEmpty(brand)) {
-            throw new BusinessBadRequestException(
+            throw new BusinessNotFoundRequestException(
                     "exception.brand.id.badRequest.notFound", null);
         }
         return brand;

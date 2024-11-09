@@ -3,6 +3,8 @@ package com.harmoni.pos.menu.mapper;
 import com.harmoni.pos.menu.model.Service;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 @Mapper
 public interface ServiceMapper {
 
@@ -11,5 +13,6 @@ public interface ServiceMapper {
     Service selectByPrimaryKey(Integer id);
     Service selectByName(String name);
     int updateByPrimaryKey(Service row);
+    List<Service> selectAllAndSubService();
 
 }

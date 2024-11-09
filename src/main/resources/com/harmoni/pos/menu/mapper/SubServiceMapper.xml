@@ -3,31 +3,37 @@
 <mapper namespace="com.harmoni.pos.menu.mapper.SubServiceMapper">
 
   <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.SubService">
-    <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="service_id" jdbcType="INTEGER" property="serviceId" />
-    <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
-    <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <id column="sub_service_id" jdbcType="INTEGER" property="id" />
+    <result column="sub_service_service_id" jdbcType="INTEGER" property="serviceId" />
+    <result column="sub_service_name" jdbcType="VARCHAR" property="name" />
+    <result column="sub_service_created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="sub_service_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
   </resultMap>
 
   <sql id="Base_Column_List">
-    id, service_id, name, created_at, updated_at
+    sub_service.id as sub_service_id,
+    sub_service.service_id as sub_service_service_id,
+    sub_service.name as sub_service_name,
+    sub_service.created_at as sub_service_created_at,
+    sub_service.updated_at as sub_service_updated_at
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />
-    from sub_services
-    where id = #{id,jdbcType=INTEGER}
+    from sub_services sub_service
+    where sub_service.id = #{id,jdbcType=INTEGER}
   </select>
+
   <select id="selectByNameServiceId" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    from sub_services
-    where name = #{name,jdbcType=VARCHAR} and service_id = #{serviceId,jdbcType=INTEGER}
+    from sub_services sub_service
+    where sub_service.name = #{name,jdbcType=VARCHAR}
+      and sub_service.service_id = #{serviceId,jdbcType=INTEGER}
   </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from sub_services
     where id = #{id,jdbcType=INTEGER}
   </delete>

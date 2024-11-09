@@ -23,8 +23,8 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public int create(StoreDto storeDto) {
 
-        if (!ObjectUtils.isEmpty(storeMapper.selectByNameTierIdBrandId(storeDto.getName(),
-                storeDto.getTierId(), storeDto.getBrandId()))) {
+        if (!ObjectUtils.isEmpty(storeMapper.selectByNameTierIdChainId(storeDto.getName(),
+                storeDto.getTierId(), storeDto.getChainId()))) {
             throw new BusinessBadRequestException("exception.store.badRequest.duplicate",
                     PosObjectUtils.appendValue(new ArrayList<>().toArray(), storeDto.getName()));
         }
