@@ -2,6 +2,7 @@ package com.harmoni.pos.http.controller.store;
 
 import com.harmoni.pos.business.service.store.StoreService;
 import com.harmoni.pos.http.response.RestAPIResponse;
+import com.harmoni.pos.menu.model.dto.ProductSkuDto;
 import com.harmoni.pos.menu.model.dto.StoreDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,4 +35,23 @@ public class StoreController {
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
+
+    @DeleteMapping("/store/{id}")
+    public ResponseEntity<RestAPIResponse> delete(@PathVariable Long id) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .data(storeService.delete(id))
+                .httpStatus(HttpStatus.OK.value())
+                .build();
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("/store/{id}")
+    public ResponseEntity<RestAPIResponse> update(@PathVariable Long id, @Valid @RequestBody StoreDto storeDto) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .data(storeService.update(id, storeDto))
+                .httpStatus(HttpStatus.OK.value())
+                .build();
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
 }

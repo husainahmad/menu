@@ -46,11 +46,29 @@ public class ChainController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    @DeleteMapping("/chain/{id}")
+    public ResponseEntity<RestAPIResponse> delete(@PathVariable Long id) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(chainService.delete(id))
+                .build();
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
     @GetMapping("/chain")
     public ResponseEntity<RestAPIResponse> list() {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(chainService.list())
+                .build();
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/chain/brand/{id}")
+    public ResponseEntity<RestAPIResponse> listByBrandId(@PathVariable Long id) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(chainService.listByBrandId(id.intValue()))
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
