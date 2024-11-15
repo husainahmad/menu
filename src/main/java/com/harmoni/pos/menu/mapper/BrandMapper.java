@@ -13,7 +13,7 @@ public interface BrandMapper {
     int insert(Brand row);
 
     Brand selectByPrimaryKey(Integer id);
-    Brand selectByNameAndChainId(Integer chainId, String name);
+    Brand selectByName(String name);
 
     List<Brand> selectAll();
     int updateByPrimaryKey(Brand row);

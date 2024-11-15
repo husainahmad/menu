@@ -14,5 +14,5 @@ public interface ChainMapper {
     Chain selectByName(String name);
     List<Chain> selectAll();
     int updateByPrimaryKey(Chain row);
-
+    List<Chain> selectByBrandId(Integer brandId);
 }

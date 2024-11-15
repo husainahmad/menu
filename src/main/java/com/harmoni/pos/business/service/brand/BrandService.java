@@ -8,7 +8,7 @@ import java.util.List;
 public interface BrandService {
 
     int create(BrandDto brandDto);
-
+    int delete(Long id);
     Brand get(Long id);
     List<Brand> list();
 }

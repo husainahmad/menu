@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service("serviceService")
@@ -33,5 +34,10 @@ public class ServiceServiceImpl implements ServiceService {
                     BusinessNoContentRequestException.NO_CONTENT, null);
         }
         return inserted;
+    }
+
+    @Override
+    public List<com.harmoni.pos.menu.model.Service> getAllWithSub() {
+        return serviceMapper.selectAllAndSubService();
     }
 }

@@ -3,29 +3,48 @@
 <mapper namespace="com.harmoni.pos.menu.mapper.ServiceMapper">
 
   <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.Service">
-    <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
-    <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
-    <result column="deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
+    <id column="service_id" jdbcType="INTEGER" property="id" />
+    <result column="service_name" jdbcType="VARCHAR" property="name" />
+    <result column="service_created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="service_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="service_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
+
+    <collection property="subServices" ofType="com.harmoni.pos.menu.model.SubService">
+      <id column="sub_service_id" property="id" />
+      <result column="sub_service_name" property="name" />
+    </collection>
+
   </resultMap>
 
   <sql id="Base_Column_List">
-    id, name, created_at, updated_at, deleted_at
+    service.id as service_id,
+    service.name as service_name,
+    service.created_at as service_created_at,
+    service.updated_at as service_updated_at,
+    service.deleted_at as service_deleted_at
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />
-    from services
-    where id = #{id,jdbcType=INTEGER}
+    from services service
+    where service.id = #{id,jdbcType=INTEGER}
   </select>
 
   <select id="selectByName" parameterType="java.lang.String" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    from services
-    where name = #{name,jdbcType=VARCHAR}
+    from services service
+    where service.name = #{name,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectAllAndSubService" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.SubServiceMapper.Base_Column_List"/>
+    from services service
+    left join sub_services sub_service
+      on sub_service.service_id = service.id
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">

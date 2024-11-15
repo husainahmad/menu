@@ -2,6 +2,7 @@ package com.harmoni.pos.business.service.chain;
 
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
+import com.harmoni.pos.exception.BusinessNotFoundRequestException;
 import com.harmoni.pos.menu.mapper.ChainMapper;
 import com.harmoni.pos.menu.model.Chain;
 import com.harmoni.pos.menu.model.dto.ChainDto;
@@ -49,16 +50,22 @@ public class ChainServiceImpl implements ChainService {
         }
 
         chainMapper.updateByPrimaryKey(
-                new Chain().setName(chainDto.getName()).setId(id.intValue()));
+                new Chain().setName(chainDto.getName()).setId(id.intValue()).setBrandId(chainDto.getBrandId()));
 
         return false;
+    }
+
+    @Override
+    public int delete(Long id) {
+        Chain chain = chainMapper.selectByPrimaryKey(id.intValue());
+        return chainMapper.deleteByPrimaryKey(chain.getId());
     }
 
     @Override
     public Chain get(Long id) {
         Chain chain = chainMapper.selectByPrimaryKey(id.intValue());
         if (ObjectUtils.isEmpty(chain)) {
-            throw new BusinessBadRequestException(
+            throw new BusinessNotFoundRequestException(
                     "exception.chain.id.badRequest.notFound", null);
         }
         return chain;
@@ -67,5 +74,10 @@ public class ChainServiceImpl implements ChainService {
     @Override
     public List<Chain> list() {
         return chainMapper.selectAll();
+    }
+
+    @Override
+    public List<Chain> listByBrandId(Integer brandId) {
+        return chainMapper.selectByBrandId(brandId);
     }
 }

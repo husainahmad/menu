@@ -50,6 +50,18 @@ public class CategoryController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    @DeleteMapping("/category/{id}")
+    public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(this.categoryService.delete(id))
+                .error(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
     @GetMapping("/category/brand/{brandId}")
     public ResponseEntity<RestAPIResponse> getByBrandId(@PathVariable Integer brandId) {
 

@@ -11,7 +11,7 @@ public interface StoreMapper {
     int deleteByPrimaryKey(Integer id);
     int insert(Store row);
     Store selectByPrimaryKey(Integer id);
-    Store selectByNameTierIdBrandId(String name, Integer tierId, Integer brandId);
+    Store selectByNameTierIdChainId(String name, Integer tierId, Integer brandId);
     List<Store> selectAll();
     int updateByPrimaryKey(Store row);
 

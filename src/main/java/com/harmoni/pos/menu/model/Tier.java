@@ -15,6 +15,7 @@ public class Tier {
     private String name;
     private Integer brandId;
     private Brand brand;
+    private TierType type;
     private Date createdAt;
     private Date updatedAt;
 
