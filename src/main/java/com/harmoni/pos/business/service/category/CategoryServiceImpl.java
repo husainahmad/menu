@@ -36,6 +36,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public int delete(Integer id) {
+        Category category = this.get(id);
+        return categoryMapper.deleteByPrimaryKey(category.getId());
+    }
+
+    @Override
     public List<Category> list() {
         return categoryMapper.selectAll();
     }

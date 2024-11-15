@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface CategoryService {
     int create(CategoryDto categoryDto);
+    int delete(Integer id);
     List<Category> list();
 
     List<Category> selectByBrandId(Integer brandId);

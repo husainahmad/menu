@@ -6,14 +6,14 @@
     <id column="store_id" jdbcType="INTEGER" property="id" />
     <result column="store_name" jdbcType="VARCHAR" property="name" />
     <result column="store_tier_id" jdbcType="INTEGER" property="tierId" />
-    <result column="store_brand_id" jdbcType="INTEGER" property="brandId" />
+    <result column="store_chain_id" jdbcType="INTEGER" property="chainId" />
     <result column="store_address" jdbcType="VARCHAR" property="address" />
     <result column="store_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="store_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <result column="store_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
-    <association property="brand" javaType="com.harmoni.pos.menu.model.Brand">
-      <id column="brand_id" jdbcType="INTEGER" property="id" />
-      <result column="brand_name" jdbcType="VARCHAR" property="name" />
+    <association property="chain" javaType="com.harmoni.pos.menu.model.Chain">
+      <id column="chain_id" jdbcType="INTEGER" property="id" />
+      <result column="chain_name" jdbcType="VARCHAR" property="name" />
     </association>
     <association property="tier" javaType="com.harmoni.pos.menu.model.Tier">
       <id column="tier_id" jdbcType="INTEGER" property="id" />
@@ -25,7 +25,7 @@
     store.id as store_id,
     store.name as store_name,
     store.tier_id as store_tier_id,
-    store.brand_id as store_brand_id,
+    store.chain_id as store_chain_id,
     store.address as store_address,
     store.created_at as store_created_at,
     store.updated_at as store_updated_at,
@@ -35,21 +35,21 @@
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />,
-    <include refid="com.harmoni.pos.menu.mapper.BrandMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>,
     <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List"/>
     from stores store
-      left join brands brand on store.brand_id = brand.id
+      left join chains chain on store.chain_id = chain.id
       left join tiers tier on store.tier_id = tier.id
     where store.id = #{id,jdbcType=INTEGER}
   </select>
 
-  <select id="selectByNameTierIdBrandId" resultMap="BaseResultMap">
+  <select id="selectByNameTierIdChainId" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />,
-    <include refid="com.harmoni.pos.menu.mapper.BrandMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>,
     <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List"/>
     from stores store
-    left join brands brand on store.brand_id = brand.id
+    left join chains chain on store.chain_id = chain.id
     left join tiers tier on store.tier_id = tier.id
     where store.name = #{name,jdbcType=VARCHAR}
           and store.tier_id = #{tierId,jdbcType=INTEGER}
@@ -59,15 +59,15 @@
   <select id="selectAll" resultMap="BaseResultMap">
       select
       <include refid="Base_Column_List" />,
-      <include refid="com.harmoni.pos.menu.mapper.BrandMapper.Base_Column_List"/>,
+      <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>,
       <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List"/>
       from stores store
-      left join brands brand on store.brand_id = brand.id
+      left join chains chain on store.chain_id = chain.id
       left join tiers tier on store.tier_id = tier.id
   </select>
 
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from stores
     where id = #{id,jdbcType=INTEGER}
   </delete>
@@ -76,10 +76,10 @@
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into stores (name, tier_id, brand_id, 
+    insert into stores (name, tier_id, chain_id,
       address, created_at, updated_at, 
       deleted_at)
-    values (#{name,jdbcType=VARCHAR}, #{tierId,jdbcType=INTEGER}, #{brandId,jdbcType=INTEGER}, 
+    values (#{name,jdbcType=VARCHAR}, #{tierId,jdbcType=INTEGER}, #{chainId,jdbcType=INTEGER},
       #{address,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}, 
       #{deletedAt,jdbcType=TIMESTAMP})
   </insert>
@@ -88,7 +88,7 @@
     update stores
     set name = #{name,jdbcType=VARCHAR},
       tier_id = #{tierId,jdbcType=INTEGER},
-      brand_id = #{brandId,jdbcType=INTEGER},
+      chain_id = #{chainId,jdbcType=INTEGER},
       address = #{address,jdbcType=VARCHAR},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},

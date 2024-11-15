@@ -15,8 +15,8 @@ public class Store {
     private String name;
     private Integer tierId;
     private Tier tier;
-    private Integer brandId;
-    private Brand brand;
+    private Integer chainId;
+    private Chain chain;
     private String address;
     private Date createdAt;
     private Date updatedAt;

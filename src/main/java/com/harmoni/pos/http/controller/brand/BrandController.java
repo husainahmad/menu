@@ -55,4 +55,16 @@ public class BrandController {
         return new ResponseEntity<>(restAPIResponse,HttpStatus.OK);
 
     }
+
+    @DeleteMapping("/brand/{id}")
+    public ResponseEntity<RestAPIResponse> delete(@PathVariable Long id) {
+        brandService.delete(id);
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse,HttpStatus.OK);
+
+    }
 }

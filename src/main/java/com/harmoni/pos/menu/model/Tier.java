@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Accessors(chain = true)
@@ -15,7 +16,10 @@ public class Tier {
     private String name;
     private Integer brandId;
     private Brand brand;
+    private TierType type;
     private Date createdAt;
     private Date updatedAt;
+
+    List<TierService> tierServices;
 
 }

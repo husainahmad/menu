@@ -3,31 +3,51 @@
 <mapper namespace="com.harmoni.pos.menu.mapper.StoreServiceTypeMapper">
 
   <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.StoreServiceType">
-    <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="store_id" jdbcType="INTEGER" property="storeId" />
-    <result column="sub_service_id" jdbcType="INTEGER" property="subServiceId" />
-    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
-    <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
-    <result column="deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
+    <id column="store_service_type_id" jdbcType="INTEGER" property="id" />
+    <result column="store_service_type_store_id" jdbcType="INTEGER" property="storeId" />
+    <result column="store_service_type_sub_service_id" jdbcType="INTEGER" property="subServiceId" />
+    <result column="store_service_type_created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="store_service_type_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="store_service_type_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
   </resultMap>
 
   <sql id="Base_Column_List">
-    id, store_id, sub_service_id, created_at, updated_at, deleted_at
+    store_service_type.id as store_service_type_id,
+    store_service_type.store_id as store_service_type_store_id,
+    store_service_type.sub_service_id as store_service_type_sub_service_id,
+    store_service_type.created_at as store_service_type_created_at,
+    store_service_type.updated_at as store_service_type_updated_at,
+    store_service_type.deleted_at as store_service_type_deleted_at
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select 
-    <include refid="Base_Column_List" />
-    from store_service_types
-    where id = #{id,jdbcType=INTEGER}
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.SubServiceMapper.Base_Column_List"/>
+    from store_service_types store_service_type
+    left join stores store
+      on store.id = store_service_type.store_id
+    left join sub_services sub_service
+      on sub_service.sub_service_id = store_service_type.sub_service_id
+    where store_service_type.id = #{id,jdbcType=INTEGER}
   </select>
-    <select id="selectByStoreIdSubServiceId" resultMap="BaseResultMap">
+
+  <select id="selectByStoreIdSubServiceId" resultMap="BaseResultMap">
       select
-      <include refid="Base_Column_List" />
-      from store_service_types
-      where store_id = #{storeId,jdbcType=INTEGER} and sub_service_id = #{subServiceId,jdbcType=INTEGER}
-    </select>
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+      <include refid="Base_Column_List" />,
+      <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>,
+      <include refid="com.harmoni.pos.menu.mapper.SubServiceMapper.Base_Column_List"/>
+      from store_service_types store_service_type
+      left join stores store
+        on store.id = store_service_type.store_id
+      left join sub_services sub_service
+        on sub_service.sub_service_id = store_service_type.sub_service_id
+      where store_service_type_store.id = #{storeId,jdbcType=INTEGER}
+      and store_service_type_sub.service_id = #{subServiceId,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from store_service_types
     where id = #{id,jdbcType=INTEGER}
   </delete>

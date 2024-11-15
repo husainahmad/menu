@@ -6,18 +6,23 @@
     <id column="tier_id" jdbcType="INTEGER" property="id" />
     <result column="tier_name" jdbcType="VARCHAR" property="name" />
     <result column="tier_brand_id" jdbcType="INTEGER" property="brandId" />
+    <result column="tier_type" property="type" javaType="com.harmoni.pos.menu.model.TierType" />
     <result column="tier_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="tier_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <association property="brand" javaType="com.harmoni.pos.menu.model.Brand">
       <id column="brand_id" jdbcType="INTEGER" property="id" />
       <result column="brand_name" jdbcType="VARCHAR" property="name" />
     </association>
+    <collection property="tierServices" ofType="com.harmoni.pos.menu.model.TierService">
+      <id column="tier_service_id" jdbcType="INTEGER" property="id" />
+    </collection>
   </resultMap>
 
   <sql id="Base_Column_List">
     tier.id as tier_id,
     tier.name as tier_name,
     tier.brand_id as tier_brand_id,
+    tier.type as tier_type,
     tier.created_at as tier_created_at,
     tier.updated_at as tier_updated_at
   </sql>
@@ -60,7 +65,19 @@
         </foreach>
     </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+  <select id="selectByBrandIdTierType" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.BrandMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.TierServiceMapper.Base_Column_List"/>
+    from tiers tier
+    left join brands brand on tier.brand_id = brand.id
+    left join tier_services tier_service on tier_service.tier_id = tier.id
+    where tier.brand_id = #{brandId,jdbcType=INTEGER}
+    and tier.type = #{type,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from tiers
     where id = #{id,jdbcType=INTEGER}
   </delete>
@@ -69,9 +86,10 @@
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into tiers (name, brand_id, created_at, 
+    insert into tiers (name, brand_id, type, created_at,
       updated_at)
-    values (#{name,jdbcType=VARCHAR}, #{brandId,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP}, 
+    values (#{name,jdbcType=VARCHAR}, #{brandId,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR},
+    #{createdAt,jdbcType=TIMESTAMP},
       #{updatedAt,jdbcType=TIMESTAMP})
   </insert>
 
@@ -79,6 +97,7 @@
     update tiers
     set name = #{name,jdbcType=VARCHAR},
       brand_id = #{brandId,jdbcType=INTEGER},
+      type = #{type,jdbcType=VARCHAR},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}

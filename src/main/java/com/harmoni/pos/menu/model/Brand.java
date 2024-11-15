@@ -13,8 +13,6 @@ public class Brand {
 
     private Integer id;
     private String name;
-    private Integer chainId;
-    private Chain chain;
     private Date createdAt;
     private Date updatedAt;
 
