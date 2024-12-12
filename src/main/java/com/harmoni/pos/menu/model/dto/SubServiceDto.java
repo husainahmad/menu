@@ -10,6 +10,7 @@ import lombok.Data;
 @Data
 public class SubServiceDto {
 
+    private Integer id;
     @NotNull(message = "{validation.subService.serviceId.NotNull}")
     private Integer serviceId;
     @NotBlank(message = "{validation.subService.name.NotBlank}")

@@ -6,6 +6,7 @@
     <id column="tier_service_id" jdbcType="INTEGER" property="id" />
     <result column="tier_service_tier_id" jdbcType="INTEGER" property="tierId" />
     <result column="tier_service_sub_service_id" jdbcType="INTEGER" property="subServiceId" />
+    <result column="tier_service_is_active" jdbcType="INTEGER" property="isActive" />
     <result column="tier_service_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="tier_service_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
   </resultMap>
@@ -14,6 +15,7 @@
     tier_service.id as tier_service_id,
     tier_service.tier_id as tier_service_tier_id,
     tier_service.sub_service_id as tier_service_sub_service_id,
+    tier_service.is_active as tier_service_is_active,
     tier_service.created_at as tier_service_created_at,
     tier_service.updated_at as tier_service_updated_at
   </sql>
@@ -34,18 +36,30 @@
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into tier_services (tier_id, sub_service_id, created_at,
+    insert into tier_services (tier_id, sub_service_id, is_active, created_at,
       updated_at)
-    values (#{tierId,jdbcType=INTEGER}, #{subServiceId,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP},
-      #{updatedAt,jdbcType=TIMESTAMP})
+    values (#{tierId,jdbcType=INTEGER}, #{subServiceId,jdbcType=INTEGER}, #{isActive,jdbcType=BOOLEAN},
+    #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
   </insert>
 
   <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.TierService">
     update tier_services
     set tier_id = #{tierId,jdbcType=INTEGER},
       sub_service_id = #{subServiceId,jdbcType=INTEGER},
+      is_active = #{isActive,jdbcType=BOOLEAN},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateTierServicesBulk">
+    insert into tier_services (tier_id, sub_service_id, is_active, created_at, updated_at)
+    values
+    <foreach collection="tierServices" item="tierService" separator=",">
+      (#{tierService.tierId}, #{tierService.subServiceId}, #{tierService.isActive},
+      #{tierService.createdAt}, #{tierService.updatedAt})
+    </foreach>
+    on duplicate key update
+    is_active = values(is_active)
   </update>
 </mapper>

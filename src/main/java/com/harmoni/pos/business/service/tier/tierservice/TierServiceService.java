@@ -11,7 +11,9 @@ public interface TierServiceService {
 
     int create(TierServiceDto tierServiceDto);
 
-    boolean update(TierServiceDto tierServiceDto, Integer id);
+    boolean update(TierServiceDto tierServiceDto, Integer tierId, Integer serviceId);
+
+    int updateTierServices(List<TierServiceDto> tierServiceDtos, Integer tierId);
 
     int delete(Integer id);
 

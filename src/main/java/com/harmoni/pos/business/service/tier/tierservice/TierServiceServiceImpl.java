@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -38,24 +39,21 @@ public class TierServiceServiceImpl implements TierServiceService {
                     BusinessNoContentRequestException.NO_CONTENT, null);
         }
 
-//        if (!ObjectUtils.isEmpty(tierServiceMapper.selectByTierSubService(tierServiceDto.getTierDto().getId(),
-//                tierServiceDto.getSubServiceId()))) {
-//            throw new BusinessBadRequestException(BusinessBadRequestException.DUPLICATION_TIER, null);
-//        }
-//
-//        inserted = tierServiceMapper.insert(tierServiceDto.toTierService());
-//
-//        if (inserted<1) {
-//            throw new BusinessNoContentRequestException(
-//                    BusinessNoContentRequestException.NO_CONTENT, null);
-//        }
-
         return inserted;
     }
 
     @Override
-    public boolean update(TierServiceDto tierServiceDto, Integer id) {
+    public boolean update(TierServiceDto tierServiceDto, Integer tierId, Integer serviceId) {
         return false;
+    }
+
+    @Override
+    public int updateTierServices(List<TierServiceDto> tierServiceDtos, Integer tierId) {
+
+        List<TierService> tierServices = new ArrayList<>();
+        tierServiceDtos.forEach(tierServiceDto -> tierServices.add(tierServiceDto.toTierService()));
+
+        return tierServiceMapper.updateTierServicesBulk(tierServices);
     }
 
     @Override

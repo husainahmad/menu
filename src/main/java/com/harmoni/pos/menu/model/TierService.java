@@ -14,7 +14,7 @@ public class TierService {
     private Tier tier;
 
     private Integer subServiceId;
-
+    private boolean isActive;
     private Date createdAt;
     private Date updatedAt;
 

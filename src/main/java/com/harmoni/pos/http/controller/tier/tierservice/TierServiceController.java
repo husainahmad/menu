@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @Slf4j
@@ -50,11 +52,12 @@ public class TierServiceController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @PutMapping("/tier/service/{id}")
-    public ResponseEntity<RestAPIResponse> get(@Valid @RequestBody TierServiceDto tierServiceDto, @PathVariable Integer id) {
+    @PutMapping("/tier/{tierId}/service")
+    public ResponseEntity<RestAPIResponse> get(@RequestBody List<TierServiceDto> tierServiceDtos,
+                                               @Valid @PathVariable Integer tierId) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .data(tierServiceService.update(tierServiceDto, id))
+                .data(tierServiceService.updateTierServices(tierServiceDtos, tierId))
                 .httpStatus(HttpStatus.OK.value())
                 .build();
 

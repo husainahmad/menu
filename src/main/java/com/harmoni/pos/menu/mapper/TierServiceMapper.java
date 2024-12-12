@@ -14,5 +14,5 @@ public interface TierServiceMapper {
     List<TierService> selectByBrandId(Integer id);
     TierService selectByTierSubService(Integer tierId, Integer subServiceId);
     int updateByPrimaryKey(TierService row);
-
+    int updateTierServicesBulk(List<TierService> tierServices);
 }
