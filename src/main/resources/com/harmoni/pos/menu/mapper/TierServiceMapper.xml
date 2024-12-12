@@ -6,7 +6,7 @@
     <id column="tier_service_id" jdbcType="INTEGER" property="id" />
     <result column="tier_service_tier_id" jdbcType="INTEGER" property="tierId" />
     <result column="tier_service_sub_service_id" jdbcType="INTEGER" property="subServiceId" />
-    <result column="tier_service_is_active" jdbcType="INTEGER" property="isActive" />
+    <result column="tier_service_is_active" jdbcType="BOOLEAN" property="active" />
     <result column="tier_service_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="tier_service_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
   </resultMap>

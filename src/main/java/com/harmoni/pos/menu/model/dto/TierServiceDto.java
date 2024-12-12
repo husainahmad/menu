@@ -14,14 +14,14 @@ public class TierServiceDto {
     @JsonProperty("subService")
     private SubServiceDto subServiceDto;
 
-    @JsonProperty("isActive")
-    private boolean isActive;
+    @JsonProperty("active")
+    private boolean active;
 
     public TierService toTierService() {
         return new TierService()
                 .setTierId(tierDto.getId())
                 .setSubServiceId(subServiceDto.getId())
-                .setActive(isActive);
+                .setActive(active);
     }
 
 }
