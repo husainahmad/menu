@@ -38,7 +38,7 @@
     </selectKey>
     insert into tier_services (tier_id, sub_service_id, is_active, created_at,
       updated_at)
-    values (#{tierId,jdbcType=INTEGER}, #{subServiceId,jdbcType=INTEGER}, #{isActive,jdbcType=BOOLEAN},
+    values (#{tierId,jdbcType=INTEGER}, #{subServiceId,jdbcType=INTEGER}, #{active,jdbcType=BOOLEAN},
     #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
   </insert>
 
@@ -46,7 +46,7 @@
     update tier_services
     set tier_id = #{tierId,jdbcType=INTEGER},
       sub_service_id = #{subServiceId,jdbcType=INTEGER},
-      is_active = #{isActive,jdbcType=BOOLEAN},
+      is_active = #{active,jdbcType=BOOLEAN},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
@@ -56,7 +56,7 @@
     insert into tier_services (tier_id, sub_service_id, is_active, created_at, updated_at)
     values
     <foreach collection="tierServices" item="tierService" separator=",">
-      (#{tierService.tierId}, #{tierService.subServiceId}, #{tierService.isActive},
+      (#{tierService.tierId}, #{tierService.subServiceId}, #{tierService.active},
       #{tierService.createdAt}, #{tierService.updatedAt})
     </foreach>
     on duplicate key update
