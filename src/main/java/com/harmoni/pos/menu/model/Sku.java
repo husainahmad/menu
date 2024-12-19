@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Accessors(chain = true)
@@ -17,6 +18,9 @@ public class Sku {
     private Product product;
     private Date createdAt;
     private Date updatedAt;
-    private Boolean isActive;
+    private Date deletedAt;
+    private Boolean active;
+    private Boolean deleted;
+    private List<SkuTierPrice> skuTierPrices;
 
 }

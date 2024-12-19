@@ -8,10 +8,11 @@ import java.util.List;
 
 public interface ProductService {
 
-    int create(ProductDto productDto);
+    Product create(ProductDto productDto);
     List<Product> selectByCategory(Integer categoryId);
     List<Product> selectByCategoryBrand(Integer categoryId, Integer brandId);
     Product get(Integer id);
     void selectByNameCategoryId(String name, Integer categoryId);
     void updateProductSku(Integer productId, ProductSkuDto productSkuDto);
+    int delete(Integer id);
 }

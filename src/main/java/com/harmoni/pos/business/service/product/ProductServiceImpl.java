@@ -5,7 +5,6 @@ import com.harmoni.pos.business.service.sku.SkuService;
 import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.business.service.tier.TierService;
 import com.harmoni.pos.exception.BusinessBadRequestException;
-import com.harmoni.pos.exception.BusinessNoContentRequestException;
 import com.harmoni.pos.menu.mapper.*;
 import com.harmoni.pos.menu.model.*;
 import com.harmoni.pos.menu.model.dto.ProductDto;
@@ -25,23 +24,22 @@ import java.util.List;
 @Service("productService")
 @Slf4j
 public class ProductServiceImpl implements ProductService {
+
     private final ProductMapper productMapper;
     private final SkuService skuService;
     private final TierService tierService;
     private final SkuTierPriceService skuTierPriceService;
     private final CategoryService categoryService;
+
     @Override
-    public int create(ProductDto productDto) {
+    public Product create(ProductDto productDto) {
 
         this.selectByNameCategoryId(productDto.getName(), productDto.getCategoryId());
+        Product product = productDto.toProduct();
+        product.setCreatedAt(new Date(System.currentTimeMillis()));
+        productMapper.insert(product);
 
-        int inserted = productMapper.insert(productDto.toProduct());
-        if (inserted<1) {
-            throw new BusinessNoContentRequestException(
-                    BusinessNoContentRequestException.NO_CONTENT, null);
-        }
-
-        return inserted;
+        return product;
     }
 
     @Override
@@ -88,6 +86,7 @@ public class ProductServiceImpl implements ProductService {
         if (!isIgnoreUpdateProduct) {
             product.setName(productSkuDto.getName());
             product.setCategoryId(category.getId());
+            product.setUpdatedAt(new Date(System.currentTimeMillis()));
             this.productMapper.updateByPrimaryKey(product);
         }
 
@@ -122,6 +121,12 @@ public class ProductServiceImpl implements ProductService {
 
         this.skuTierPriceService.insetOrUpdateBulk(skuTierPrices);
 
+    }
+
+    @Override
+    public int delete(Integer id) {
+        skuService.deleteSkuByProductId(id);
+        return productMapper.deleteByPrimaryKey(id, true, new Date(System.currentTimeMillis()));
     }
 
     private Sku setSku(Integer skuId, String skuName, Integer productId) {

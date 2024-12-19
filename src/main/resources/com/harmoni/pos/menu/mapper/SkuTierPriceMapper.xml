@@ -7,6 +7,7 @@
     <result column="stp_sku_id" jdbcType="INTEGER" property="skuId" />
     <result column="stp_tier_id" jdbcType="INTEGER" property="tierId" />
     <result column="stp_price" jdbcType="DECIMAL" property="price" />
+    <result column="stp_is_deleted" jdbcType="BOOLEAN" property="deleted" />
     <result column="stp_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="stp_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <association property="tier" javaType="com.harmoni.pos.menu.model.Tier">
@@ -20,6 +21,7 @@
     stp.sku_id as stp_sku_id,
     stp.tier_id as stp_tier_id,
     stp.price as stp_price,
+    stp.is_deleted as stp_is_deleted,
     stp.created_at as stp_created_at,
     stp.updated_at as stp_updated_at
   </sql>
@@ -48,7 +50,9 @@
             #{skuId}
           </foreach>
         </if>
-        and stp.tier_id =  #{tierId,jdbcType=INTEGER}
+        <if test="tierId>0">
+          and stp.tier_id =  #{tierId,jdbcType=INTEGER}
+        </if>
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
@@ -61,7 +65,19 @@
     where sku_id = #{skuId,jdbcType=INTEGER}
   </delete>
 
-    <insert id="insert" parameterType="com.harmoni.pos.menu.model.SkuTierPrice">
+  <update id="deleteBySkuIds">
+    <if test="skus!=null">
+      update sku_tier_prices
+      set is_deleted = #{deleted,jdbcType=BOOLEAN},
+      deleted_at = #{deletedAt,jdbcType=TIMESTAMP}
+      where sku_id in
+      <foreach item="sku" index="index" collection="skus" open="(" separator="," close=")">
+        #{sku.id,jdbcType=INTEGER}
+      </foreach>
+    </if>
+  </update>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.SkuTierPrice">
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
@@ -77,6 +93,23 @@
     values (#{skuId,jdbcType=INTEGER}, #{tierId,jdbcType=INTEGER}, #{price,jdbcType=DECIMAL},
     #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
     on duplicate key update price = #{price,jdbcType=DECIMAL}
+  </insert>
+
+  <insert id="insertOrUpdateSkuTierPrices" useGeneratedKeys="true" keyProperty="id">
+      insert into sku_tier_prices (sku_id, tier_id, price,
+      created_at, updated_at)
+      values
+      <foreach item="skuTierPrice" index="index" collection="skuTierPrices" separator=",">
+        (#{skuTierPrice.skuId,jdbcType=INTEGER},
+        #{skuTierPrice.tierId,jdbcType=INTEGER},
+        #{skuTierPrice.price,jdbcType=DECIMAL},
+        #{skuTierPrice.createdAt,jdbcType=TIMESTAMP},
+        #{skuTierPrice.updatedAt,jdbcType=TIMESTAMP})
+      </foreach>
+      on duplicate key update
+      price = values(price),
+      created_at = values(created_at),
+      updated_at = values(updated_at)
   </insert>
 
   <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.SkuTierPrice">

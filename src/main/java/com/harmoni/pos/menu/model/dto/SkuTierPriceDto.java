@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 @Data
 public class SkuTierPriceDto {
 
-    @NotNull(message = "{validation.skutierprice.skuId.NotNull}")
     private Integer skuId;
     @NotNull(message = "{validation.skutierprice.tierId.NotNull}")
     private Integer tierId;

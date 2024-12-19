@@ -8,7 +8,8 @@
     <result column="sku_product_id" jdbcType="INTEGER" property="productId" />
     <result column="sku_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="sku_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
-    <result column="sku_is_active" jdbcType="BIT" property="isActive" />
+    <result column="sku_is_active" jdbcType="BOOLEAN" property="active" />
+    <result column="sku_is_deleted" jdbcType="BOOLEAN" property="deleted" />
     <association property="product" javaType="com.harmoni.pos.menu.model.Product">
       <id column="product_id" jdbcType="INTEGER" property="id" />
       <result column="product_name" jdbcType="VARCHAR" property="name" />
@@ -22,7 +23,8 @@
     sku.product_id as sku_product_id,
     sku.created_at as sku_created_at,
     sku.updated_at as sku_updated_at,
-    sku.is_active as sku_is_active
+    sku.is_active as sku_is_active,
+    sku.is_deleted as sku_is_deleted
   </sql>
 
   <select id="selectById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -72,14 +74,21 @@
     where id = #{id,jdbcType=INTEGER}
   </delete>
 
+  <update id="deleteByProductId" parameterType="com.harmoni.pos.menu.model.Sku">
+    update skus
+    set is_deleted = #{deleted,jdbcType=BOOLEAN},
+    deleted_at = #{deletedAt,jdbcType=TIMESTAMP}
+    where product_id = #{productId,jdbcType=INTEGER}
+  </update>
+
   <insert id="insert" parameterType="com.harmoni.pos.menu.model.Sku">
     <selectKey keyProperty="id" order="BEFORE" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into skus (name, product_id, created_at, 
-      updated_at, is_active)
+      updated_at, is_active, is_deleted)
     values (#{name,jdbcType=VARCHAR}, #{productId,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP}, 
-      #{updatedAt,jdbcType=TIMESTAMP}, #{isActive,jdbcType=BIT})
+      #{updatedAt,jdbcType=TIMESTAMP}, #{active,jdbcType=BOOLEAN}, #{deleted,jdbcType=BOOLEAN})
   </insert>
 
   <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Sku">
@@ -90,18 +99,18 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
-  <update id="insertOrUpdate" parameterType="com.harmoni.pos.menu.model.Sku">
+  <update id="insertOrUpdate" parameterType="com.harmoni.pos.menu.model.Sku" useGeneratedKeys="true">
     <selectKey keyProperty="id" keyColumn="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into skus (name, product_id, created_at, updated_at, is_active)
     values (#{name,jdbcType=VARCHAR}, #{productId,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP},
-      #{updatedAt,jdbcType=TIMESTAMP}, #{isActive,jdbcType=BIT})
+      #{updatedAt,jdbcType=TIMESTAMP}, #{active,jdbcType=BOOLEAN})
     on duplicate key
     update
     name = #{name,jdbcType=VARCHAR},
     product_id = #{productId,jdbcType=INTEGER},
     updated_at = #{updatedAt,jdbcType=TIMESTAMP},
-    is_active = #{isActive,jdbcType=BIT}
+    is_active = #{active,jdbcType=BOOLEAN}
   </update>
 </mapper>

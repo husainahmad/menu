@@ -1,13 +1,16 @@
 package com.harmoni.pos.http.controller.product;
 
 import com.harmoni.pos.business.service.product.ProductService;
+import com.harmoni.pos.business.service.product.ProductSkuService;
 import com.harmoni.pos.http.response.RestAPIResponse;
+import com.harmoni.pos.menu.model.Product;
 import com.harmoni.pos.menu.model.dto.ProductDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -17,13 +20,12 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductSkuService productSkuService;
 
     @PostMapping("/product")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ProductDto productDto) {
-        int id = productService.create(productDto);
-
-        log.debug("Product created {} ", id);
-
+        Product product = productSkuService.create(productDto);
+        log.debug("Product created {} ", ObjectUtils.getDisplayString(product));
         RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
 
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
@@ -35,6 +37,19 @@ public class ProductController {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(this.productService.get(id))
+                .error(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/product/{id}")
+    public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
+
+        this.productService.delete(id);
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(null)
                 .error(null)
                 .build();
 

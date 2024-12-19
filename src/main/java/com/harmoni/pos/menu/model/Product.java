@@ -17,6 +17,7 @@ public class Product {
     private Integer categoryId;
     private Category category;
     private List<Sku> skus;
+    private Boolean deleted;
     private Date createdAt;
     private Date updatedAt;
     private Date deletedAt;

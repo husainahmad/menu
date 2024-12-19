@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,9 +24,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service("skuService")
 @Slf4j
 public class SkuServiceImpl implements SkuService {
+
     private final SkuMapper skuMapper;
     private final SqlSessionFactory sqlSessionFactory;
     private final SkuTierPriceService skuTierPriceService;
+
     @Override
     public int create(SkuDto skuDto) {
 
@@ -42,6 +45,12 @@ public class SkuServiceImpl implements SkuService {
         }
 
         return inserted;
+    }
+
+    @Override
+    public List<Sku> createOrUpdate(List<Sku> skus) {
+        updateBulk(skus);
+        return skus;
     }
 
     @Override
@@ -94,7 +103,8 @@ public class SkuServiceImpl implements SkuService {
     @Override
     public void validateSkuName(List<Sku> originalSkus, List<Sku> skuDtos) {
         skuDtos.forEach(sku -> skuDtos.forEach(skuDto -> {
-            if (!ObjectUtils.isEmpty(sku.getId()) && !sku.getId().equals(skuDto.getId()) && sku.getProductId().equals(skuDto.getProductId()) &&
+            if (!ObjectUtils.isEmpty(sku.getId()) && !sku.getId().equals(skuDto.getId()) &&
+                    sku.getProductId().equals(skuDto.getProductId()) &&
                     sku.getName().equals(skuDto.getName())) {
                 throw new BusinessNoContentRequestException(BusinessNoContentRequestException.NO_CONTENT, null);
             }
@@ -103,13 +113,36 @@ public class SkuServiceImpl implements SkuService {
 
     @Override
     public void deleteSku(Integer skuId) {
+        Sku sku = getSku(skuId);
+        skuTierPriceService.deleteBySkuId(sku.getId());
+        skuMapper.deleteById(sku.getId());
+    }
+
+    public Sku getSku(Integer skuId) {
         Sku sku = skuMapper.selectById(skuId);
         if (ObjectUtils.isEmpty(sku)) {
             throw new BusinessNoContentRequestException(
                     BusinessNoContentRequestException.NO_CONTENT, null);
         }
-        skuTierPriceService.deleteBySkuId(skuId);
-        skuMapper.deleteById(skuId);
+
+        return sku;
+    }
+
+    @Override
+    public void deleteSkuByProductId(Integer id) {
+        Sku sku = new Sku();
+        sku.setProductId(id);
+        sku.setDeleted(true);
+        sku.setDeletedAt(new Date(System.currentTimeMillis()));
+
+        List<Sku> skus = skuMapper.selectByProductId(id);
+        skuTierPriceService.deleteBySkuIds(skus, sku.getDeleted(), sku.getDeletedAt());
+        skuMapper.deleteByProductId(sku);
+    }
+
+    @Override
+    public int insertOrUpdate(Sku sku) {
+        return skuMapper.insertOrUpdate(sku);
     }
 
     @Override

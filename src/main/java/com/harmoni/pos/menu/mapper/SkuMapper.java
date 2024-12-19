@@ -9,7 +9,9 @@ import java.util.List;
 public interface SkuMapper {
 
     int deleteById(Integer id);
+    int deleteByProductId(Sku row);
     int insert(Sku row);
+
     Sku selectById(Integer id);
     Sku selectByNameProductId(String name, Integer productId);
     List<Sku> selectAll();

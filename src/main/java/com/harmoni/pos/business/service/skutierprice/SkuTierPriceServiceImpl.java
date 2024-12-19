@@ -1,6 +1,7 @@
 package com.harmoni.pos.business.service.skutierprice;
 
 import com.harmoni.pos.menu.mapper.SkuTierPriceMapper;
+import com.harmoni.pos.menu.model.Sku;
 import com.harmoni.pos.menu.model.SkuTierPrice;
 import com.harmoni.pos.menu.model.dto.SkuTierPriceDto;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,9 @@ import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
+import java.util.Date;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -42,5 +45,13 @@ public class SkuTierPriceServiceImpl implements SkuTierPriceService {
     @Override
     public int deleteBySkuId(Integer skuId) {
         return skuTierPriceMapper.deleteBySkuId(skuId);
+    }
+
+    @Override
+    public int deleteBySkuIds(List<Sku> skus, Boolean deleted, Date deletedAt) {
+        if (ObjectUtils.isEmpty(skus)) {
+            return 0;
+        }
+        return skuTierPriceMapper.deleteBySkuIds(skus, deleted, deletedAt);
     }
 }

@@ -15,7 +15,9 @@ public class SkuTierPrice {
     private Integer tierId;
     private Tier tier;
     private BigDecimal price;
+    private Boolean deleted;
     private Date createdAt;
     private Date updatedAt;
+    private Date deletedAt;
 
 }

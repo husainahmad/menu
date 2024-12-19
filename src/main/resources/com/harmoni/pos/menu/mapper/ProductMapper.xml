@@ -6,6 +6,7 @@
     <id column="product_id" jdbcType="INTEGER" property="id" />
     <result column="product_name" jdbcType="VARCHAR" property="name" />
     <result column="product_category_id" jdbcType="INTEGER" property="categoryId" />
+    <result column="product_is_deleted" jdbcType="BOOLEAN" property="deleted" />
     <result column="product_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="product_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <result column="product_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
@@ -25,6 +26,7 @@
     product.id as product_id,
     product.name as product_name,
     product.category_id as product_category_id,
+    product.is_deleted as product_is_deleted,
     product.created_at as product_created_at,
     product.updated_at as product_updated_at,
     product.deleted_at as product_deleted_at
@@ -67,6 +69,7 @@
       left join categories category on category.id = product.category_id
       left join skus sku on sku.product_id = product.id
     where 1=1
+    and (product.is_deleted = 0 or product.is_deleted is null)
     <if test="categoryId != -1">
       and product.category_id = #{categoryId,jdbcType=INTEGER}
     </if>
@@ -81,6 +84,7 @@
       left join categories category on category.id = product.category_id
       left join skus sku on sku.product_id = product.id
       where 1=1
+      and (product.is_deleted = 0 or product.is_deleted is null)
       <if test="categoryId != -1">
         and product.category_id = #{categoryId,jdbcType=INTEGER}
       </if>
@@ -89,25 +93,28 @@
       </if>
   </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-    delete from products
+  <update id="deleteByPrimaryKey">
+    update products
+    set is_deleted = #{deleted,jdbcType=BOOLEAN},
+    deleted_at = #{deletedAt,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
-  </delete>
+  </update>
 
-  <insert id="insert" parameterType="com.harmoni.pos.menu.model.Product">
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.Product" useGeneratedKeys="true">
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into products (name, category_id, created_at, 
+    insert into products (name, category_id, is_deleted, created_at,
       updated_at, deleted_at)
-    values (#{name,jdbcType=VARCHAR}, #{categoryId,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP}, 
-      #{updatedAt,jdbcType=TIMESTAMP}, #{deletedAt,jdbcType=TIMESTAMP})
+    values (#{name,jdbcType=VARCHAR}, #{categoryId,jdbcType=INTEGER}, #{deleted,jdbcType=BOOLEAN},
+    #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}, #{deletedAt,jdbcType=TIMESTAMP})
   </insert>
 
   <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Product">
     update products
     set name = #{name,jdbcType=VARCHAR},
       category_id = #{categoryId,jdbcType=INTEGER},
+      is_deleted = #{deleted,jdbcType=BOOLEAN},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},
       deleted_at = #{deletedAt,jdbcType=TIMESTAMP}
