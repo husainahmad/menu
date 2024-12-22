@@ -4,6 +4,7 @@ import com.harmoni.pos.business.service.sku.SkuService;
 import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.SkuDto;
+import com.harmoni.pos.menu.model.dto.add.SkuAddDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ public class SkuController {
     private final SkuService skuService;
 
     @PostMapping("/sku")
-    public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody SkuDto skuDto) {
+    public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody SkuAddDto skuDto) {
         int id = skuService.create(skuDto);
 
         log.debug("Sku created {} ", id);

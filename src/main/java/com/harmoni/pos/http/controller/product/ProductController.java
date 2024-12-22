@@ -4,7 +4,8 @@ import com.harmoni.pos.business.service.product.ProductService;
 import com.harmoni.pos.business.service.product.ProductSkuService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.Product;
-import com.harmoni.pos.menu.model.dto.ProductDto;
+import com.harmoni.pos.menu.model.dto.add.ProductAddDto;
+import com.harmoni.pos.menu.model.dto.edit.ProductEditDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ public class ProductController {
     private final ProductSkuService productSkuService;
 
     @PostMapping("/product")
-    public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ProductDto productDto) {
+    public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ProductAddDto productDto) {
         Product product = productSkuService.create(productDto);
         log.debug("Product created {} ", ObjectUtils.getDisplayString(product));
         RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
@@ -37,6 +38,19 @@ public class ProductController {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(this.productService.get(id))
+                .error(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("/product")
+    public ResponseEntity<RestAPIResponse> put(@Valid @RequestBody ProductEditDto productEditDto) {
+        this.productSkuService.update(productEditDto);
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(null)
                 .error(null)
                 .build();
 

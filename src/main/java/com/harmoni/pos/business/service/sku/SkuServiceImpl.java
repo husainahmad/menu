@@ -6,7 +6,7 @@ import com.harmoni.pos.exception.BusinessNoContentRequestException;
 import com.harmoni.pos.http.utils.PosObjectUtils;
 import com.harmoni.pos.menu.mapper.SkuMapper;
 import com.harmoni.pos.menu.model.Sku;
-import com.harmoni.pos.menu.model.dto.SkuDto;
+import com.harmoni.pos.menu.model.dto.add.SkuAddDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.ExecutorType;
@@ -30,7 +30,7 @@ public class SkuServiceImpl implements SkuService {
     private final SkuTierPriceService skuTierPriceService;
 
     @Override
-    public int create(SkuDto skuDto) {
+    public int create(SkuAddDto skuDto) {
 
         if (!ObjectUtils.isEmpty(skuMapper.selectByNameProductId(skuDto.getName(),
                 skuDto.getProductId()))) {
@@ -96,6 +96,15 @@ public class SkuServiceImpl implements SkuService {
         try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
             SkuMapper mapper = sqlSession.getMapper(SkuMapper.class);
             skus.forEach(mapper::insertOrUpdate);
+            sqlSession.commit();
+        }
+    }
+
+    @Override
+    public void updateByIdBulk(List<Sku> skus) {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+            SkuMapper mapper = sqlSession.getMapper(SkuMapper.class);
+            skus.forEach(mapper::updateByPrimaryKey);
             sqlSession.commit();
         }
     }

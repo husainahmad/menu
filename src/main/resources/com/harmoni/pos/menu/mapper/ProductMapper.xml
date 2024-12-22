@@ -19,6 +19,12 @@
     <collection property="skus" ofType="com.harmoni.pos.menu.model.Sku">
       <id column="sku_id" jdbcType="INTEGER" property="id" />
       <result column="sku_name" jdbcType="VARCHAR" property="name" />
+
+      <collection property="skuTierPrices" ofType="com.harmoni.pos.menu.model.SkuTierPrice">
+          <id column="stp_id" property="id"/>
+          <result column="stp_tier_id" property="tierId"/>
+          <result column="stp_price" property="price"/>
+      </collection>
     </collection>
   </resultMap>
 
@@ -36,11 +42,15 @@
     select 
     <include refid="Base_Column_List" />,
     <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List"/>,
-    <include refid="com.harmoni.pos.menu.mapper.SkuMapper.Base_Column_List"/>
+    <include refid="com.harmoni.pos.menu.mapper.SkuMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.SkuTierPriceMapper.Base_Column_List"/>
     from products product
           left join categories category on category.id = product.category_id
-          right join skus sku on sku.product_id = product.id
+          left join skus sku on sku.product_id = product.id
+          left join sku_tier_prices stp on stp.sku_id = sku.id
     where product.id = #{id,jdbcType=INTEGER}
+    and (sku.is_deleted = 0 or sku.is_deleted is null)
+    and (stp.is_deleted = 0 or stp.is_deleted is null)
   </select>
 
   <select id="selectByNameCategoryId" resultMap="BaseResultMap">
@@ -48,6 +58,7 @@
     <include refid="Base_Column_List" />
     from products product
     where product.name = #{name,jdbcType=VARCHAR} and product.category_id = #{categoryId,jdbcType=INTEGER}
+    and (product.is_deleted = 0 or product.is_deleted is null)
   </select>
 
   <select id="selectAll" resultMap="BaseResultMap">

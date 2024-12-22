@@ -1,6 +1,7 @@
 package com.harmoni.pos.menu.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -21,6 +22,7 @@ public class Sku {
     private Date deletedAt;
     private Boolean active;
     private Boolean deleted;
+    @JsonProperty("tierPrices")
     private List<SkuTierPrice> skuTierPrices;
 
 }

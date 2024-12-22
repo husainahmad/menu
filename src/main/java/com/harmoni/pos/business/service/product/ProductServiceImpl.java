@@ -7,9 +7,10 @@ import com.harmoni.pos.business.service.tier.TierService;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.menu.mapper.*;
 import com.harmoni.pos.menu.model.*;
-import com.harmoni.pos.menu.model.dto.ProductDto;
+import com.harmoni.pos.menu.model.dto.add.ProductAddDto;
 import com.harmoni.pos.menu.model.dto.ProductSkuDto;
 import com.harmoni.pos.menu.model.dto.ProductSkuTierDto;
+import com.harmoni.pos.menu.model.dto.edit.ProductEditDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,9 +33,9 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryService categoryService;
 
     @Override
-    public Product create(ProductDto productDto) {
+    public Product create(ProductAddDto productDto) {
 
-        this.selectByNameCategoryId(productDto.getName(), productDto.getCategoryId());
+        this.selectByNameCategoryId(null, productDto.getName(), productDto.getCategoryId());
         Product product = productDto.toProduct();
         product.setCreatedAt(new Date(System.currentTimeMillis()));
         productMapper.insert(product);
@@ -64,9 +65,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void selectByNameCategoryId(String name, Integer categoryId) {
+    public void selectByNameCategoryId(Integer id, String name, Integer categoryId) {
         Product product = productMapper.selectByNameCategoryId(name, categoryId);
-        if (!ObjectUtils.isEmpty(product)) {
+
+        if (!ObjectUtils.isEmpty(product) && id==null) {
             throw new BusinessBadRequestException("exception.product.badRequest.duplicate", null);
         }
     }
@@ -121,6 +123,15 @@ public class ProductServiceImpl implements ProductService {
 
         this.skuTierPriceService.insetOrUpdateBulk(skuTierPrices);
 
+    }
+
+    @Override
+    public Product update(ProductEditDto productEditDto) {
+        this.selectByNameCategoryId(productEditDto.getId(), productEditDto.getName(), productEditDto.getCategoryId());
+        Product product = productEditDto.toProduct();
+        product.setUpdatedAt(new Date(System.currentTimeMillis()));
+        productMapper.updateByPrimaryKey(product);
+        return product;
     }
 
     @Override
