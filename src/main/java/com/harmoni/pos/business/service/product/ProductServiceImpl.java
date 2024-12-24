@@ -1,10 +1,12 @@
 package com.harmoni.pos.business.service.product;
 
+import com.github.pagehelper.PageInfo;
 import com.harmoni.pos.business.service.category.CategoryService;
 import com.harmoni.pos.business.service.sku.SkuService;
 import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.business.service.tier.TierService;
 import com.harmoni.pos.exception.BusinessBadRequestException;
+import com.harmoni.pos.http.utils.PaginationUtils;
 import com.harmoni.pos.menu.mapper.*;
 import com.harmoni.pos.menu.model.*;
 import com.harmoni.pos.menu.model.dto.add.ProductAddDto;
@@ -17,9 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service("productService")
@@ -49,8 +49,23 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> selectByCategoryBrand(Integer categoryId, Integer brandId) {
-        return productMapper.selectByCategoryIdBrandId(categoryId, brandId);
+    public Map<String, Object> selectByCategoryBrand(Integer categoryId, Integer brandId, int page, int size, String search) {
+        PaginationUtils.applyPagination(page, size);
+
+        Map<String, Object> paginationData = new HashMap<>();
+        PageInfo<Product> productPageInfo = new PageInfo<>(getProducts(categoryId, brandId, search));
+
+        paginationData.put("page", productPageInfo.getPages());
+        paginationData.put("size", productPageInfo.getSize());
+        paginationData.put("total", productPageInfo.getTotal());
+        paginationData.put("data", productPageInfo.getList());
+        paginationData.put("navigate", productPageInfo.getNavigatepageNums());
+
+        return paginationData;
+    }
+
+    private List<Product> getProducts(Integer categoryId, Integer brandId, String search) {
+        return productMapper.selectByCategoryIdBrandId(categoryId, brandId, search);
     }
 
     @Override

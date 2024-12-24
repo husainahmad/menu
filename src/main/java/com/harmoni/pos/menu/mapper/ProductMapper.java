@@ -16,7 +16,7 @@ public interface ProductMapper {
     List<Product> selectAll();
 
     List<Product> selectByCategoryId(Integer categoryId);
-    List<Product> selectByCategoryIdBrandId(Integer categoryId, Integer brandId);
+    List<Product> selectByCategoryIdBrandId(Integer categoryId, Integer brandId, String search);
     int updateByPrimaryKey(Product row);
 
 }

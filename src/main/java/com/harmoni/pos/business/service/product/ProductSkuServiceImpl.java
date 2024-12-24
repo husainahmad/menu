@@ -64,7 +64,7 @@ public class ProductSkuServiceImpl implements ProductSkuService {
 
     private void extractSkuAndSave(SkuDto skuDto, Product product, List<Sku> skus) {
         Sku sku = getSku(skuDto, product);
-        skuService.insertOrUpdate(getSku(skuDto, product));
+        skuService.insertOrUpdate(sku);
         skus.add(sku);
     }
 
@@ -74,13 +74,10 @@ public class ProductSkuServiceImpl implements ProductSkuService {
     }
 
     private static Sku getSku(SkuDto skuDto, Product product) {
-        Sku sku = null;
-        sku = getSkuAddOrEdit(skuDto, sku);
-
+        Sku sku = getSkuAddOrEdit(skuDto);
         if (sku == null) {
             throw new IllegalArgumentException("Unable to create SKU from SkuDto");
         }
-
         sku.setActive(true);
         sku.setProductId(product.getId());
         List<SkuTierPrice> skuTierPrices = getPriceTier(skuDto);
@@ -89,15 +86,11 @@ public class ProductSkuServiceImpl implements ProductSkuService {
         return sku;
     }
 
-    private static Sku getSkuAddOrEdit(SkuDto skuDto, Sku sku) {
+    private static Sku getSkuAddOrEdit(SkuDto skuDto) {
         if (skuDto instanceof SkuEditDto skuEditDto) {
-            sku = skuEditDto.toSku();
-            sku.setUpdatedAt(new Date(System.currentTimeMillis()));
-        } else if (skuDto instanceof SkuAddDto skuAddDto) {
-            sku = skuAddDto.toSku();
-            sku.setCreatedAt(new Date(System.currentTimeMillis()));
+            return skuEditDto.toSku();
         }
-        return sku;
+        return ((SkuAddDto) skuDto).toSku();
     }
 
     private static List<SkuTierPrice> getPriceTier(SkuDto skuDto) {

@@ -6,12 +6,13 @@ import com.harmoni.pos.menu.model.dto.ProductSkuDto;
 import com.harmoni.pos.menu.model.dto.edit.ProductEditDto;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ProductService {
 
     Product create(ProductAddDto productDto);
     List<Product> selectByCategory(Integer categoryId);
-    List<Product> selectByCategoryBrand(Integer categoryId, Integer brandId);
+    Map<String, Object> selectByCategoryBrand(Integer categoryId, Integer brandId, int page, int size, String search);
     Product get(Integer id);
     void selectByNameCategoryId(Integer id, String name, Integer categoryId);
     void updateProductSku(Integer productId, ProductSkuDto productSkuDto);

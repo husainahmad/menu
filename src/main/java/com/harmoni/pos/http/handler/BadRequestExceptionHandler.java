@@ -9,6 +9,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -37,7 +38,27 @@ public class BadRequestExceptionHandler {
                 .data(null)
                 .build();
 
+        logAsWarning(message);
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    private static void logAsWarning(String message) {
         log.warn("BadRequest: {}", message);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<RestAPIResponse> missingRequiredParam(MissingServletRequestParameterException e) {
+        String messageName = e.getMessage();
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.BAD_REQUEST.value())
+                .timeStamp(System.currentTimeMillis())
+                .error(messageName)
+                .data(null)
+                .build();
+
+        logAsWarning(messageName);
 
         return new ResponseEntity<>(restAPIResponse, HttpStatus.BAD_REQUEST);
     }

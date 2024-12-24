@@ -84,11 +84,14 @@ public class ProductController {
 
     @GetMapping("/product/category/{categoryId}/{brandId}")
     public ResponseEntity<RestAPIResponse> getByCategoryBrand(@PathVariable Integer categoryId,
-                                                              @PathVariable Integer brandId) {
+                                                              @PathVariable Integer brandId,
+                                                              @RequestParam(name = "page") int page,
+                                                              @RequestParam(name = "size") int size,
+                                                              @RequestParam(name = "search") String search) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(this.productService.selectByCategoryBrand(categoryId, brandId))
+                .data(this.productService.selectByCategoryBrand(categoryId, brandId, page, size, search))
                 .error(null)
                 .build();
 
