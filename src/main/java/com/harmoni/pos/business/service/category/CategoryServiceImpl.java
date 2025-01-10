@@ -1,7 +1,9 @@
 package com.harmoni.pos.business.service.category;
 
+import com.github.pagehelper.PageInfo;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
+import com.harmoni.pos.http.utils.PaginationUtils;
 import com.harmoni.pos.menu.model.Category;
 import com.harmoni.pos.menu.model.dto.CategoryDto;
 import com.harmoni.pos.menu.mapper.CategoryMapper;
@@ -10,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service("categoryService")
@@ -44,6 +48,22 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> list() {
         return categoryMapper.selectAll();
+    }
+
+    @Override
+    public Map<String, Object> listPaginated(int page, int size) {
+        PaginationUtils.applyPagination(page, size);
+
+        Map<String, Object> paginationData = new HashMap<>();
+        PageInfo<Category> categoryPageInfo = new PageInfo<>(list());
+
+        paginationData.put("page", categoryPageInfo.getPages());
+        paginationData.put("size", categoryPageInfo.getSize());
+        paginationData.put("total", categoryPageInfo.getTotal());
+        paginationData.put("data", categoryPageInfo.getList());
+        paginationData.put("navigate", categoryPageInfo.getNavigatepageNums());
+
+        return paginationData;
     }
 
     @Override

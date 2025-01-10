@@ -10,7 +10,6 @@ import lombok.Data;
 @Data
 public class TierDto {
 
-    private Integer id;
     @NotBlank(message = "{validation.tier.name.NotBlank}")
     @Size(min = 2, max = 45)
     private String name;

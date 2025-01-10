@@ -30,10 +30,11 @@ public class CategoryController {
     }
 
     @GetMapping("/category")
-    public ResponseEntity<RestAPIResponse> list() {
+    public ResponseEntity<RestAPIResponse> list(@RequestParam(name = "page") int page,
+                                                @RequestParam(name = "size") int size) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(categoryService.list())
+                .data(categoryService.listPaginated(page, size))
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }

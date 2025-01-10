@@ -14,6 +14,7 @@ public class CategoryDto {
     private String description;
     @NotNull(message = "{validation.category.brandId.NotNull}")
     private Integer brandId;
+    private Boolean active;
 
     public Category toCategory() {
         return new Category()

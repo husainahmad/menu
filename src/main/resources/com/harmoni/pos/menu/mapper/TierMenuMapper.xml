@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.TierMenuMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.TierMenu">
+    <id column="tier_menu_id" jdbcType="INTEGER" property="id" />
+    <result column="tier_menu_tier_id" jdbcType="INTEGER" property="tierId" />
+    <result column="tier_menu_category_id" jdbcType="INTEGER" property="categoryId" />
+    <result column="tier_menu_is_active" jdbcType="BOOLEAN" property="active" />
+    <result column="tier_menu_created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="tier_menu_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    tier_menu.id as tier_menu_id,
+    tier_menu.tier_id as tier_menu_tier_id,
+    tier_menu.category_id as tier_menu_category_id,
+    tier_menu.is_active as tier_menu_is_active,
+    tier_menu.created_at as tier_menu_created_at,
+    tier_menu.updated_at as tier_menu_updated_at
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from tier_menus tier_menu
+    where tier_menu.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByBrandId" resultType="com.harmoni.pos.menu.model.TierMenu">
+
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from tier_menus
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.TierMenu">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into tier_menus (tier_id, category_id, is_active, created_at,
+      updated_at)
+    values (#{tierId,jdbcType=INTEGER}, #{categoryId,jdbcType=INTEGER}, #{active,jdbcType=BOOLEAN},
+    #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.TierMenu">
+    update tier_menus
+    set tier_id = #{tierId,jdbcType=INTEGER},
+    category_id = #{categoryId,jdbcType=INTEGER},
+      is_active = #{active,jdbcType=BOOLEAN},
+      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateTierMenuBulk">
+    insert into tier_menus (tier_id, category_id, is_active, created_at, updated_at)
+    values
+    <foreach collection="tierMenus" item="tierMenu" separator=",">
+      (#{tierMenu.tierId}, #{tierMenu.categoryId}, #{tierMenu.active},
+      #{tierMenu.createdAt}, #{tierMenu.updatedAt})
+    </foreach>
+    on duplicate key update
+    is_active = values(is_active)
+  </update>
+</mapper>

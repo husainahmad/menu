@@ -21,9 +21,7 @@ public class ServiceController {
     @PostMapping("/service")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ServiceDto serviceDto) {
 
-        int id = serviceService.create(serviceDto);
-
-        log.debug("service created {} ", id);
+        serviceService.create(serviceDto);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
 

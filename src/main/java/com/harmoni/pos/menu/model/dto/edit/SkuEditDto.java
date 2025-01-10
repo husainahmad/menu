@@ -6,9 +6,11 @@ import com.harmoni.pos.menu.model.dto.SkuDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class SkuEditDto extends SkuDto {
     @NotNull(message = "{validation.sku.id.NotBlank}")
