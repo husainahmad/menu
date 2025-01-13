@@ -1,16 +1,14 @@
 package com.harmoni.pos.business.service.tier.tiermenu;
 
-import com.harmoni.pos.menu.model.Tier;
+import com.harmoni.pos.menu.model.TierMenu;
 import com.harmoni.pos.menu.model.dto.add.TierMenuEditDto;
+
+import java.util.List;
 
 public interface TierMenuService {
 
-    int create(Integer tierId, TierMenuEditDto tierMenuAddDto);
+    int create(Integer tierId, List<TierMenuEditDto> tierMenuEditDtos);
 
-    boolean update(com.harmoni.pos.menu.model.dto.edit.TierMenuEditDto tierMenuEditDto, Integer tierId);
-
-    int delete(Integer id);
-
-    Tier get(Integer id);
+    List<TierMenu> getMenusByBrandId(Integer brandId);
 
 }

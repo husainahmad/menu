@@ -50,7 +50,7 @@
     <include refid="com.harmoni.pos.menu.mapper.SubServiceMapper.Base_Column_List" />,
     <include refid="com.harmoni.pos.menu.mapper.ServiceMapper.Base_Column_List" />
     from tier_services tier_service
-    left join tiers tier
+    right join tiers tier
       on tier.id = tier_service.tier_id
     left join sub_services sub_service
       on sub_service.id = tier_service.sub_service_id

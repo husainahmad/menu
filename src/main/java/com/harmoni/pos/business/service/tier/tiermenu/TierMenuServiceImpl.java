@@ -20,16 +20,17 @@ public class TierMenuServiceImpl implements TierMenuService {
     private final TierMenuMapper tierMenuMapper;
 
     @Override
-    public int create(Integer tierId, TierMenuEditDto tierMenuAddDto) {
+    public int create(Integer tierId, List<TierMenuEditDto> tierMenuEditDtos) {
         Tier tier = tierService.get(tierId);
 
         List<TierMenu> tierMenuList = new ArrayList<>();
 
-        tierMenuAddDto.getCategoryEditDtos().forEach(categoryEditDto -> {
+        tierMenuEditDtos.forEach(categoryEditDto -> {
             TierMenu tierMenu = new TierMenu();
             tierMenu.setTierId(tier.getId());
-            tierMenu.setCategoryId(categoryEditDto.getId());
+            tierMenu.setCategoryId(categoryEditDto.getCategoryDto().getId());
             tierMenu.setActive(categoryEditDto.getActive());
+            tierMenu.setUpdatedAt(new Date(System.currentTimeMillis()));
             tierMenu.setCreatedAt(new Date(System.currentTimeMillis()));
 
             tierMenuList.add(tierMenu);
@@ -39,17 +40,7 @@ public class TierMenuServiceImpl implements TierMenuService {
     }
 
     @Override
-    public boolean update(com.harmoni.pos.menu.model.dto.edit.TierMenuEditDto tierMenuEditDto, Integer tierId) {
-        return false;
-    }
-
-    @Override
-    public int delete(Integer id) {
-        return 0;
-    }
-
-    @Override
-    public Tier get(Integer id) {
-        return null;
+    public List<TierMenu> getMenusByBrandId(Integer brandId) {
+        return tierMenuMapper.selectByBrandId(brandId);
     }
 }

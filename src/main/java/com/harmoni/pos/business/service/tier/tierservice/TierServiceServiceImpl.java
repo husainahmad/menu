@@ -4,9 +4,7 @@ import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
 import com.harmoni.pos.menu.mapper.TierMapper;
 import com.harmoni.pos.menu.mapper.TierServiceMapper;
-import com.harmoni.pos.menu.model.Tier;
 import com.harmoni.pos.menu.model.TierService;
-import com.harmoni.pos.menu.model.TierType;
 import com.harmoni.pos.menu.model.dto.TierServiceDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,11 +41,6 @@ public class TierServiceServiceImpl implements TierServiceService {
     }
 
     @Override
-    public boolean update(TierServiceDto tierServiceDto, Integer tierId, Integer serviceId) {
-        return false;
-    }
-
-    @Override
     public int updateTierServices(List<TierServiceDto> tierServiceDtos, Integer tierId) {
 
         List<TierService> tierServices = new ArrayList<>();
@@ -57,27 +50,7 @@ public class TierServiceServiceImpl implements TierServiceService {
     }
 
     @Override
-    public int delete(Integer id) {
-        return 0;
-    }
-
-    @Override
-    public Tier get(Integer id) {
-        return null;
-    }
-
-    @Override
     public List<TierService> getByBrandId(Integer id) {
         return this.tierServiceMapper.selectByBrandId(id);
-    }
-
-    @Override
-    public List<TierService> getByBrandIdAndTierType(Integer id, TierType tierType) {
-        return List.of();
-    }
-
-    @Override
-    public List<TierService> validateTierByIds(List<Integer> ids) {
-        return List.of();
     }
 }

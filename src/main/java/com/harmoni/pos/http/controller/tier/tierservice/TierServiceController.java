@@ -30,19 +30,8 @@ public class TierServiceController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
     }
 
-    @GetMapping("/tier/service/{id}")
-    public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
-
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .data(tierServiceService.get(id))
-                .httpStatus(HttpStatus.OK.value())
-                .build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
-    }
-
-    @GetMapping("/tier/service/brand/{id}")
-    public ResponseEntity<RestAPIResponse> getByBrand(@PathVariable Integer id) {
+    @GetMapping("/tier/service")
+    public ResponseEntity<RestAPIResponse> getByBrand(@RequestParam(name = "brandId") Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(tierServiceService.getByBrandId(id))
@@ -53,7 +42,7 @@ public class TierServiceController {
     }
 
     @PutMapping("/tier/{tierId}/service")
-    public ResponseEntity<RestAPIResponse> get(@RequestBody List<TierServiceDto> tierServiceDtos,
+    public ResponseEntity<RestAPIResponse> update(@RequestBody List<TierServiceDto> tierServiceDtos,
                                                @Valid @PathVariable Integer tierId) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

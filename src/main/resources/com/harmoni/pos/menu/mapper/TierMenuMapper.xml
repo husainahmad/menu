@@ -9,6 +9,18 @@
     <result column="tier_menu_is_active" jdbcType="BOOLEAN" property="active" />
     <result column="tier_menu_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="tier_menu_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <association property="tier" javaType="com.harmoni.pos.menu.model.Tier">
+      <id column="tier_id" jdbcType="INTEGER" property="id" />
+      <result column="tier_name" jdbcType="VARCHAR" property="name" />
+      <result column="tier_brand_id" jdbcType="INTEGER" property="brandId" />
+      <result column="tier_type" property="type" javaType="com.harmoni.pos.menu.model.TierType" />
+    </association>
+    <association property="category" javaType="com.harmoni.pos.menu.model.Category">
+      <id column="category_id" jdbcType="INTEGER" property="id" />
+      <result column="category_name" jdbcType="VARCHAR" property="name" />
+      <result column="category_description" jdbcType="VARCHAR" property="description" />
+      <result column="category_brand_id" jdbcType="INTEGER" property="brandId" />
+    </association>
   </resultMap>
 
   <sql id="Base_Column_List">
@@ -20,41 +32,19 @@
     tier_menu.updated_at as tier_menu_updated_at
   </sql>
 
-  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-    select 
-    <include refid="Base_Column_List" />
+  <select id="selectByBrandId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List" />
     from tier_menus tier_menu
-    where tier_menu.id = #{id,jdbcType=INTEGER}
+    right join tiers tier
+      on tier.id = tier_menu.tier_id
+    left join categories category
+      on category.id = tier_menu.category_id
+    where tier.brand_id = #{id,jdbcType=INTEGER}
+    and tier.type = 'MENU'
   </select>
-
-  <select id="selectByBrandId" resultType="com.harmoni.pos.menu.model.TierMenu">
-
-  </select>
-
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-    delete from tier_menus
-    where id = #{id,jdbcType=INTEGER}
-  </delete>
-
-  <insert id="insert" parameterType="com.harmoni.pos.menu.model.TierMenu">
-    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
-      SELECT LAST_INSERT_ID()
-    </selectKey>
-    insert into tier_menus (tier_id, category_id, is_active, created_at,
-      updated_at)
-    values (#{tierId,jdbcType=INTEGER}, #{categoryId,jdbcType=INTEGER}, #{active,jdbcType=BOOLEAN},
-    #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
-  </insert>
-
-  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.TierMenu">
-    update tier_menus
-    set tier_id = #{tierId,jdbcType=INTEGER},
-    category_id = #{categoryId,jdbcType=INTEGER},
-      is_active = #{active,jdbcType=BOOLEAN},
-      created_at = #{createdAt,jdbcType=TIMESTAMP},
-      updated_at = #{updatedAt,jdbcType=TIMESTAMP}
-    where id = #{id,jdbcType=INTEGER}
-  </update>
 
   <update id="updateTierMenuBulk">
     insert into tier_menus (tier_id, category_id, is_active, created_at, updated_at)
