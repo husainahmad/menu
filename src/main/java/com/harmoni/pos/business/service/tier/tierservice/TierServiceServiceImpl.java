@@ -68,10 +68,7 @@ public class TierServiceServiceImpl implements TierServiceService {
 
     @Override
     public List<TierService> getByBrandId(Integer id) {
-
-        List<Tier> tiers = this.tierMapper.selectByBrandId(id);
-
-        return List.of();
+        return this.tierServiceMapper.selectByBrandId(id);
     }
 
     @Override

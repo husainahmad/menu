@@ -14,6 +14,7 @@ public class SubService {
     private Integer id;
     private Integer serviceId;
     private String name;
+    private Service service;
     private Date createdAt;
     private Date updatedAt;
 

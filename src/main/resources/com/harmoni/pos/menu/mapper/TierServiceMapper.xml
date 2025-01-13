@@ -9,6 +9,22 @@
     <result column="tier_service_is_active" jdbcType="BOOLEAN" property="active" />
     <result column="tier_service_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="tier_service_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <association property="tier" javaType="com.harmoni.pos.menu.model.Tier">
+      <id column="tier_id" jdbcType="INTEGER" property="id" />
+      <result column="tier_name" jdbcType="VARCHAR" property="name" />
+      <result column="tier_brand_id" jdbcType="INTEGER" property="brandId" />
+      <result column="tier_type" property="type" javaType="com.harmoni.pos.menu.model.TierType" />
+    </association>
+    <association property="subService" javaType="com.harmoni.pos.menu.model.SubService">
+      <id column="sub_service_id" jdbcType="INTEGER" property="id" />
+      <result column="sub_service_service_id" jdbcType="INTEGER" property="serviceId" />
+      <result column="sub_service_name" jdbcType="VARCHAR" property="name" />
+      <association property="service" javaType="com.harmoni.pos.menu.model.Service">
+        <id column="service_id" jdbcType="INTEGER" property="id" />
+        <result column="service_name" jdbcType="VARCHAR" property="name" />
+      </association>
+    </association>
+
   </resultMap>
 
   <sql id="Base_Column_List">
@@ -25,6 +41,23 @@
     <include refid="Base_Column_List" />
     from tier_services tier_service
     where tier_service.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByBrandId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.SubServiceMapper.Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.ServiceMapper.Base_Column_List" />
+    from tier_services tier_service
+    left join tiers tier
+      on tier.id = tier_service.tier_id
+    left join sub_services sub_service
+      on sub_service.id = tier_service.sub_service_id
+    left join services service
+      on service.id = sub_service.service_id
+    where tier.brand_id = #{id,jdbcType=INTEGER}
+    and tier.type = 'SERVICE'
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
