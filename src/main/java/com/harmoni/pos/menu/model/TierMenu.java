@@ -19,6 +19,7 @@ public class TierMenu {
     private Category category;
 
     private Boolean active;
+    private Boolean deleted;
     private Date createdAt;
     private Date updatedAt;
     private Date deletedAt;

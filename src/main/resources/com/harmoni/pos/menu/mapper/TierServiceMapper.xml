@@ -7,8 +7,10 @@
     <result column="tier_service_tier_id" jdbcType="INTEGER" property="tierId" />
     <result column="tier_service_sub_service_id" jdbcType="INTEGER" property="subServiceId" />
     <result column="tier_service_is_active" jdbcType="BOOLEAN" property="active" />
+    <result column="tier_service_is_deleted" jdbcType="BOOLEAN" property="deleted" />
     <result column="tier_service_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="tier_service_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="tier_service_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
     <association property="tier" javaType="com.harmoni.pos.menu.model.Tier">
       <id column="tier_id" jdbcType="INTEGER" property="id" />
       <result column="tier_name" jdbcType="VARCHAR" property="name" />
@@ -32,6 +34,7 @@
     tier_service.tier_id as tier_service_tier_id,
     tier_service.sub_service_id as tier_service_sub_service_id,
     tier_service.is_active as tier_service_is_active,
+    tier_service.is_deleted as tier_service_is_deleted,
     tier_service.created_at as tier_service_created_at,
     tier_service.updated_at as tier_service_updated_at
   </sql>
@@ -58,11 +61,17 @@
       on service.id = sub_service.service_id
     where tier.brand_id = #{id,jdbcType=INTEGER}
     and tier.type = 'SERVICE'
+    and (tier.is_deleted = 0 or tier.is_deleted is null)
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from tier_services
     where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteByTierId" parameterType="java.lang.Integer">
+    update tier_services set
+    where tier_id = #{tierId,jdbcType=INTEGER}
   </delete>
 
   <insert id="insert" parameterType="com.harmoni.pos.menu.model.TierService">

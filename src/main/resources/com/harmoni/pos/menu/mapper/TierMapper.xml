@@ -7,8 +7,10 @@
     <result column="tier_name" jdbcType="VARCHAR" property="name" />
     <result column="tier_brand_id" jdbcType="INTEGER" property="brandId" />
     <result column="tier_type" property="type" javaType="com.harmoni.pos.menu.model.TierType" />
+    <result column="tier_is_deleted" jdbcType="BOOLEAN" property="deleted" />
     <result column="tier_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="tier_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="tier_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
     <association property="brand" javaType="com.harmoni.pos.menu.model.Brand">
       <id column="brand_id" jdbcType="INTEGER" property="id" />
       <result column="brand_name" jdbcType="VARCHAR" property="name" />
@@ -25,8 +27,10 @@
     tier.name as tier_name,
     tier.brand_id as tier_brand_id,
     tier.type as tier_type,
+    tier.is_deleted as tier_is_deleted,
     tier.created_at as tier_created_at,
-    tier.updated_at as tier_updated_at
+    tier.updated_at as tier_updated_at,
+    tier.deleted_at as tier_deleted_at
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -80,7 +84,7 @@
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-    delete from tiers
+    update tiers set is_deleted = 1, deleted_at = now()
     where id = #{id,jdbcType=INTEGER}
   </delete>
 

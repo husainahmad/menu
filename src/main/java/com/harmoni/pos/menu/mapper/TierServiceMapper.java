@@ -9,10 +9,10 @@ import java.util.List;
 public interface TierServiceMapper {
 
     int deleteByPrimaryKey(Integer id);
+    int deleteByTierId(Integer tierId);
     int insert(TierService row);
     TierService selectByPrimaryKey(Integer id);
     List<TierService> selectByBrandId(Integer id);
-    TierService selectByTierSubService(Integer tierId, Integer subServiceId);
     int updateByPrimaryKey(TierService row);
     int updateTierServicesBulk(List<TierService> tierServices);
 }

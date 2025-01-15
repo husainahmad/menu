@@ -7,8 +7,10 @@
     <result column="tier_menu_tier_id" jdbcType="INTEGER" property="tierId" />
     <result column="tier_menu_category_id" jdbcType="INTEGER" property="categoryId" />
     <result column="tier_menu_is_active" jdbcType="BOOLEAN" property="active" />
+    <result column="tier_menu_is_deleted" jdbcType="BOOLEAN" property="deleted" />
     <result column="tier_menu_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="tier_menu_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="tier_menu_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
     <association property="tier" javaType="com.harmoni.pos.menu.model.Tier">
       <id column="tier_id" jdbcType="INTEGER" property="id" />
       <result column="tier_name" jdbcType="VARCHAR" property="name" />
@@ -28,8 +30,10 @@
     tier_menu.tier_id as tier_menu_tier_id,
     tier_menu.category_id as tier_menu_category_id,
     tier_menu.is_active as tier_menu_is_active,
+    tier_menu.is_deleted as tier_menu_is_deleted,
     tier_menu.created_at as tier_menu_created_at,
-    tier_menu.updated_at as tier_menu_updated_at
+    tier_menu.updated_at as tier_menu_updated_at,
+    tier_menu.deleted_at as tier_menu_deleted_at
   </sql>
 
   <select id="selectByBrandId" resultMap="BaseResultMap">
@@ -44,6 +48,7 @@
       on category.id = tier_menu.category_id
     where tier.brand_id = #{id,jdbcType=INTEGER}
     and tier.type = 'MENU'
+    and (tier.is_deleted = 0 or tier.is_deleted is null)
   </select>
 
   <update id="updateTierMenuBulk">

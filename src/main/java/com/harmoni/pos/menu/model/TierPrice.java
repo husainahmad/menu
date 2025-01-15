@@ -13,7 +13,9 @@ public class TierPrice {
 
     private Integer id;
     private Integer tierId;
+    private Boolean deleted;
     private Date createdAt;
     private Date updatedAt;
+    private Date deletedAt;
 
 }

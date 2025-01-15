@@ -7,7 +7,6 @@ import lombok.experimental.Accessors;
 import java.util.Date;
 
 @Data
-@Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TierService {
 
@@ -18,8 +17,10 @@ public class TierService {
     private Integer subServiceId;
     private SubService subService;
 
-    private boolean active;
+    private Boolean active;
+    private Boolean deleted;
     private Date createdAt;
     private Date updatedAt;
+    private Date deletedAt;
 
 }

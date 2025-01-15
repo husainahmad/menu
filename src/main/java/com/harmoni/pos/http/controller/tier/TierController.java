@@ -41,7 +41,7 @@ public class TierController {
     }
 
     @PutMapping("/tier/{id}")
-    public ResponseEntity<RestAPIResponse> get(@Valid @RequestBody TierDto tierDto, @PathVariable Integer id) {
+    public ResponseEntity<RestAPIResponse> update(@Valid @RequestBody TierDto tierDto, @PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(tierService.update(tierDto, id))

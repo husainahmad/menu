@@ -17,8 +17,10 @@ public class Tier {
     private Integer brandId;
     private Brand brand;
     private TierType type;
+    private Boolean deleted;
     private Date createdAt;
     private Date updatedAt;
+    private Date deletedAt;
 
     List<TierService> tierServices;
 
