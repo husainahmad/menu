@@ -29,7 +29,7 @@ public class StoreController {
     @GetMapping("/store")
     public ResponseEntity<RestAPIResponse> list() {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .data(storeService.list())
+                .data(storeService.getAllStoresByBrandId(24L))
                 .httpStatus(HttpStatus.OK.value())
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);

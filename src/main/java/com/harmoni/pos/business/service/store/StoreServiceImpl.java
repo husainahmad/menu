@@ -56,8 +56,8 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public List<Store> list() {
-        return storeMapper.selectAll();
+    public List<Store> getAllStoresByBrandId(Long chainId) {
+        return storeMapper.selectAllByBrandId(chainId.intValue());
     }
 
     @Override

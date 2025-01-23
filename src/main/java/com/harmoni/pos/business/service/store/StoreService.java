@@ -10,6 +10,6 @@ public interface StoreService {
     int create(StoreDto storeDto);
     int delete(Long id);
     Store get(Long id);
-    List<Store> list();
+    List<Store> getAllStoresByBrandId(Long chainId);
     int update(Long id, StoreDto storeDto);
 }

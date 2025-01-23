@@ -56,7 +56,7 @@
           and store.brand_id = #{brandId,jdbcType=INTEGER}
   </select>
 
-  <select id="selectAll" resultMap="BaseResultMap">
+  <select id="selectAllByBrandId" resultMap="BaseResultMap">
       select
       <include refid="Base_Column_List" />,
       <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>,
@@ -64,6 +64,7 @@
       from stores store
       left join chains chain on store.chain_id = chain.id
       left join tiers tier on store.tier_id = tier.id
+      where store.chain_id = #{chainId,jdbcType=INTEGER}
   </select>
 
 
