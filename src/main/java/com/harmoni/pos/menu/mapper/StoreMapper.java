@@ -12,7 +12,7 @@ public interface StoreMapper {
     int insert(Store row);
     Store selectByPrimaryKey(Integer id);
     List<Store> selectAllByBrandId(Integer chainId);
-    Store selectByNameTierIdChainId(String name, Integer tierId, Integer brandId);
+    Store selectByNameTierIdChainId(String name, Integer chainId);
     int updateByPrimaryKey(Store row);
 
 }

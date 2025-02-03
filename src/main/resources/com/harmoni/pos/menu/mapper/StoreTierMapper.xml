@@ -54,9 +54,6 @@
   <update id="updateByStoreId" parameterType="com.harmoni.pos.menu.model.Store">
     update stores
     set name = #{name,jdbcType=VARCHAR},
-      tier_menu_id = #{tierMenuId,jdbcType=INTEGER},
-      tier_service_id = #{tierServiceId,jdbcType=INTEGER},
-      tier_price_id = #{tierPriceId,jdbcType=VARCHAR},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},
       deleted_at = #{deletedAt,jdbcType=TIMESTAMP}

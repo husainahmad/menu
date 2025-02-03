@@ -13,11 +13,14 @@ public class Store {
 
     private Integer id;
     private String name;
-    private Integer tierId;
-    private Tier tier;
     private Integer chainId;
     private Chain chain;
     private String address;
+
+    private Integer tierMenuId;
+    private Integer tierPriceId;
+    private Integer tierServiceId;
+
     private Date createdAt;
     private Date updatedAt;
     private Date deletedAt;

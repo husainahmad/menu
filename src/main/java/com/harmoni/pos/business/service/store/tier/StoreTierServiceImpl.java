@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service("storeTierService")
-public class StoreTierServiceImpl implements StoreTierService{
+public class StoreTierServiceImpl implements StoreTierService {
 
     private final StoreTierMapper storeTierMapper;
 

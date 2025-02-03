@@ -5,7 +5,6 @@
   <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.Store">
     <id column="store_id" jdbcType="INTEGER" property="id" />
     <result column="store_name" jdbcType="VARCHAR" property="name" />
-    <result column="store_tier_id" jdbcType="INTEGER" property="tierId" />
     <result column="store_chain_id" jdbcType="INTEGER" property="chainId" />
     <result column="store_address" jdbcType="VARCHAR" property="address" />
     <result column="store_created_at" jdbcType="TIMESTAMP" property="createdAt" />
@@ -15,16 +14,11 @@
       <id column="chain_id" jdbcType="INTEGER" property="id" />
       <result column="chain_name" jdbcType="VARCHAR" property="name" />
     </association>
-    <association property="tier" javaType="com.harmoni.pos.menu.model.Tier">
-      <id column="tier_id" jdbcType="INTEGER" property="id" />
-      <result column="tier_name" jdbcType="VARCHAR" property="name" />
-    </association>
   </resultMap>
 
   <sql id="Base_Column_List">
     store.id as store_id,
     store.name as store_name,
-    store.tier_id as store_tier_id,
     store.chain_id as store_chain_id,
     store.address as store_address,
     store.created_at as store_created_at,
@@ -35,35 +29,28 @@
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />,
-    <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>,
-    <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List"/>
+    <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>
     from stores store
       left join chains chain on store.chain_id = chain.id
-      left join tiers tier on store.tier_id = tier.id
     where store.id = #{id,jdbcType=INTEGER}
   </select>
 
   <select id="selectByNameTierIdChainId" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />,
-    <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>,
-    <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List"/>
+    <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>
     from stores store
     left join chains chain on store.chain_id = chain.id
-    left join tiers tier on store.tier_id = tier.id
     where store.name = #{name,jdbcType=VARCHAR}
-          and store.tier_id = #{tierId,jdbcType=INTEGER}
-          and store.brand_id = #{brandId,jdbcType=INTEGER}
+          and store.chain_id = #{chainId,jdbcType=INTEGER}
   </select>
 
   <select id="selectAllByBrandId" resultMap="BaseResultMap">
       select
       <include refid="Base_Column_List" />,
-      <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>,
-      <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List"/>
+      <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>
       from stores store
       left join chains chain on store.chain_id = chain.id
-      left join tiers tier on store.tier_id = tier.id
       where store.chain_id = #{chainId,jdbcType=INTEGER}
   </select>
 
@@ -77,10 +64,10 @@
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into stores (name, tier_id, chain_id,
+    insert into stores (name, chain_id,
       address, created_at, updated_at, 
       deleted_at)
-    values (#{name,jdbcType=VARCHAR}, #{tierId,jdbcType=INTEGER}, #{chainId,jdbcType=INTEGER},
+    values (#{name,jdbcType=VARCHAR}, #{chainId,jdbcType=INTEGER},
       #{address,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}, 
       #{deletedAt,jdbcType=TIMESTAMP})
   </insert>
@@ -88,7 +75,6 @@
   <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Store">
     update stores
     set name = #{name,jdbcType=VARCHAR},
-      tier_id = #{tierId,jdbcType=INTEGER},
       chain_id = #{chainId,jdbcType=INTEGER},
       address = #{address,jdbcType=VARCHAR},
       created_at = #{createdAt,jdbcType=TIMESTAMP},

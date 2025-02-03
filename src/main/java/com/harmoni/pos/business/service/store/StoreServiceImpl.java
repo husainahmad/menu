@@ -1,11 +1,13 @@
 package com.harmoni.pos.business.service.store;
 
+import com.harmoni.pos.business.service.store.tier.StoreTierService;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
 import com.harmoni.pos.exception.BusinessNotFoundRequestException;
 import com.harmoni.pos.http.utils.PosObjectUtils;
 import com.harmoni.pos.menu.mapper.StoreMapper;
 import com.harmoni.pos.menu.model.Store;
+import com.harmoni.pos.menu.model.StoreTier;
 import com.harmoni.pos.menu.model.dto.StoreDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +23,12 @@ import java.util.List;
 @Slf4j
 public class StoreServiceImpl implements StoreService {
     private final StoreMapper storeMapper;
+    private final StoreTierService storeTierService;
 
     @Override
     public int create(StoreDto storeDto) {
 
-        if (!ObjectUtils.isEmpty(storeMapper.selectByNameTierIdChainId(storeDto.getName(),
-                storeDto.getTierId(), storeDto.getChainId()))) {
+        if (!ObjectUtils.isEmpty(storeMapper.selectByNameTierIdChainId(storeDto.getName(), storeDto.getChainId()))) {
             throw new BusinessBadRequestException("exception.store.badRequest.duplicate",
                     PosObjectUtils.appendValue(new ArrayList<>().toArray(), storeDto.getName()));
         }
@@ -36,6 +38,11 @@ public class StoreServiceImpl implements StoreService {
             throw new BusinessNoContentRequestException(
                     BusinessNoContentRequestException.NO_CONTENT, null);
         }
+
+        StoreTier storeTier = storeDto.toStoreTier();
+        storeTier.setStoreId(inserted);
+
+        storeTierService.insert(storeTier);
 
         return inserted;
     }
@@ -62,16 +69,12 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public int update(Long id, StoreDto storeDto) {
-        Store store = storeMapper.selectByPrimaryKey(id.intValue());
-        if (ObjectUtils.isEmpty(store)) {
+        if (ObjectUtils.isEmpty(storeMapper.selectByPrimaryKey(id.intValue()))) {
             throw new BusinessNotFoundRequestException("exception.store.id.notFound", null);
         }
-        store.setChainId(storeDto.getChainId());
-        store.setTierId(storeDto.getTierId());
-        store.setName(storeDto.getName());
-        store.setAddress(storeDto.getAddress());
-        store.setUpdatedAt(new Date(System.currentTimeMillis()));
 
-        return storeMapper.updateByPrimaryKey(store);
+        Store storeUpdated = storeDto.toStore();
+        storeUpdated.setUpdatedAt(new Date(System.currentTimeMillis()));
+        return storeMapper.updateByPrimaryKey(storeUpdated);
     }
 }
