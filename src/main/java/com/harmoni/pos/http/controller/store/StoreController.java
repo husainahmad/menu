@@ -27,7 +27,7 @@ public class StoreController {
     }
 
     @GetMapping("/store")
-    public ResponseEntity<RestAPIResponse> list(@RequestParam(name = "chainId") Long chainId,
+    public ResponseEntity<RestAPIResponse> list(@RequestParam(name = "chainId") Integer chainId,
                                                 @RequestParam(name = "page") int page,
                                                 @RequestParam(name = "size") int size,
                                                 @RequestParam(name = "search") String search) {
@@ -39,7 +39,7 @@ public class StoreController {
     }
 
     @DeleteMapping("/store/{id}")
-    public ResponseEntity<RestAPIResponse> delete(@PathVariable Long id) {
+    public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(storeService.delete(id))
                 .httpStatus(HttpStatus.OK.value())
@@ -48,7 +48,7 @@ public class StoreController {
     }
 
     @PutMapping("/store/{id}")
-    public ResponseEntity<RestAPIResponse> update(@PathVariable Long id, @Valid @RequestBody StoreDto storeDto) {
+    public ResponseEntity<RestAPIResponse> update(@PathVariable Integer id, @Valid @RequestBody StoreDto storeDto) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(storeService.update(id, storeDto))
                 .httpStatus(HttpStatus.OK.value())

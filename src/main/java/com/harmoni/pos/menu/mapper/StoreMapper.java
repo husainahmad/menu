@@ -7,12 +7,11 @@ import java.util.List;
 
 @Mapper
 public interface StoreMapper {
-
-    int deleteByPrimaryKey(Long id);
+    int deleteByPrimaryKey(Integer id);
     int insert(Store row);
-    Store selectByPrimaryKey(Long id);
-    List<Store> selectAllByChainId(Long chainId, String search);
-    Store selectByNameChainId(String name, Long chainId);
+    Store selectByPrimaryKey(Integer id);
+    List<Store> selectAllByChainId(Integer chainId, String search);
+    Store selectByNameChainId(String name, Integer chainId);
     int updateByPrimaryKey(Store row);
 
 }

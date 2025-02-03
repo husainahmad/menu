@@ -27,7 +27,7 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public int create(StoreDto storeDto) {
 
-        if (!ObjectUtils.isEmpty(storeMapper.selectByNameChainId(storeDto.getName(), storeDto.getChainId().longValue()))) {
+        if (!ObjectUtils.isEmpty(storeMapper.selectByNameChainId(storeDto.getName(), storeDto.getChainId()))) {
             throw new BusinessBadRequestException("exception.store.badRequest.duplicate",
                     PosObjectUtils.appendValue(new ArrayList<>().toArray(), storeDto.getName()));
         }
@@ -47,13 +47,13 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public int delete(Long id) {
+    public int delete(Integer id) {
         Store store = this.get(id);
-        return storeMapper.deleteByPrimaryKey(store.getId().longValue());
+        return storeMapper.deleteByPrimaryKey(store.getId());
     }
 
     @Override
-    public Store get(Long id) {
+    public Store get(Integer id) {
         Store store = storeMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(store)) {
             throw new BusinessNotFoundRequestException("exception.store.id.notFound", null);
@@ -62,7 +62,7 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public Map<String, Object> getAllStoresByChainIdPaginated(Long chainId, int page, int size, String search) {
+    public Map<String, Object> getAllStoresByChainIdPaginated(Integer chainId, int page, int size, String search) {
 
         PaginationUtils.applyPagination(page, size);
 
@@ -79,16 +79,13 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public List<Store> getAllStoresByChainId(Long chainId, String search) {
+    public List<Store> getAllStoresByChainId(Integer chainId, String search) {
         return storeMapper.selectAllByChainId(chainId, search);
     }
 
     @Override
-    public int update(Long id, StoreDto storeDto) {
-        if (ObjectUtils.isEmpty(storeMapper.selectByPrimaryKey(id))) {
-            throw new BusinessNotFoundRequestException("exception.store.id.notFound", null);
-        }
-
+    public int update(Integer id, StoreDto storeDto) {
+        this.get(id);
         Store storeUpdated = storeDto.toStore();
         storeUpdated.setUpdatedAt(new Date(System.currentTimeMillis()));
         return storeMapper.updateByPrimaryKey(storeUpdated);
