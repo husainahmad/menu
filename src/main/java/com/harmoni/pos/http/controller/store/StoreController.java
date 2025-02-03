@@ -27,9 +27,12 @@ public class StoreController {
     }
 
     @GetMapping("/store")
-    public ResponseEntity<RestAPIResponse> list() {
+    public ResponseEntity<RestAPIResponse> list(@RequestParam(name = "chainId") Long chainId,
+                                                @RequestParam(name = "page") int page,
+                                                @RequestParam(name = "size") int size,
+                                                @RequestParam(name = "search") String search) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .data(storeService.getAllStoresByBrandId(24L))
+                .data(storeService.getAllStoresByChainIdPaginated(chainId, page, size, search))
                 .httpStatus(HttpStatus.OK.value())
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);

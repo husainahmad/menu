@@ -35,7 +35,7 @@
     where store.id = #{id,jdbcType=INTEGER}
   </select>
 
-  <select id="selectByNameTierIdChainId" resultMap="BaseResultMap">
+  <select id="selectByNameChainId" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />,
     <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>
@@ -45,15 +45,17 @@
           and store.chain_id = #{chainId,jdbcType=INTEGER}
   </select>
 
-  <select id="selectAllByBrandId" resultMap="BaseResultMap">
-      select
-      <include refid="Base_Column_List" />,
-      <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>
-      from stores store
-      left join chains chain on store.chain_id = chain.id
-      where store.chain_id = #{chainId,jdbcType=INTEGER}
+  <select id="selectAllByChainId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>
+    from stores store
+    left join chains chain on store.chain_id = chain.id
+    where store.chain_id = #{chainId,jdbcType=INTEGER}
+    <if test="search != null">
+      and store.name like concat('%', #{search, jdbcType=VARCHAR}, '%')
+    </if>
   </select>
-
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from stores
