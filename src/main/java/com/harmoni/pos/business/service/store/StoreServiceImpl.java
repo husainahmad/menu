@@ -32,7 +32,10 @@ public class StoreServiceImpl implements StoreService {
                     PosObjectUtils.appendValue(new ArrayList<>().toArray(), storeDto.getName()));
         }
 
-        int inserted = storeMapper.insert(storeDto.toStore());
+        Store store = storeDto.toStore();
+        store.setCreatedAt(new Date(System.currentTimeMillis()));
+
+        int inserted = storeMapper.insert(store);
         if (inserted<1) {
             throw new BusinessNoContentRequestException(
                     BusinessNoContentRequestException.NO_CONTENT, null);
@@ -85,9 +88,15 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public int update(Integer id, StoreDto storeDto) {
-        this.get(id);
+        Store store = this.get(id);
         Store storeUpdated = storeDto.toStore();
+        storeUpdated.setId(store.getId());
         storeUpdated.setUpdatedAt(new Date(System.currentTimeMillis()));
-        return storeMapper.updateByPrimaryKey(storeUpdated);
+
+        storeMapper.updateByPrimaryKey(storeUpdated);
+        StoreTier storeTier = storeDto.toStoreTier();
+        storeTier.setStoreId(storeUpdated.getId());
+
+        return storeTierService.insertOrUpdateByStoreId(storeTier);
     }
 }

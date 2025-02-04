@@ -7,6 +7,11 @@
     <result column="store_name" jdbcType="VARCHAR" property="name" />
     <result column="store_chain_id" jdbcType="INTEGER" property="chainId" />
     <result column="store_address" jdbcType="VARCHAR" property="address" />
+
+    <result column="store_tier_menu_id" jdbcType="INTEGER" property="tierMenuId" />
+    <result column="store_tier_service_id" jdbcType="INTEGER" property="tierServiceId" />
+    <result column="store_tier_price_id" jdbcType="INTEGER" property="tierPriceId" />
+
     <result column="store_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="store_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <result column="store_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
@@ -23,7 +28,10 @@
     store.address as store_address,
     store.created_at as store_created_at,
     store.updated_at as store_updated_at,
-    store.deleted_at as store_deleted_at
+    store.deleted_at as store_deleted_at,
+    store_tier.tier_menu_id as store_tier_menu_id,
+    store_tier.tier_service_id as store_tier_service_id,
+    store_tier.tier_price_id as store_tier_price_id
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -32,6 +40,7 @@
     <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>
     from stores store
       left join chains chain on store.chain_id = chain.id
+    left join store_tiers store_tier on store_tier.store_id = store.id
     where store.id = #{id,jdbcType=INTEGER}
   </select>
 
@@ -51,6 +60,7 @@
     <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>
     from stores store
     left join chains chain on store.chain_id = chain.id
+    left join store_tiers store_tier on store_tier.store_id = store.id
     where store.chain_id = #{chainId,jdbcType=INTEGER}
     <if test="search != null">
       and store.name like concat('%', #{search, jdbcType=VARCHAR}, '%')

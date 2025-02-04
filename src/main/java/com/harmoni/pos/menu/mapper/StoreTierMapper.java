@@ -9,6 +9,6 @@ public interface StoreTierMapper {
     int insert(StoreTier row);
     StoreTier selectByPrimaryKey(Integer id);
     StoreTier selectByStoreId(Integer id);
-    int updateByStoreId(StoreTier row);
+    int insertOrUpdateByStoreId(StoreTier row);
 
 }

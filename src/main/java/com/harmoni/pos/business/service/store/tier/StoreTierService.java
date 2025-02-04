@@ -5,6 +5,5 @@ import com.harmoni.pos.menu.model.StoreTier;
 public interface StoreTierService {
     int insert(StoreTier row);
     StoreTier selectByPrimaryKey(Integer id);
-    StoreTier selectByStoreId(Integer id);
-    int updateByStoreId(StoreTier row);
+    int insertOrUpdateByStoreId(StoreTier row);
 }

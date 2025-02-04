@@ -22,12 +22,7 @@ public class StoreTierServiceImpl implements StoreTierService {
     }
 
     @Override
-    public StoreTier selectByStoreId(Integer id) {
-        return storeTierMapper.selectByStoreId(id);
-    }
-
-    @Override
-    public int updateByStoreId(StoreTier row) {
-        return storeTierMapper.updateByStoreId(row);
+    public int insertOrUpdateByStoreId(StoreTier row) {
+        return storeTierMapper.insertOrUpdateByStoreId(row);
     }
 }

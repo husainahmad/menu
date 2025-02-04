@@ -51,12 +51,19 @@
       #{deletedAt,jdbcType=TIMESTAMP})
   </insert>
 
-  <update id="updateByStoreId" parameterType="com.harmoni.pos.menu.model.Store">
-    update stores
-    set name = #{name,jdbcType=VARCHAR},
-      created_at = #{createdAt,jdbcType=TIMESTAMP},
-      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
-      deleted_at = #{deletedAt,jdbcType=TIMESTAMP}
-    where store_id = #{storeId,jdbcType=INTEGER}
+  <update id="insertOrUpdateByStoreId" parameterType="com.harmoni.pos.menu.model.Store">
+    insert into store_tiers (store_id, tier_menu_id, tier_service_id,
+              tier_price_id, created_at, updated_at,
+              deleted_at)
+              values (#{storeId,jdbcType=INTEGER}, #{tierMenuId,jdbcType=INTEGER},
+              #{tierServiceId,jdbcType=INTEGER}, #{tierPriceId,jdbcType=INTEGER},
+              #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP},
+              #{deletedAt,jdbcType=TIMESTAMP})
+    on duplicate key update
+    tier_menu_id = #{tierMenuId,jdbcType=INTEGER},
+    tier_service_id = #{tierServiceId,jdbcType=INTEGER},
+    tier_price_id = #{tierPriceId,jdbcType=INTEGER},
+    created_at = #{createdAt,jdbcType=TIMESTAMP},
+    updated_at = #{updatedAt,jdbcType=TIMESTAMP}
   </update>
 </mapper>
