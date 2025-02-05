@@ -22,6 +22,7 @@ public class ProductEditDto extends ProductDto {
         return new Product()
                 .setId(id)
                 .setName(getName())
+                .setDescription(getDescription())
                 .setCategoryId(getCategoryId());
     }
 }

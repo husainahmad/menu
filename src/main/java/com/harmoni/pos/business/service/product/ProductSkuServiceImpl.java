@@ -1,5 +1,6 @@
 package com.harmoni.pos.business.service.product;
 
+import com.harmoni.pos.business.service.product.image.ProductImageService;
 import com.harmoni.pos.business.service.sku.SkuService;
 import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.menu.model.Product;
@@ -26,6 +27,7 @@ public class ProductSkuServiceImpl implements ProductSkuService {
     private final ProductService productService;
     private final SkuService skuService;
     private final SkuTierPriceService skuTierPriceService;
+    private final ProductImageService productImageService;
 
     @Override
     public Product create(ProductAddDto productDto) {
@@ -38,6 +40,7 @@ public class ProductSkuServiceImpl implements ProductSkuService {
         skus.forEach(sku -> extractedSkuTierPrice(sku, skuTierPrices));
         skuTierPriceService.insetOrUpdateBulk(skuTierPrices);
         product.setSkus(skus);
+        productImageService.updateByProductId(product.getId(), productDto.getProductImageEditDto());
         return product;
     }
 
@@ -52,6 +55,8 @@ public class ProductSkuServiceImpl implements ProductSkuService {
         skus.forEach(sku -> extractedSkuTierPrice(sku, skuTierPrices));
         skuTierPriceService.insetOrUpdateBulk(skuTierPrices);
         product.setSkus(skus);
+
+        productImageService.updateByProductId(product.getId(), productEditDto.getProductImageEditDto());
         return product;
     }
 

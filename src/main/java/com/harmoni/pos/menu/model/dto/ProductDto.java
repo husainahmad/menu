@@ -1,5 +1,7 @@
 package com.harmoni.pos.menu.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.harmoni.pos.menu.model.dto.edit.ProductImageEditDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -14,4 +16,6 @@ public class ProductDto {
     @NotNull(message = "{validation.product.categoryId.NotNull}")
     private Integer categoryId;
     private String description;
+    @JsonProperty("productImage")
+    private ProductImageEditDto productImageEditDto;
 }

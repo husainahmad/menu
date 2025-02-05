@@ -2,6 +2,7 @@ package com.harmoni.pos.business.service.product;
 
 import com.github.pagehelper.PageInfo;
 import com.harmoni.pos.business.service.category.CategoryService;
+import com.harmoni.pos.business.service.product.image.ProductImageService;
 import com.harmoni.pos.business.service.sku.SkuService;
 import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.business.service.tier.TierService;
@@ -31,6 +32,7 @@ public class ProductServiceImpl implements ProductService {
     private final TierService tierService;
     private final SkuTierPriceService skuTierPriceService;
     private final CategoryService categoryService;
+    private final ProductImageService productImageService;
 
     @Override
     public Product create(ProductAddDto productDto) {
@@ -75,7 +77,7 @@ public class ProductServiceImpl implements ProductService {
         if (ObjectUtils.isEmpty(product)) {
             throw new BusinessBadRequestException("exception.product.id.badRequest.notFound", null);
         }
-
+        product.setProductImage(this.productImageService.selectByProductId(id));
         return product;
     }
 

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.ProductImageMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.ProductImage">
+    <id column="product_image_id" jdbcType="INTEGER" property="id" />
+    <result column="product_image_product_id" jdbcType="INTEGER" property="productId" />
+    <result column="product_image_file_name" jdbcType="VARCHAR" property="fileName" />
+    <result column="product_image_image_blob" jdbcType="BLOB" property="imageBlob" />
+    <result column="product_image_mime_type" jdbcType="BLOB" property="mimeType" />
+    <result column="product_image_created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="product_image_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+      product_image.id as product_image_id,
+      product_image.product_id as product_image_product_id,
+      product_image.file_name as product_image_file_name,
+      product_image.image_blob as product_image_image_blob,
+      product_image.mime_type as product_image_mime_type,
+      product_image.created_at as product_image_created_at,
+      product_image.updated_at as product_image_updated_at
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from product_images product_image
+    where product_image.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByProductKey" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from product_images product_image
+    where product_image.product_id = #{productId,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from product_images
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.ProductImage">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into product_images (product_id, file_name, image_blob, mime_type, created_at,
+      updated_at)
+    values (#{productId,jdbcType=INTEGER}, #{fileName,jdbcType=VARCHAR}, #{imageBlob,jdbcType=BLOB},
+    #{mimeType,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.ProductImage">
+    update product_images
+    set product_id = #{productId,jdbcType=INTEGER},
+      file_name = #{fileName,jdbcType=VARCHAR},
+      image_blob = #{imageBlob,jdbcType=BLOB},
+      mime_type = #{mimeType,jdbcType=VARCHAR},
+      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateProductIdByPrimaryKey" parameterType="com.harmoni.pos.menu.model.ProductImage">
+    update product_images
+    set product_id = #{productId,jdbcType=INTEGER},
+    updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateImageByProductKey" parameterType="com.harmoni.pos.menu.model.ProductImage">
+    update product_images
+    set file_name = #{fileName,jdbcType=VARCHAR},
+        image_blob = #{imageBlob,jdbcType=BLOB},
+        mime_type = #{mimeType,jdbcType=VARCHAR},
+        created_at = #{createdAt,jdbcType=TIMESTAMP},
+        updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+    where product_id = #{productId,jdbcType=INTEGER}
+  </update>
+</mapper>
