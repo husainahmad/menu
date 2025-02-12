@@ -27,8 +27,7 @@ public class UserController {
                                                       @RequestHeader("Authorization") String authHeader) throws Exception {
         int id = this.userService.insert(jwtUtil.getTokenFromBearer(authHeader), userDto);
         log.debug("tier created {} ", id);
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
     @GetMapping("/chain/{chainId}")

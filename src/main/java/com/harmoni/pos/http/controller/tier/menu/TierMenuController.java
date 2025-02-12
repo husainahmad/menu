@@ -15,22 +15,19 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/tier")
 public class TierMenuController {
 
     private final TierMenuService tierMenuService;
 
-    @PutMapping("/tier/{tierId}/menu")
+    @PutMapping("/{tierId}/menu")
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer tierId,
                                                   @Valid @RequestBody List<TierMenuEditDto> tierMenuEditDtos) {
-
         tierMenuService.create(tierId, tierMenuEditDtos);
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
-    @GetMapping("/tier/menu")
+    @GetMapping("/menu")
     public ResponseEntity<RestAPIResponse> getByBrandId(@RequestParam(name = "brandId") Integer brandId) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())

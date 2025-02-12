@@ -15,25 +15,21 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/sku")
 
 public class SkuController {
 
     private final SkuService skuService;
 
-    @PostMapping("/sku")
+    @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody SkuAddDto skuDto) {
         int id = skuService.create(skuDto);
-
         log.debug("Sku created {} ", id);
-
-        RestAPIResponse restAPIResponse = RestAPIResponse
-                .builder().httpStatus(HttpStatus.CREATED.value()).build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(RestAPIResponse
+                .builder().httpStatus(HttpStatus.CREATED.value()).build(), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/sku/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         skuService.deleteSku(id);
 

@@ -15,22 +15,19 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/tier")
 public class TierServiceController {
 
     private final TierServiceService tierServiceService;
 
-    @PostMapping("/tier/service")
+    @PostMapping("/service")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody TierServiceDto tierServiceDto) {
-
         int id = tierServiceService.create(tierServiceDto);
         log.debug("tier created {} ", id);
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
-    @GetMapping("/tier/service")
+    @GetMapping("/service")
     public ResponseEntity<RestAPIResponse> getByBrand(@RequestParam(name = "brandId") Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -41,7 +38,7 @@ public class TierServiceController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @PutMapping("/tier/{tierId}/service")
+    @PutMapping("/{tierId}/service")
     public ResponseEntity<RestAPIResponse> update(@RequestBody List<TierServiceDto> tierServiceDtos,
                                                @Valid @PathVariable Integer tierId) {
 

@@ -15,23 +15,19 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/skutier")
 public class SkuTierPriceController {
 
     private final SkuTierPriceService skuTierPriceService;
 
-    @PostMapping("/skutier")
+    @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody SkuTierPriceDto skuTierPriceDto) {
         int id = skuTierPriceService.create(skuTierPriceDto);
-
         log.debug("Sku Tier Price created {} ", id);
-
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
-    @GetMapping("/skutier")
+    @GetMapping("")
     public ResponseEntity<RestAPIResponse> listBySku(@RequestParam List<Integer> skuIds,
                                                      @RequestParam Integer tierId) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

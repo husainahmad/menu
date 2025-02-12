@@ -12,24 +12,20 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/category")
 @Slf4j
 public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @PostMapping("/category")
+    @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody CategoryDto categoryDto) {
         int id = categoryService.create(categoryDto);
-
         log.debug("Category created {} ", id);
-
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
-    @GetMapping("/category")
+    @GetMapping("")
     public ResponseEntity<RestAPIResponse> list(@RequestParam(name = "page") int page,
                                                 @RequestParam(name = "size") int size) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -39,7 +35,7 @@ public class CategoryController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/category/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -51,7 +47,7 @@ public class CategoryController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @DeleteMapping("/category/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -63,7 +59,7 @@ public class CategoryController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/category/brand/{brandId}")
+    @GetMapping("/brand/{brandId}")
     public ResponseEntity<RestAPIResponse> getByBrandId(@PathVariable Integer brandId) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

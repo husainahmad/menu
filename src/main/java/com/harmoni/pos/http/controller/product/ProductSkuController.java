@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/product")
 public class ProductSkuController {
 
     private final ProductService productService;
     private final SkuService skuService;
 
-    @GetMapping("/product/{id}/sku")
+    @GetMapping("/{id}/sku")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -32,7 +32,7 @@ public class ProductSkuController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @PutMapping("/product/{id}/sku")
+    @PutMapping("/{id}/sku")
     public ResponseEntity<RestAPIResponse> putSku(@PathVariable Integer id, @Valid @RequestBody ProductSkuDto productSkuDto) {
         productService.updateProductSku(id, productSkuDto);
 

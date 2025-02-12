@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/service")
 public class ServiceController {
 
     private final ServiceService serviceService;
 
-    @PostMapping("/service")
+    @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ServiceDto serviceDto) {
 
         serviceService.create(serviceDto);
@@ -27,7 +27,7 @@ public class ServiceController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
     }
 
-    @GetMapping("/service")
+    @GetMapping("")
     public ResponseEntity<RestAPIResponse> get() {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

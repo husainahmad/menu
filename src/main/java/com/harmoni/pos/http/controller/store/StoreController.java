@@ -12,21 +12,20 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/store")
 @Slf4j
 public class StoreController {
 
     private final StoreService storeService;
 
-    @PostMapping("/store")
+    @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody StoreDto storeDto) {
         int id = storeService.create(storeDto);
         log.debug("store created {} ", id);
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
-    @GetMapping("/store")
+    @GetMapping("")
     public ResponseEntity<RestAPIResponse> list(@RequestParam(name = "chainId") Integer chainId,
                                                 @RequestParam(name = "page") int page,
                                                 @RequestParam(name = "size") int size,
@@ -38,7 +37,7 @@ public class StoreController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @DeleteMapping("/store/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(storeService.delete(id))
@@ -47,7 +46,7 @@ public class StoreController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @PutMapping("/store/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer id, @Valid @RequestBody StoreDto storeDto) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(storeService.update(id, storeDto))

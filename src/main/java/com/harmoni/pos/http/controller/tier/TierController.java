@@ -21,12 +21,9 @@ public class TierController {
 
     @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody TierDto tierDto) {
-
         int id = tierService.create(tierDto);
         log.debug("tier created {} ", id);
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")

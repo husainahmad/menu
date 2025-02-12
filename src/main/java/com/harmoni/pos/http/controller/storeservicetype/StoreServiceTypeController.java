@@ -16,20 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/storeservicetype")
 public class StoreServiceTypeController {
 
     private final StoreServiceTypeService storeServiceTypeService;
 
-    @PostMapping("/storeservicetype")
+    @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody StoreServiceTypeDto storeServiceTypeDto) {
-
         int id = storeServiceTypeService.create(storeServiceTypeDto);
-
         log.debug("store service type created {} ", id);
-
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 }

@@ -13,26 +13,20 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/brand")
 public class BrandController {
 
     private final Logger log = LoggerFactory.getLogger(BrandController.class);
     private final BrandService brandService;
 
-    @PostMapping("/brand")
+    @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody BrandDto brandDto) {
-
         int id = brandService.create(brandDto);
-
         log.debug("Brand created {} ", id);
-
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
-
-        return new ResponseEntity<>(restAPIResponse,HttpStatus.CREATED);
-
+        return new ResponseEntity<>(RestAPIResponse.builder().build(),HttpStatus.CREATED);
     }
 
-    @GetMapping("/brand")
+    @GetMapping("")
     public ResponseEntity<RestAPIResponse> all() {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -44,7 +38,7 @@ public class BrandController {
 
     }
 
-    @GetMapping("/brand/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -56,7 +50,7 @@ public class BrandController {
 
     }
 
-    @DeleteMapping("/brand/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         brandService.delete(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

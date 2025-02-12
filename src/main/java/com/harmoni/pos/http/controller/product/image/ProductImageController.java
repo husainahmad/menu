@@ -18,13 +18,13 @@ import java.io.IOException;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/product")
+@RequestMapping("/api/v1/product/image")
 @Slf4j
 public class ProductImageController {
 
     private final ProductImageService productImageService;
 
-    @PostMapping(value = "/image/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RestAPIResponse> create(@RequestParam("file") MultipartFile file) throws IOException {
 
         ProductImageDto productImageDto = new ProductImageDto();
@@ -42,7 +42,7 @@ public class ProductImageController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
     }
 
-    @PutMapping(value = "/image/{productId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{productId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer productId,
                                                   @RequestParam("file") MultipartFile file) throws IOException {
 
@@ -62,7 +62,7 @@ public class ProductImageController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
     }
 
-    @GetMapping("/image/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

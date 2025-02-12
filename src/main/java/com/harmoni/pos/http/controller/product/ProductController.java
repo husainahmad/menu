@@ -16,23 +16,21 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/product")
 @Slf4j
 public class ProductController {
 
     private final ProductService productService;
     private final ProductSkuService productSkuService;
 
-    @PostMapping("/product")
+    @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ProductAddDto productDto) {
         Product product = productSkuService.create(productDto);
         log.debug("Product created {} ", ObjectUtils.getDisplayString(product));
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
-    @GetMapping("/product/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -44,7 +42,7 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @PutMapping("/product")
+    @PutMapping("")
     public ResponseEntity<RestAPIResponse> put(@Valid @RequestBody ProductEditDto productEditDto) {
         this.productSkuService.update(productEditDto);
 
@@ -57,7 +55,7 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @DeleteMapping("/product/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
 
         this.productService.delete(id);
@@ -70,7 +68,7 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/product/category/{id}")
+    @GetMapping("/category/{id}")
     public ResponseEntity<RestAPIResponse> getByCategory(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -82,7 +80,7 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/product/category/{categoryId}/{brandId}")
+    @GetMapping("/category/{categoryId}/{brandId}")
     public ResponseEntity<RestAPIResponse> getByCategoryBrand(@PathVariable Integer categoryId,
                                                               @PathVariable Integer brandId,
                                                               @RequestParam(name = "page") int page,

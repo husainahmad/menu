@@ -16,20 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/subservice")
 public class SubServiceController {
 
     private final SubServiceService subServiceService;
 
-    @PostMapping("/subservice")
+    @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody SubServiceDto subServiceDto) {
-
         int id = subServiceService.create(subServiceDto);
-
         log.debug("subservice created {} ", id);
-
-        RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
-
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 }
