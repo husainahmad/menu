@@ -56,6 +56,7 @@
       from tiers tier
       left join brands brand on tier.brand_id = brand.id
       where tier.brand_id = #{brandId,jdbcType=INTEGER}
+      and (tier.is_deleted = 0 or tier.is_deleted is null)
     </select>
 
     <select id="selectByIds" resultMap="BaseResultMap">
@@ -81,6 +82,7 @@
     left join tier_services tier_service on tier_service.tier_id = tier.id
     where tier.brand_id = #{brandId,jdbcType=INTEGER}
     and tier.type = #{type,jdbcType=VARCHAR}
+    and (tier.is_deleted = 0 or tier.is_deleted is null)
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
