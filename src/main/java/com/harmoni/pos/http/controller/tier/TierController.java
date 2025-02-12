@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/tier")
 public class TierController {
 
     private final TierService tierService;
 
-    @PostMapping("/tier")
+    @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody TierDto tierDto) {
 
         int id = tierService.create(tierDto);
@@ -29,7 +29,7 @@ public class TierController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
     }
 
-    @GetMapping("/tier/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -40,7 +40,7 @@ public class TierController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @PutMapping("/tier/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<RestAPIResponse> update(@Valid @RequestBody TierDto tierDto, @PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -51,7 +51,7 @@ public class TierController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/tier/brand/{brandId}")
+    @GetMapping("/brand/{brandId}")
     public ResponseEntity<RestAPIResponse> getByBrand(@PathVariable Integer brandId) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -62,7 +62,7 @@ public class TierController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @DeleteMapping("/tier/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> deleteByBrand(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -73,7 +73,7 @@ public class TierController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/tier/brand/{brandId}/type/{tierType}")
+    @GetMapping("/brand/{brandId}/type/{tierType}")
     public ResponseEntity<RestAPIResponse> getByBrandType(@PathVariable Integer brandId,
                                                           @PathVariable TierType tierType) {
 

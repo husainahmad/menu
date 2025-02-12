@@ -38,14 +38,14 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
-    public int delete(Long id) {
+    public int delete(Integer id) {
         Brand brand = this.get(id);
         return brandMapper.deleteByPrimaryKey(brand.getId());
     }
 
     @Override
-    public Brand get(Long id) {
-        Brand brand = brandMapper.selectByPrimaryKey(id.intValue());
+    public Brand get(Integer id) {
+        Brand brand = brandMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(brand)) {
             throw new BusinessNotFoundRequestException(
                     "exception.brand.id.badRequest.notFound", null);

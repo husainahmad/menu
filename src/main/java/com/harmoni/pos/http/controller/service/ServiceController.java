@@ -22,7 +22,6 @@ public class ServiceController {
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ServiceDto serviceDto) {
 
         serviceService.create(serviceDto);
-
         RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
 
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);

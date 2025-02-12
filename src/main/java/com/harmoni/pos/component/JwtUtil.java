@@ -55,5 +55,9 @@ public class JwtUtil {
                 .before(new Date());
     }
 
+    public String getTokenFromBearer(String authorization) {
+        return authorization.substring(7);
+    }
+
 }
 

@@ -9,10 +9,10 @@ public interface ChainService {
 
     int create(ChainDto chainDto);
 
-    boolean update(ChainDto chainDto, Long id);
-    int delete(Long id);
+    boolean update(ChainDto chainDto, Integer id);
+    int delete(Integer id);
 
-    Chain get(Long id);
+    Chain get(Integer id);
     List<Chain> list();
     List<Chain> listByBrandId(Integer brandId);
 }

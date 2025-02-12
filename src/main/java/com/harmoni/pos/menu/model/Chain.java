@@ -14,6 +14,7 @@ public class Chain {
     private Integer id;
     private String name;
     private Integer brandId;
+    private Brand brand;
     private Date createdAt;
     private Date updatedAt;
     private Date deletedAt;

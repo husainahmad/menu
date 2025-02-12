@@ -45,7 +45,7 @@ public class BrandController {
     }
 
     @GetMapping("/brand/{id}")
-    public ResponseEntity<RestAPIResponse> get(@PathVariable Long id) {
+    public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(brandService.get(id))
@@ -57,7 +57,7 @@ public class BrandController {
     }
 
     @DeleteMapping("/brand/{id}")
-    public ResponseEntity<RestAPIResponse> delete(@PathVariable Long id) {
+    public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         brandService.delete(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())

@@ -37,33 +37,33 @@ public class ChainServiceImpl implements ChainService {
     }
 
     @Override
-    public boolean update(ChainDto chainDto, Long id) {
+    public boolean update(ChainDto chainDto, Integer id) {
 
         if (!ObjectUtils.isEmpty(chainMapper.selectByName(chainDto.getName()))) {
             throw new BusinessBadRequestException(
                     "exception.chain.name.badRequest.duplicate", null);
         }
 
-        if (ObjectUtils.isEmpty(chainMapper.selectByPrimaryKey(id.intValue()))) {
+        if (ObjectUtils.isEmpty(chainMapper.selectByPrimaryKey(id))) {
             throw new BusinessBadRequestException(
                     "exception.chain.id.badRequest.notFound", null);
         }
 
         chainMapper.updateByPrimaryKey(
-                new Chain().setName(chainDto.getName()).setId(id.intValue()).setBrandId(chainDto.getBrandId()));
+                new Chain().setName(chainDto.getName()).setId(id).setBrandId(chainDto.getBrandId()));
 
         return false;
     }
 
     @Override
-    public int delete(Long id) {
-        Chain chain = chainMapper.selectByPrimaryKey(id.intValue());
+    public int delete(Integer id) {
+        Chain chain = chainMapper.selectByPrimaryKey(id);
         return chainMapper.deleteByPrimaryKey(chain.getId());
     }
 
     @Override
-    public Chain get(Long id) {
-        Chain chain = chainMapper.selectByPrimaryKey(id.intValue());
+    public Chain get(Integer id) {
+        Chain chain = chainMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(chain)) {
             throw new BusinessNotFoundRequestException(
                     "exception.chain.id.badRequest.notFound", null);

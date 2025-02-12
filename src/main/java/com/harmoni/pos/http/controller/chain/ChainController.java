@@ -27,7 +27,7 @@ public class ChainController {
     }
 
     @PutMapping("/chain/{id}")
-    public ResponseEntity<RestAPIResponse> update(@Valid @RequestBody ChainDto chainDto, @PathVariable Long id) {
+    public ResponseEntity<RestAPIResponse> update(@Valid @RequestBody ChainDto chainDto, @PathVariable Integer id) {
         chainService.update(chainDto, id);
         log.debug("Chain updated {} ", id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -38,7 +38,7 @@ public class ChainController {
     }
 
     @GetMapping("/chain/{id}")
-    public ResponseEntity<RestAPIResponse> get(@PathVariable Long id) {
+    public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(chainService.get(id))
@@ -47,7 +47,7 @@ public class ChainController {
     }
 
     @DeleteMapping("/chain/{id}")
-    public ResponseEntity<RestAPIResponse> delete(@PathVariable Long id) {
+    public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(chainService.delete(id))
@@ -65,10 +65,10 @@ public class ChainController {
     }
 
     @GetMapping("/chain/brand/{id}")
-    public ResponseEntity<RestAPIResponse> listByBrandId(@PathVariable Long id) {
+    public ResponseEntity<RestAPIResponse> listByBrandId(@PathVariable Integer id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(chainService.listByBrandId(id.intValue()))
+                .data(chainService.listByBrandId(id))
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }

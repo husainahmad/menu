@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.UserMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.User">
+    <id column="user_id" jdbcType="INTEGER" property="id" />
+    <result column="user_name" jdbcType="VARCHAR" property="username" />
+    <result column="user_auth_id" jdbcType="VARCHAR" property="authId" />
+    <result column="user_store_id" jdbcType="INTEGER" property="storeId" />
+    <result column="user_created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="user_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="user_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    user.id as user_id,
+    user.auth_id as user_auth_id,
+    user.name as user_name,
+    user.store_id as user_store_id,
+    user.created_at as user_created_at,
+    user.updated_at as user_updated_at,
+    user.deleted_at as user_deleted_at
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from users user
+    where user.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByUsername" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from users user
+    where user.name = #{username,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByListChain"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from users user
+    where user.store_id is not null
+    <if test="stores!=null">
+      and user.store_id in
+      <foreach item="store" index="index" collection="stores"
+               open="(" separator="," close=")" nullable="true">
+        #{store.id}
+      </foreach>
+    </if>
+    <if test="search!=null">
+      and user.name like concat('%', #{search, jdbcType=VARCHAR}, '%')
+    </if>
+  </select>
+
+  <select id="selectByUsernameAuthIdAndStoreId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from users user
+    where user.auth_id = #{authId,jdbcType=INTEGER}
+      and user.name = #{username,jdbcType=VARCHAR}
+    and user.store_id = #{storeId,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from users
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.User">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into users (auth_id, name, store_id,
+        created_at, updated_at, deleted_at
+      )
+    values (#{authId,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{storeId,jdbcType=INTEGER},
+      #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}, #{deletedAt,jdbcType=TIMESTAMP}
+      )
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.User">
+    update users
+    set name = #{username,jdbcType=VARCHAR},
+      auth_id = #{authId,jdbcType=INTEGER},
+      store_id = #{storeId,jdbcType=INTEGER},
+      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      deleted_at = #{deletedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+</mapper>
