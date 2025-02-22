@@ -15,6 +15,8 @@
       <result column="product_name" jdbcType="VARCHAR" property="name" />
       <result column="product_category_id" jdbcType="INTEGER" property="categoryId" />
     </association>
+    <association property="skuTierPrice" resultMap="com.harmoni.pos.menu.mapper.SkuTierPriceMapper.BaseResultMap"/>
+    <collection property="skuTierPrices" resultMap="com.harmoni.pos.menu.mapper.SkuTierPriceMapper.BaseResultMap"/>
   </resultMap>
 
   <sql id="Base_Column_List">

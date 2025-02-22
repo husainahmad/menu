@@ -17,16 +17,15 @@
       <result column="category_name" jdbcType="VARCHAR" property="name" />
     </association>
 
-    <collection property="skus" ofType="com.harmoni.pos.menu.model.Sku">
-      <id column="sku_id" jdbcType="INTEGER" property="id" />
-      <result column="sku_name" jdbcType="VARCHAR" property="name" />
+    <association property="productImage" javaType="com.harmoni.pos.menu.model.ProductImage">
+      <id column="product_image_id" jdbcType="INTEGER" property="id" />
+      <result column="product_image_file_name" jdbcType="VARCHAR" property="fileName" />
+      <result column="product_image_image_blob" jdbcType="BLOB" property="imageBlob" />
+      <result column="product_image_mime_type" jdbcType="BLOB" property="mimeType" />
+    </association>
 
-      <collection property="skuTierPrices" ofType="com.harmoni.pos.menu.model.SkuTierPrice">
-          <id column="stp_id" property="id"/>
-          <result column="stp_tier_id" property="tierId"/>
-          <result column="stp_price" property="price"/>
-      </collection>
-    </collection>
+    <collection property="skus" resultMap="com.harmoni.pos.menu.mapper.SkuMapper.BaseResultMap"/>
+
   </resultMap>
 
   <sql id="Base_Column_List">
@@ -77,15 +76,38 @@
     select
     <include refid="Base_Column_List" />,
     <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List"/>,
-    <include refid="com.harmoni.pos.menu.mapper.SkuMapper.Base_Column_List"/>
+    <include refid="com.harmoni.pos.menu.mapper.SkuMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.ProductImageMapper.Base_Column_List"/>
     from products product
       left join categories category on category.id = product.category_id
       left join skus sku on sku.product_id = product.id
+      left join product_images product_image on product_image.product_id = product.id
     where 1=1
     and (product.is_deleted = 0 or product.is_deleted is null)
     <if test="categoryId != -1">
       and product.category_id = #{categoryId,jdbcType=INTEGER}
     </if>
+  </select>
+
+  <select id="selectByCategoryIdPrice" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.SkuMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.ProductImageMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.SkuTierPriceMapper.Base_Column_List"/>
+    from products product
+    left join categories category on category.id = product.category_id
+    left join skus sku on sku.product_id = product.id
+    left join sku_tier_prices stp on stp.sku_id = sku.id
+    and stp.tier_id = #{tierId,jdbcType=INTEGER}
+    left join product_images product_image on product_image.product_id = product.id
+    where 1=1
+    and (product.is_deleted = 0 or product.is_deleted is null)
+    <if test="categoryId != -1">
+      and product.category_id = #{categoryId,jdbcType=INTEGER}
+    </if>
+
   </select>
 
   <select id="selectByCategoryIdBrandId" resultMap="BaseResultMap">

@@ -5,7 +5,9 @@ import com.harmoni.pos.business.service.category.CategoryService;
 import com.harmoni.pos.business.service.product.image.ProductImageService;
 import com.harmoni.pos.business.service.sku.SkuService;
 import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
+import com.harmoni.pos.business.service.store.tier.StoreTierService;
 import com.harmoni.pos.business.service.tier.TierService;
+import com.harmoni.pos.business.service.user.UserService;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.http.utils.PaginationUtils;
 import com.harmoni.pos.menu.mapper.*;
@@ -33,6 +35,8 @@ public class ProductServiceImpl implements ProductService {
     private final SkuTierPriceService skuTierPriceService;
     private final CategoryService categoryService;
     private final ProductImageService productImageService;
+    private final UserService userService;
+    private final StoreTierService storeTierService;
 
     @Override
     public Product create(ProductAddDto productDto) {
@@ -43,6 +47,13 @@ public class ProductServiceImpl implements ProductService {
         productMapper.insert(product);
 
         return product;
+    }
+
+    @Override
+    public List<Product> selectByCategoryPrice(String authHeader, Integer categoryId) {
+        User user = userService.selectByAuthToken(authHeader.substring(7));
+        StoreTier storeTier = storeTierService.selectByStoreId(user.getStoreId());
+        return productMapper.selectByCategoryIdPrice(categoryId, storeTier.getTierPriceId());
     }
 
     @Override

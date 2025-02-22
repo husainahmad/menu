@@ -8,5 +8,6 @@ import java.util.List;
 @Mapper
 public interface TierMenuMapper {
     List<TierMenu> selectByBrandId(Integer id);
+    List<TierMenu> selectByTierId(Integer tierId);
     int updateTierMenuBulk(List<TierMenu> tierMenus);
 }

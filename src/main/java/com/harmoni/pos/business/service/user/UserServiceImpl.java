@@ -5,6 +5,7 @@ import com.harmoni.pos.business.service.auth.AuthService;
 import com.harmoni.pos.business.service.brand.BrandService;
 import com.harmoni.pos.business.service.chain.ChainService;
 import com.harmoni.pos.business.service.store.StoreService;
+import com.harmoni.pos.component.JwtUtil;
 import com.harmoni.pos.exception.BusinessNotFoundRequestException;
 import com.harmoni.pos.http.utils.PaginationUtils;
 import com.harmoni.pos.menu.mapper.UserMapper;
@@ -33,6 +34,7 @@ public class UserServiceImpl implements UserService {
     private final ChainService chainService;
     private final BrandService brandService;
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
     private static final String AUTH_FAILED_EXCEPTION = "exception.auth.process.Failed";
     private static final String USER_NOT_FOUND_EXCEPTION = "exception.user.id.NotFound";
@@ -97,6 +99,11 @@ public class UserServiceImpl implements UserService {
         Brand brand = brandService.get(chain.getBrandId());
         chain.setBrand(brand);
         return user;
+    }
+
+    @Override
+    public User selectByAuthToken(String authToken) {
+        return this.selectByUsername(jwtUtil.extractUsername(authToken));
     }
 
     @Override

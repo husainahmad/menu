@@ -10,5 +10,6 @@ public interface TierMenuService {
     int create(Integer tierId, List<TierMenuEditDto> tierMenuEditDtos);
 
     List<TierMenu> getMenusByBrandId(Integer brandId);
+    List<TierMenu> getMenusByTierId(Integer tierId);
 
 }

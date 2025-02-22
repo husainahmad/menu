@@ -12,7 +12,7 @@ public interface CategoryMapper {
     int insert(Category row);
     Category selectByPrimaryKey(Integer id);
     Category selectByNameBrandId(String name, Integer brandId);
-    List<Category> selectAll();
+    List<Category> selectByListCategories(List<Integer> categoryIds);
     List<Category> selectByBrandId(Integer brandId);
     int updateByPrimaryKey(Category row);
 

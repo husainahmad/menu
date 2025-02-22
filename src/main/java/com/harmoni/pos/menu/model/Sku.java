@@ -24,5 +24,6 @@ public class Sku {
     private Boolean deleted;
     @JsonProperty("tierPrices")
     private List<SkuTierPrice> skuTierPrices;
-
+    @JsonProperty("tierPrice")
+    private SkuTierPrice skuTierPrice;
 }

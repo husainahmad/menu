@@ -9,8 +9,9 @@ import java.util.Map;
 public interface CategoryService {
     int create(CategoryDto categoryDto);
     int delete(Integer id);
-    List<Category> list();
-    Map<String, Object> listPaginated(int page, int size);
+
+    List<Category> getListByUserAuth(String authToken);
+    Map<String, Object> listPaginated(String authToken, int page, int size);
 
     List<Category> selectByBrandId(Integer brandId);
 

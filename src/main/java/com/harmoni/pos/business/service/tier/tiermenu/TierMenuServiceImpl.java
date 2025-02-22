@@ -43,4 +43,9 @@ public class TierMenuServiceImpl implements TierMenuService {
     public List<TierMenu> getMenusByBrandId(Integer brandId) {
         return tierMenuMapper.selectByBrandId(brandId);
     }
+
+    @Override
+    public List<TierMenu> getMenusByTierId(Integer tierId) {
+        return tierMenuMapper.selectByTierId(tierId);
+    }
 }

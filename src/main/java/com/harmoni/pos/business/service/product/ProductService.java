@@ -11,6 +11,7 @@ import java.util.Map;
 public interface ProductService {
 
     Product create(ProductAddDto productDto);
+    List<Product> selectByCategoryPrice(String authHeader, Integer categoryId);
     List<Product> selectByCategory(Integer categoryId);
     Map<String, Object> selectByCategoryBrand(Integer categoryId, Integer brandId, int page, int size, String search);
     Product get(Integer id);

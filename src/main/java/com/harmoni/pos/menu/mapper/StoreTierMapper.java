@@ -8,7 +8,7 @@ public interface StoreTierMapper {
 
     int insert(StoreTier row);
     StoreTier selectByPrimaryKey(Integer id);
-    StoreTier selectByStoreId(Integer id);
+    StoreTier selectByStoreId(Integer storeId);
     int insertOrUpdateByStoreId(StoreTier row);
 
 }

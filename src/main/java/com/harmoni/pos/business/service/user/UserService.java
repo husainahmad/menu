@@ -14,6 +14,7 @@ public interface UserService {
     User selectById(Integer id);
     int delete(String token, Integer id);
     User selectByUsername(String username);
+    User selectByAuthToken(String authToken);
     User selectByUsernameAuthIdAndStoreId(String name, Integer authId, Integer storeId);
     List<User> selectByStoreIds(List<Store> stores, String search);
     Map<String, Object> selectByChainId(Integer chainId, int page, int size, String search);

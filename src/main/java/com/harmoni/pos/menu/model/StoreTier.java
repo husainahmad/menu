@@ -17,6 +17,8 @@ public class StoreTier {
     private Integer tierServiceId;
     private Integer tierPriceId;
 
+    private TierMenu tierMenu;
+
     private Date createdAt;
     private Date updatedAt;
     private Date deletedAt;

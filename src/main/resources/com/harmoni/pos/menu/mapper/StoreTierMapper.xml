@@ -11,6 +11,7 @@
     <result column="store_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="store_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <result column="store_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
+    <association property="tierMenu" resultMap="com.harmoni.pos.menu.mapper.TierMenuMapper.BaseResultMap"/>
   </resultMap>
 
   <sql id="Base_Column_List">
@@ -33,8 +34,11 @@
 
   <select id="selectByStoreId" resultMap="BaseResultMap">
     select
-    <include refid="Base_Column_List" />
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.TierMenuMapper.Base_Column_List"/>
     from store_tiers store_tier
+    left join tier_menus tier_menu
+        on tier_menu.id = store_tier.tier_menu_id
     where store_tier.store_id = #{storeId,jdbcType=INTEGER}
   </select>
 

@@ -28,8 +28,6 @@ public class AuthService implements Serializable {
     @Value("${auth.url.update}")
     private String urlUpdate;
 
-
-
     public int create(String token, UserDto userDto) {
         AtomicInteger statusCode = new AtomicInteger();
         restClientService.post(token, url, Mono.just(userDto), UserDto.class).map(restAPIResponse -> {

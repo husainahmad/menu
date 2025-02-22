@@ -1,6 +1,7 @@
 package com.harmoni.pos.http.controller.category;
 
 import com.harmoni.pos.business.service.category.CategoryService;
+import com.harmoni.pos.menu.model.User;
 import com.harmoni.pos.menu.model.dto.CategoryDto;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import jakarta.validation.Valid;
@@ -26,11 +27,12 @@ public class CategoryController {
     }
 
     @GetMapping("")
-    public ResponseEntity<RestAPIResponse> list(@RequestParam(name = "page") int page,
+    public ResponseEntity<RestAPIResponse> list(@RequestHeader("Authorization") String authHeader,
+                                                @RequestParam(name = "page") int page,
                                                 @RequestParam(name = "size") int size) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(categoryService.listPaginated(page, size))
+                .data(categoryService.listPaginated(authHeader, page, size))
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
@@ -67,7 +69,15 @@ public class CategoryController {
                 .data(this.categoryService.selectByBrandId(brandId))
                 .error(null)
                 .build();
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
 
+    @GetMapping("/tier")
+    public ResponseEntity<RestAPIResponse> getAll(@RequestHeader("Authorization") String authHeader) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(categoryService.getListByUserAuth(authHeader))
+                .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 

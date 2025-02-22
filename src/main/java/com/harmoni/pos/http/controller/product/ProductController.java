@@ -80,6 +80,19 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/category/{id}/price")
+    public ResponseEntity<RestAPIResponse> getByCategoryPrice(@RequestHeader("Authorization") String authHeader,
+                                                              @PathVariable Integer id) {
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(this.productService.selectByCategoryPrice(authHeader, id))
+                .error(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
     @GetMapping("/category/{categoryId}/{brandId}")
     public ResponseEntity<RestAPIResponse> getByCategoryBrand(@PathVariable Integer categoryId,
                                                               @PathVariable Integer brandId,

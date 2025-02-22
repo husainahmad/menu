@@ -8,6 +8,7 @@
     <result column="sub_service_name" jdbcType="VARCHAR" property="name" />
     <result column="sub_service_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="sub_service_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <association property="service" resultMap="com.harmoni.pos.menu.mapper.ServiceMapper.BaseResultMap" />
   </resultMap>
 
   <sql id="Base_Column_List">

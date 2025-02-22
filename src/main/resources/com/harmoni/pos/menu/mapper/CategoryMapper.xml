@@ -10,10 +10,7 @@
     <result column="category_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="category_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <result column="category_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
-    <association property="brand" javaType="com.harmoni.pos.menu.model.Brand">
-      <id column="brand_id" jdbcType="INTEGER" property="id" />
-      <result column="brand_name" jdbcType="VARCHAR" property="name" />
-    </association>
+    <association property="brand" resultMap="com.harmoni.pos.menu.mapper.BrandMapper.BaseResultMap"/>
   </resultMap>
 
   <sql id="Base_Column_List">
@@ -43,12 +40,15 @@
           and category.brand_id = #{brandId,jdbcType=INTEGER}
   </select>
 
-  <select id="selectAll" resultMap="BaseResultMap">
+  <select id="selectByListCategories" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />,
     <include refid="com.harmoni.pos.menu.mapper.BrandMapper.Base_Column_List"/>
     from categories category
-    left join brands brand on brand.id = category.brand_id
+    where category.id in
+    <foreach item="id" index="index" collection="categoryIds" separator="," open="(" close=")">
+      #{id}
+    </foreach>
   </select>
 
   <select id="selectByBrandId" resultMap="BaseResultMap">

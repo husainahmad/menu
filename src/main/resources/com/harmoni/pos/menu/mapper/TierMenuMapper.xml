@@ -11,18 +11,8 @@
     <result column="tier_menu_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="tier_menu_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <result column="tier_menu_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
-    <association property="tier" javaType="com.harmoni.pos.menu.model.Tier">
-      <id column="tier_id" jdbcType="INTEGER" property="id" />
-      <result column="tier_name" jdbcType="VARCHAR" property="name" />
-      <result column="tier_brand_id" jdbcType="INTEGER" property="brandId" />
-      <result column="tier_type" property="type" javaType="com.harmoni.pos.menu.model.TierType" />
-    </association>
-    <association property="category" javaType="com.harmoni.pos.menu.model.Category">
-      <id column="category_id" jdbcType="INTEGER" property="id" />
-      <result column="category_name" jdbcType="VARCHAR" property="name" />
-      <result column="category_description" jdbcType="VARCHAR" property="description" />
-      <result column="category_brand_id" jdbcType="INTEGER" property="brandId" />
-    </association>
+    <association property="tier" resultMap="com.harmoni.pos.menu.mapper.TierMapper.BaseResultMap"/>
+    <association property="category" resultMap="com.harmoni.pos.menu.mapper.CategoryMapper.BaseResultMap"/>
   </resultMap>
 
   <sql id="Base_Column_List">
@@ -49,6 +39,22 @@
     where tier.brand_id = #{id,jdbcType=INTEGER}
     and tier.type = 'MENU'
     and (tier.is_deleted = 0 or tier.is_deleted is null)
+  </select>
+
+  <select id="selectByTierId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List" />
+    from tier_menus tier_menu
+    right join tiers tier
+    on tier.id = tier_menu.tier_id
+    left join categories category
+    on category.id = tier_menu.category_id
+    where tier.type = 'MENU'
+    and (tier.is_deleted = 0 or tier.is_deleted is null)
+    and tier_menu.tier_id = #{tierId,jdbcType=INTEGER}
+    and tier_menu.is_active = 1
   </select>
 
   <update id="updateTierMenuBulk">
