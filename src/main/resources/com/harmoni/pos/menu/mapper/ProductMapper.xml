@@ -131,6 +131,25 @@
       </if>
   </select>
 
+  <select id="selectByIds" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from products product
+    left join categories category on category.id = product.category_id
+    where 1=1
+    and (product.is_deleted = 0 or product.is_deleted is null)
+    <if test="brandId != -1">
+      and category.brand_id = #{brandId,jdbcType=INTEGER}
+    </if>
+    <if test="ids != null">
+      and product.id in
+      <foreach item="id" index="index" collection="ids"
+               open="(" separator="," close=")" nullable="true">
+        #{id}
+      </foreach>
+    </if>
+  </select>
+
   <update id="deleteByPrimaryKey">
     update products
     set is_deleted = #{deleted,jdbcType=BOOLEAN},

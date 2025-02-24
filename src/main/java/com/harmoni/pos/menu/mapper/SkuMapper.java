@@ -22,4 +22,6 @@ public interface SkuMapper {
     List<Sku> selectByProductId(Integer productId);
     List<Sku> selectByIds(List<Integer> ids);
 
+    List<Sku> selectPriceByIdsAndTierId(List<Integer> ids, Integer tierId);
+
 }

@@ -11,6 +11,7 @@ public interface SkuService {
     List<Sku> createOrUpdate(List<Sku> skus);
     List<Sku> selectByProductId(Integer productId);
     List<Sku> selectByIds(List<Integer> ids);
+    List<Sku> selectPriceByIds(String jwtToken, List<Integer> ids);
     List<Sku> compareListSkus(List<Sku> skus, List<Integer> ids);
     void updateBulk(List<Sku> skus);
     void updateByIdBulk(List<Sku> skus);

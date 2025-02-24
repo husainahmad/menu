@@ -55,4 +55,13 @@ public class StoreController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .data(storeService.get(id))
+                .httpStatus(HttpStatus.OK.value())
+                .build();
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
 }

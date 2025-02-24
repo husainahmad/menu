@@ -37,7 +37,8 @@
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />,
-    <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>
+    <include refid="com.harmoni.pos.menu.mapper.ChainMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.StoreTierMapper.Base_Column_List"/>
     from stores store
       left join chains chain on store.chain_id = chain.id
     left join store_tiers store_tier on store_tier.store_id = store.id

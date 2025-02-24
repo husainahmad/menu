@@ -1,9 +1,7 @@
 package com.harmoni.pos.http.controller.sku;
 
 import com.harmoni.pos.business.service.sku.SkuService;
-import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.http.response.RestAPIResponse;
-import com.harmoni.pos.menu.model.dto.SkuDto;
 import com.harmoni.pos.menu.model.dto.add.SkuAddDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -39,5 +39,15 @@ public class SkuController {
                 .httpStatus(HttpStatus.NO_CONTENT.value()).build();
 
         return new ResponseEntity<>(restAPIResponse, HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/price")
+    public ResponseEntity<RestAPIResponse> getDetails(@RequestHeader("Authorization") String authHeader,
+                                                      @RequestParam List<Integer> ids) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .data(skuService.selectPriceByIds(authHeader.substring(7), ids))
+                .httpStatus(HttpStatus.NO_CONTENT.value()).build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 }

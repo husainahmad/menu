@@ -93,6 +93,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<Product> getByList(List<Integer> ids, String jwtToken) {
+        User user = this.userService.selectByAuthToken(jwtToken);
+        return productMapper.selectByIds(ids, user.getStore().getChain().getBrandId());
+    }
+
+    @Override
     public void selectByNameCategoryId(Integer id, String name, Integer categoryId) {
         Product product = productMapper.selectByNameCategoryId(name, categoryId);
 

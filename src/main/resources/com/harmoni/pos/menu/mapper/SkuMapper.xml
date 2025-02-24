@@ -71,6 +71,22 @@
     </foreach>
   </select>
 
+  <select id="selectPriceByIdsAndTierId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.ProductMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.SkuTierPriceMapper.Base_Column_List"/>
+    from skus sku
+    left join products product on sku.product_id = product.id
+    left join sku_tier_prices stp on stp.sku_id = sku.id
+          and stp.tier_id = #{tierId,jdbcType=INTEGER}
+    where sku.id in
+    <foreach item="id" index="index" collection="ids"
+             open="(" separator="," close=")" nullable="true">
+      #{id}
+    </foreach>
+  </select>
+
   <delete id="deleteById" parameterType="java.lang.Integer">
     delete from skus
     where id = #{id,jdbcType=INTEGER}

@@ -1,11 +1,14 @@
 package com.harmoni.pos.business.service.sku;
 
 import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
+import com.harmoni.pos.business.service.user.UserService;
+import com.harmoni.pos.component.JwtUtil;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
 import com.harmoni.pos.http.utils.PosObjectUtils;
 import com.harmoni.pos.menu.mapper.SkuMapper;
 import com.harmoni.pos.menu.model.Sku;
+import com.harmoni.pos.menu.model.User;
 import com.harmoni.pos.menu.model.dto.add.SkuAddDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,8 @@ public class SkuServiceImpl implements SkuService {
     private final SkuMapper skuMapper;
     private final SqlSessionFactory sqlSessionFactory;
     private final SkuTierPriceService skuTierPriceService;
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
 
     @Override
     public int create(SkuAddDto skuDto) {
@@ -61,6 +66,12 @@ public class SkuServiceImpl implements SkuService {
     @Override
     public List<Sku> selectByIds(List<Integer> ids) {
         return this.skuMapper.selectByIds(ids);
+    }
+
+    @Override
+    public List<Sku> selectPriceByIds(String jwtToken, List<Integer> ids) {
+        User user = userService.selectByAuthToken(jwtToken);
+        return this.skuMapper.selectPriceByIdsAndTierId(ids, user.getStore().getTierPriceId());
     }
 
     @Override

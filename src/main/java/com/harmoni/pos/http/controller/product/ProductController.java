@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/product")
@@ -36,6 +38,19 @@ public class ProductController {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(this.productService.get(id))
+                .error(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("")
+    public ResponseEntity<RestAPIResponse> getByIds(@RequestHeader("Authorization") String authHeader,
+                                                    @RequestParam List<Integer> ids) {
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(this.productService.getByList(ids, authHeader.substring(7)))
                 .error(null)
                 .build();
 

@@ -15,6 +15,7 @@ public interface ProductService {
     List<Product> selectByCategory(Integer categoryId);
     Map<String, Object> selectByCategoryBrand(Integer categoryId, Integer brandId, int page, int size, String search);
     Product get(Integer id);
+    List<Product> getByList(List<Integer> ids, String jwtToken);
     void selectByNameCategoryId(Integer id, String name, Integer categoryId);
     void updateProductSku(Integer productId, ProductSkuDto productSkuDto);
     Product update(ProductEditDto productEditDto);
