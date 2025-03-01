@@ -53,7 +53,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> getListByUserAuth(String authToken) {
         User user = userService.selectByAuthToken(authToken.substring(7));
-        StoreTier storeTier = storeTierService.selectByStoreId(user.getStoreId());
+        StoreTier storeTier = storeTierService.selectByStoreId(user.getStore().getId());
         List<TierMenu> tierMenus = tierMenuService.getMenusByTierId(storeTier.getTierMenuId());
         return tierMenus.stream()
                 .map(TierMenu::getCategory)

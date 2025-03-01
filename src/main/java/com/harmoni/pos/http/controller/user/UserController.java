@@ -63,7 +63,7 @@ public class UserController {
     }
 
     @GetMapping("/{username}")
-    public ResponseEntity<RestAPIResponse> deleteUser(@PathVariable String username) throws Exception {
+    public ResponseEntity<RestAPIResponse> detailUser(@PathVariable String username) throws Exception {
         User user = this.userService.selectByUsername(username);
         log.debug("user detail {} ", user);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

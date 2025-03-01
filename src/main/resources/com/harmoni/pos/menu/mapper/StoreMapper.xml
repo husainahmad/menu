@@ -7,6 +7,7 @@
     <result column="store_name" jdbcType="VARCHAR" property="name" />
     <result column="store_chain_id" jdbcType="INTEGER" property="chainId" />
     <result column="store_address" jdbcType="VARCHAR" property="address" />
+    <result column="store_time_zone" jdbcType="VARCHAR" property="timeZone" />
 
     <result column="store_tier_menu_id" jdbcType="INTEGER" property="tierMenuId" />
     <result column="store_tier_service_id" jdbcType="INTEGER" property="tierServiceId" />
@@ -26,6 +27,7 @@
     store.name as store_name,
     store.chain_id as store_chain_id,
     store.address as store_address,
+    store.time_zone as store_time_zone,
     store.created_at as store_created_at,
     store.updated_at as store_updated_at,
     store.deleted_at as store_deleted_at,
@@ -78,10 +80,10 @@
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into stores (name, chain_id,
-      address, created_at, updated_at, 
+      address, time_zone, created_at, updated_at,
       deleted_at)
     values (#{name,jdbcType=VARCHAR}, #{chainId,jdbcType=INTEGER},
-      #{address,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}, 
+      #{address,jdbcType=VARCHAR}, #{timeZone,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP},
       #{deletedAt,jdbcType=TIMESTAMP})
   </insert>
 
@@ -90,6 +92,7 @@
     set name = #{name,jdbcType=VARCHAR},
       chain_id = #{chainId,jdbcType=INTEGER},
       address = #{address,jdbcType=VARCHAR},
+      time_zone = #{timeZone,jdbcType=VARCHAR},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},
       deleted_at = #{deletedAt,jdbcType=TIMESTAMP}

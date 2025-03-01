@@ -13,7 +13,6 @@ public class User {
     private Integer id;
     private Integer authId;
     private String username;
-
     private Integer storeId;
     private Store store;
 

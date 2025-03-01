@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
         if (ObjectUtils.isEmpty(user)) {
             throw new BusinessNotFoundRequestException(USER_AUTH_ID_EXCEPTION, null);
         }
-        Store store = storeService.get(user.getId());
+        Store store = storeService.get(user.getStoreId());
         user.setStore(store);
         Chain chain = chainService.get(store.getChainId());
         store.setChain(chain);

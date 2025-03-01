@@ -16,6 +16,7 @@ public class Store {
     private Integer chainId;
     private Chain chain;
     private String address;
+    private String timeZone;
 
     private Integer tierMenuId;
     private Integer tierPriceId;
