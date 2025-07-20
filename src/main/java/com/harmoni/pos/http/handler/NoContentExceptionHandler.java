@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Locale;
 
+/**
+ * Exception handler for business operations that result in no content.
+ */
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
 @Slf4j
@@ -26,6 +29,13 @@ public class NoContentExceptionHandler {
         this.messageSource = messageSource;
     }
 
+    /**
+     * Handles {@link BusinessNoContentRequestException} and returns a formatted no content response.
+     *
+     * @param e the exception thrown when no content is found
+     * @param locale the locale for message translation
+     * @return ResponseEntity with error details and HTTP status 204
+     */
     @ExceptionHandler(BusinessNoContentRequestException.class)
     public ResponseEntity<RestAPIResponse>
             badRequestExceptionHandler(BusinessNoContentRequestException e, Locale locale) {

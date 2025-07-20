@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for managing SKU Tier Price entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @Slf4j
@@ -20,6 +23,12 @@ public class SkuTierPriceController {
 
     private final SkuTierPriceService skuTierPriceService;
 
+    /**
+     * Creates a new SKU Tier Price.
+     *
+     * @param skuTierPriceDto the SKU Tier Price data transfer object
+     * @return ResponseEntity with creation status
+     */
     @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody SkuTierPriceDto skuTierPriceDto) {
         int id = skuTierPriceService.create(skuTierPriceDto);
@@ -27,6 +36,13 @@ public class SkuTierPriceController {
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves SKU Tier Prices by SKU IDs and Tier ID.
+     *
+     * @param skuIds the list of SKU IDs
+     * @param tierId the tier ID
+     * @return ResponseEntity containing SKU Tier Prices
+     */
     @GetMapping("")
     public ResponseEntity<RestAPIResponse> listBySku(@RequestParam List<Integer> skuIds,
                                                      @RequestParam Integer tierId) {

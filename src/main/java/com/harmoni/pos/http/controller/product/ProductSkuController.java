@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller for managing Product SKU entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @Slf4j
@@ -20,6 +23,12 @@ public class ProductSkuController {
     private final ProductService productService;
     private final SkuService skuService;
 
+    /**
+     * Retrieves SKUs for a Product by its ID.
+     *
+     * @param id the product ID
+     * @return ResponseEntity containing SKUs for the product
+     */
     @GetMapping("/{id}/sku")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
@@ -32,6 +41,13 @@ public class ProductSkuController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Updates SKUs for a Product.
+     *
+     * @param id the product ID
+     * @param productSkuDto the product SKU data transfer object
+     * @return ResponseEntity with update status
+     */
     @PutMapping("/{id}/sku")
     public ResponseEntity<RestAPIResponse> putSku(@PathVariable Integer id, @Valid @RequestBody ProductSkuDto productSkuDto) {
         productService.updateProductSku(id, productSkuDto);

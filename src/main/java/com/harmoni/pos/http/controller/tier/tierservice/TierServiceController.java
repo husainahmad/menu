@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for managing Tier Service entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @Slf4j
@@ -20,6 +23,12 @@ public class TierServiceController {
 
     private final TierServiceService tierServiceService;
 
+    /**
+     * Creates a new Tier Service.
+     *
+     * @param tierServiceDto the tier service data transfer object
+     * @return ResponseEntity with creation status
+     */
     @PostMapping("/service")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody TierServiceDto tierServiceDto) {
         int id = tierServiceService.create(tierServiceDto);
@@ -27,6 +36,12 @@ public class TierServiceController {
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves Tier Services by Brand ID.
+     *
+     * @param id the brand ID
+     * @return ResponseEntity containing tier services for the brand
+     */
     @GetMapping("/service")
     public ResponseEntity<RestAPIResponse> getByBrand(@RequestParam(name = "brandId") Integer id) {
 
@@ -38,6 +53,13 @@ public class TierServiceController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Updates Tier Services for a Tier.
+     *
+     * @param tierServiceDtos the list of tier service data transfer objects
+     * @param tierId the tier ID
+     * @return ResponseEntity with update status
+     */
     @PutMapping("/{tierId}/service")
     public ResponseEntity<RestAPIResponse> update(@RequestBody List<TierServiceDto> tierServiceDtos,
                                                @Valid @PathVariable Integer tierId) {

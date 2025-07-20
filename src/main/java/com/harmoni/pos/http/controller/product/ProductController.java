@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for managing Product entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/product")
@@ -25,6 +28,12 @@ public class ProductController {
     private final ProductService productService;
     private final ProductSkuService productSkuService;
 
+    /**
+     * Creates a new Product.
+     *
+     * @param productDto the product data transfer object
+     * @return ResponseEntity with creation status
+     */
     @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ProductAddDto productDto) {
         Product product = productSkuService.create(productDto);
@@ -32,6 +41,12 @@ public class ProductController {
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves a Product by its ID.
+     *
+     * @param id the product ID
+     * @return ResponseEntity containing the product data
+     */
     @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
@@ -44,6 +59,13 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves Products by a list of IDs.
+     *
+     * @param authHeader the authorization header
+     * @param ids the list of product IDs
+     * @return ResponseEntity containing the products
+     */
     @GetMapping("")
     public ResponseEntity<RestAPIResponse> getByIds(@RequestHeader("Authorization") String authHeader,
                                                     @RequestParam List<Integer> ids) {
@@ -57,6 +79,12 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Updates an existing Product.
+     *
+     * @param productEditDto the product edit data transfer object
+     * @return ResponseEntity with update status
+     */
     @PutMapping("")
     public ResponseEntity<RestAPIResponse> put(@Valid @RequestBody ProductEditDto productEditDto) {
         this.productSkuService.update(productEditDto);
@@ -70,6 +98,12 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Deletes a Product by its ID.
+     *
+     * @param id the product ID
+     * @return ResponseEntity with deletion status
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
 
@@ -83,6 +117,12 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves Products by Category ID.
+     *
+     * @param id the category ID
+     * @return ResponseEntity containing products for the category
+     */
     @GetMapping("/category/{id}")
     public ResponseEntity<RestAPIResponse> getByCategory(@PathVariable Integer id) {
 
@@ -95,6 +135,13 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves Products by Category ID with price information.
+     *
+     * @param authHeader the authorization header
+     * @param id the category ID
+     * @return ResponseEntity containing products with price for the category
+     */
     @GetMapping("/category/{id}/price")
     public ResponseEntity<RestAPIResponse> getByCategoryPrice(@RequestHeader("Authorization") String authHeader,
                                                               @PathVariable Integer id) {
@@ -108,6 +155,16 @@ public class ProductController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves Products by Category and Brand with pagination and search.
+     *
+     * @param categoryId the category ID
+     * @param brandId the brand ID
+     * @param page the page number
+     * @param size the page size
+     * @param search the search term
+     * @return ResponseEntity containing products for the category and brand
+     */
     @GetMapping("/category/{categoryId}/{brandId}")
     public ResponseEntity<RestAPIResponse> getByCategoryBrand(@PathVariable Integer categoryId,
                                                               @PathVariable Integer brandId,

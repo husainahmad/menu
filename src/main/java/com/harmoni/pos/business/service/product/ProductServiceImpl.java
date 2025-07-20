@@ -23,12 +23,22 @@ import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
-
+/**
+ * Implementation of the {@link ProductService} that handles product management operations.
+ * <p>
+ * This class is responsible for creating, updating, retrieving, and deleting products,
+ * as well as managing related entities like SKUs and tier-based pricing. It coordinates
+ * with various service layers to ensure consistent business logic and data integrity.
+ * </p>
+ *
+ * @author husainahmad
+ */
 @RequiredArgsConstructor
 @Service("productService")
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
+    // Injected dependencies for data access and related services
     private final ProductMapper productMapper;
     private final SkuService skuService;
     private final TierService tierService;
@@ -38,17 +48,28 @@ public class ProductServiceImpl implements ProductService {
     private final UserService userService;
     private final StoreTierService storeTierService;
 
+    /**
+     * Creates a new product.
+     *
+     * @param productDto the DTO containing product information
+     * @return the created {@link Product}
+     */
     @Override
     public Product create(ProductAddDto productDto) {
-
         this.selectByNameCategoryId(null, productDto.getName(), productDto.getCategoryId());
         Product product = productDto.toProduct();
         product.setCreatedAt(new Date(System.currentTimeMillis()));
         productMapper.insert(product);
-
         return product;
     }
 
+    /**
+     * Retrieves a list of products in a specific category with pricing based on user's store tier.
+     *
+     * @param authHeader JWT token in Authorization header
+     * @param categoryId the ID of the category
+     * @return list of {@link Product} with pricing information
+     */
     @Override
     public List<Product> selectByCategoryPrice(String authHeader, Integer categoryId) {
         User user = userService.selectByAuthToken(authHeader.substring(7));
@@ -56,15 +77,30 @@ public class ProductServiceImpl implements ProductService {
         return productMapper.selectByCategoryIdPrice(categoryId, storeTier.getTierPriceId());
     }
 
+    /**
+     * Retrieves all products in a specific category.
+     *
+     * @param categoryId the ID of the category
+     * @return list of {@link Product}
+     */
     @Override
     public List<Product> selectByCategory(Integer categoryId) {
         return productMapper.selectByCategoryId(categoryId);
     }
 
+    /**
+     * Retrieves paginated list of products filtered by category, brand, and optional search keyword.
+     *
+     * @param categoryId the ID of the category
+     * @param brandId    the ID of the brand
+     * @param page       the current page number
+     * @param size       the number of records per page
+     * @param search     optional search keyword
+     * @return paginated map with product data and metadata
+     */
     @Override
     public Map<String, Object> selectByCategoryBrand(Integer categoryId, Integer brandId, int page, int size, String search) {
         PaginationUtils.applyPagination(page, size);
-
         Map<String, Object> paginationData = new HashMap<>();
         PageInfo<Product> productPageInfo = new PageInfo<>(getProducts(categoryId, brandId, search));
 
@@ -77,13 +113,27 @@ public class ProductServiceImpl implements ProductService {
         return paginationData;
     }
 
+    /**
+     * Helper method to get products by category and brand with optional search keyword.
+     *
+     * @param categoryId the category ID
+     * @param brandId    the brand ID
+     * @param search     search keyword
+     * @return list of products
+     */
     private List<Product> getProducts(Integer categoryId, Integer brandId, String search) {
         return productMapper.selectByCategoryIdBrandId(categoryId, brandId, search);
     }
 
+    /**
+     * Retrieves a single product by its ID.
+     *
+     * @param id the product ID
+     * @return the {@link Product}
+     * @throws BusinessBadRequestException if product not found
+     */
     @Override
     public Product get(Integer id) {
-
         Product product = productMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(product)) {
             throw new BusinessBadRequestException("exception.product.id.badRequest.notFound", null);
@@ -92,30 +142,49 @@ public class ProductServiceImpl implements ProductService {
         return product;
     }
 
+    /**
+     * Retrieves multiple products by a list of IDs and JWT token to validate brand access.
+     *
+     * @param ids      list of product IDs
+     * @param jwtToken JWT token
+     * @return list of {@link Product}
+     */
     @Override
     public List<Product> getByList(List<Integer> ids, String jwtToken) {
         User user = this.userService.selectByAuthToken(jwtToken);
         return productMapper.selectByIds(ids, user.getStore().getChain().getBrandId());
     }
 
+    /**
+     * Validates if a product with the given name exists in a category.
+     *
+     * @param id         optional product ID to exclude from check
+     * @param name       the product name
+     * @param categoryId the category ID
+     * @throws BusinessBadRequestException if a duplicate exists
+     */
     @Override
     public void selectByNameCategoryId(Integer id, String name, Integer categoryId) {
         Product product = productMapper.selectByNameCategoryId(name, categoryId);
-
-        if (!ObjectUtils.isEmpty(product) && id==null) {
+        if (!ObjectUtils.isEmpty(product) && id == null) {
             throw new BusinessBadRequestException("exception.product.badRequest.duplicate", null);
         }
     }
 
+    /**
+     * Updates product SKUs and their corresponding tier-based pricing.
+     *
+     * @param productId     the product ID
+     * @param productSkuDto the DTO containing SKU and tier pricing info
+     */
     @Override
     public void updateProductSku(Integer productId, ProductSkuDto productSkuDto) {
         Product product = this.get(productId);
         boolean isIgnoreUpdateProduct = false;
-
         Category category = this.categoryService.get(productSkuDto.getCategoryId());
 
         if (product.getName().equals(productSkuDto.getName()) &&
-            product.getCategoryId().equals(productSkuDto.getCategoryId())) {
+                product.getCategoryId().equals(productSkuDto.getCategoryId())) {
             isIgnoreUpdateProduct = true;
         }
 
@@ -139,9 +208,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         this.skuService.compareListSkus(skus, skuIds);
-        this.skuService.validateSkuName(
-                this.skuService.selectByProductId(product.getId()), skus);
-
+        this.skuService.validateSkuName(this.skuService.selectByProductId(product.getId()), skus);
         this.skuService.updateBulk(skus);
         this.skuService.setSkuIdInListSkus(skus, this.skuService.selectByProductId(productId));
         this.tierService.validateTierByIds(tierIds);
@@ -156,9 +223,14 @@ public class ProductServiceImpl implements ProductService {
         }
 
         this.skuTierPriceService.insetOrUpdateBulk(skuTierPrices);
-
     }
 
+    /**
+     * Updates product information such as name and category.
+     *
+     * @param productEditDto DTO containing updated product info
+     * @return the updated {@link Product}
+     */
     @Override
     public Product update(ProductEditDto productEditDto) {
         this.selectByNameCategoryId(productEditDto.getId(), productEditDto.getName(), productEditDto.getCategoryId());
@@ -168,21 +240,43 @@ public class ProductServiceImpl implements ProductService {
         return product;
     }
 
+    /**
+     * Deletes a product and its related SKUs.
+     *
+     * @param id the product ID
+     * @return number of deleted records
+     */
     @Override
     public int delete(Integer id) {
         skuService.deleteSkuByProductId(id);
         return productMapper.deleteByPrimaryKey(id, true, new Date(System.currentTimeMillis()));
     }
 
+    /**
+     * Constructs a {@link Sku} object.
+     *
+     * @param skuId     the SKU ID
+     * @param skuName   the name of the SKU
+     * @param productId the associated product ID
+     * @return constructed {@link Sku}
+     */
     private Sku setSku(Integer skuId, String skuName, Integer productId) {
         Sku sku = new Sku();
-        sku.setId(skuId<=0 ? null : skuId);
+        sku.setId(skuId <= 0 ? null : skuId);
         sku.setName(skuName);
         sku.setProductId(productId);
         sku.setUpdatedAt(new Date(System.currentTimeMillis()));
         return sku;
     }
 
+    /**
+     * Constructs a {@link SkuTierPrice} object.
+     *
+     * @param skuId       the SKU ID
+     * @param tierPriceId the Tier ID
+     * @param price       the price for the tier
+     * @return constructed {@link SkuTierPrice}
+     */
     private SkuTierPrice setTierPrice(Integer skuId, Integer tierPriceId, BigDecimal price) {
         SkuTierPrice skuTierPrice = new SkuTierPrice();
         skuTierPrice.setSkuId(skuId);
@@ -190,5 +284,4 @@ public class ProductServiceImpl implements ProductService {
         skuTierPrice.setPrice(price);
         return skuTierPrice;
     }
-
 }

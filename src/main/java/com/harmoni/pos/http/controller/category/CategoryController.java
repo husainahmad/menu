@@ -1,7 +1,6 @@
 package com.harmoni.pos.http.controller.category;
 
 import com.harmoni.pos.business.service.category.CategoryService;
-import com.harmoni.pos.menu.model.User;
 import com.harmoni.pos.menu.model.dto.CategoryDto;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import jakarta.validation.Valid;
@@ -11,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller for managing Category entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/category")
@@ -19,6 +21,12 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    /**
+     * Creates a new Category.
+     *
+     * @param categoryDto the category data transfer object
+     * @return ResponseEntity with creation status
+     */
     @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody CategoryDto categoryDto) {
         int id = categoryService.create(categoryDto);
@@ -26,6 +34,14 @@ public class CategoryController {
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves paginated list of Categories.
+     *
+     * @param authHeader the authorization header
+     * @param page the page number
+     * @param size the page size
+     * @return ResponseEntity containing paginated categories
+     */
     @GetMapping("")
     public ResponseEntity<RestAPIResponse> list(@RequestHeader("Authorization") String authHeader,
                                                 @RequestParam(name = "page") int page,
@@ -37,6 +53,12 @@ public class CategoryController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves a Category by its ID.
+     *
+     * @param id the category ID
+     * @return ResponseEntity containing the category data
+     */
     @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
@@ -49,6 +71,12 @@ public class CategoryController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Deletes a Category by its ID.
+     *
+     * @param id the category ID
+     * @return ResponseEntity with deletion status
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
 
@@ -61,6 +89,12 @@ public class CategoryController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves Categories by Brand ID.
+     *
+     * @param brandId the brand ID
+     * @return ResponseEntity containing categories for the brand
+     */
     @GetMapping("/brand/{brandId}")
     public ResponseEntity<RestAPIResponse> getByBrandId(@PathVariable Integer brandId) {
 
@@ -72,6 +106,12 @@ public class CategoryController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all Categories accessible by the authenticated user.
+     *
+     * @param authHeader the authorization header
+     * @return ResponseEntity containing categories for the user
+     */
     @GetMapping("/tier")
     public ResponseEntity<RestAPIResponse> getAll(@RequestHeader("Authorization") String authHeader) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

@@ -15,11 +15,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Exception handler for validation errors.
+ */
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
 @Slf4j
 public class ValidationExceptionHandler {
 
+    /**
+     * Handles MethodArgumentNotValidException and returns a formatted validation error response.
+     *
+     * @param e the exception
+     * @return ResponseEntity with error details
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<RestAPIResponse>
     handleValidationException(MethodArgumentNotValidException e) {

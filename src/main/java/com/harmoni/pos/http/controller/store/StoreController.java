@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller for managing Store entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/store")
@@ -18,6 +21,12 @@ public class StoreController {
 
     private final StoreService storeService;
 
+    /**
+     * Creates a new Store.
+     *
+     * @param storeDto the store data transfer object
+     * @return ResponseEntity with creation status
+     */
     @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody StoreDto storeDto) {
         int id = storeService.create(storeDto);
@@ -25,6 +34,15 @@ public class StoreController {
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves paginated list of Stores by Chain ID.
+     *
+     * @param chainId the chain ID
+     * @param page the page number
+     * @param size the page size
+     * @param search the search term
+     * @return ResponseEntity containing paginated stores
+     */
     @GetMapping("")
     public ResponseEntity<RestAPIResponse> list(@RequestParam(name = "chainId") Integer chainId,
                                                 @RequestParam(name = "page") int page,
@@ -37,6 +55,12 @@ public class StoreController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Deletes a Store by its ID.
+     *
+     * @param id the store ID
+     * @return ResponseEntity with deletion status
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -46,6 +70,13 @@ public class StoreController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Updates a Store by its ID.
+     *
+     * @param id the store ID
+     * @param storeDto the store data transfer object
+     * @return ResponseEntity with update status
+     */
     @PutMapping("/{id}")
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer id, @Valid @RequestBody StoreDto storeDto) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -55,6 +86,12 @@ public class StoreController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves a Store by its ID.
+     *
+     * @param id the store ID
+     * @return ResponseEntity containing the store data
+     */
     @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST controller for managing Store Service Type entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @Slf4j
@@ -21,6 +24,12 @@ public class StoreServiceTypeController {
 
     private final StoreServiceTypeService storeServiceTypeService;
 
+    /**
+     * Creates a new Store Service Type.
+     *
+     * @param storeServiceTypeDto the store service type data transfer object
+     * @return ResponseEntity with creation status
+     */
     @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody StoreServiceTypeDto storeServiceTypeDto) {
         int id = storeServiceTypeService.create(storeServiceTypeDto);

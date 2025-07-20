@@ -24,6 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Implementation of {@link UserService} for managing User entities.
+ * Provides business logic for creating, updating, deleting, and retrieving users.
+ */
 @RequiredArgsConstructor
 @Service("userService")
 @Slf4j
@@ -40,6 +44,14 @@ public class UserServiceImpl implements UserService {
     private static final String USER_NOT_FOUND_EXCEPTION = "exception.user.id.NotFound";
     private static final String USER_AUTH_ID_EXCEPTION = "exception.user.authId.NotFound";
 
+    /**
+     * Inserts a new user.
+     *
+     * @param token the authentication token of the requester
+     * @param userDto the data transfer object containing user details
+     * @return the ID of the inserted user
+     * @throws BusinessNotFoundRequestException if authentication fails or user already exists
+     */
     @Override
     public int insert(String token, UserDto userDto) {
         if (authService.create(token, userDto)==0) {
@@ -53,6 +65,14 @@ public class UserServiceImpl implements UserService {
         return userMapper.insert(userDto.toUser());
     }
 
+    /**
+     * Updates an existing user.
+     *
+     * @param token the authentication token of the requester
+     * @param userEditDto the data transfer object containing updated user details
+     * @return the number of records updated
+     * @throws BusinessNotFoundRequestException if authentication fails
+     */
     @Override
     public int update(String token, UserEditDto userEditDto) {
         User user = selectById(userEditDto.getId());
@@ -65,6 +85,13 @@ public class UserServiceImpl implements UserService {
         return userMapper.updateByPrimaryKey(user);
     }
 
+    /**
+     * Retrieves a user by their ID.
+     *
+     * @param id the ID of the user to retrieve
+     * @return the User object
+     * @throws BusinessNotFoundRequestException if the user is not found
+     */
     @Override
     public User selectById(Integer id) {
         User user = userMapper.selectByPrimaryKey(id);
@@ -74,6 +101,14 @@ public class UserServiceImpl implements UserService {
         return userMapper.selectByPrimaryKey(id);
     }
 
+    /**
+     * Deletes a user by their ID.
+     *
+     * @param token the authentication token of the requester
+     * @param id the ID of the user to delete
+     * @return the number of records deleted
+     * @throws BusinessNotFoundRequestException if the user is not found or authentication fails
+     */
     @Override
     public int delete(String token, Integer id) {
         User user = userMapper.selectByPrimaryKey(id);
@@ -86,6 +121,13 @@ public class UserServiceImpl implements UserService {
         return userMapper.deleteByPrimaryKey(user.getId());
     }
 
+    /**
+     * Retrieves a user by their username.
+     *
+     * @param username the username of the user to retrieve
+     * @return the User object
+     * @throws BusinessNotFoundRequestException if the user is not found
+     */
     @Override
     public User selectByUsername(String username) {
         User user = userMapper.selectByUsername(username);
@@ -101,21 +143,51 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    /**
+     * Retrieves a user by their authentication token.
+     *
+     * @param authToken the authentication token of the user
+     * @return the User object
+     */
     @Override
     public User selectByAuthToken(String authToken) {
         return this.selectByUsername(jwtUtil.extractUsername(authToken));
     }
 
+    /**
+     * Retrieves a user by username, authentication ID, and store ID.
+     *
+     * @param name the username of the user
+     * @param authId the authentication ID
+     * @param storeId the store ID
+     * @return the User object, or null if not found
+     */
     @Override
     public User selectByUsernameAuthIdAndStoreId(String name, Integer authId, Integer storeId) {
         return userMapper.selectByUsernameAuthIdAndStoreId(name, authId, storeId);
     }
 
+    /**
+     * Retrieves users by a list of stores and an optional search term.
+     *
+     * @param stores the list of stores to filter users
+     * @param search the search term to filter users
+     * @return a list of User objects matching the criteria
+     */
     @Override
     public List<User> selectByStoreIds(List<Store> stores, String search) {
         return userMapper.selectByListChain(stores, search);
     }
 
+    /**
+     * Retrieves users by chain ID with pagination and an optional search term.
+     *
+     * @param chainId the chain ID to filter users
+     * @param page the page number for pagination
+     * @param size the number of records per page
+     * @param search the search term to filter users
+     * @return a map containing user data and pagination information
+     */
     @Override
     public Map<String, Object> selectByChainId(Integer chainId, int page, int size, String search) {
         PaginationUtils.applyPagination(page, size);

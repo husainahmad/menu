@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Locale;
 
+/**
+ * Exception handler for bad request exceptions.
+ */
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
 @AllArgsConstructor
@@ -22,6 +25,13 @@ import java.util.Locale;
 public class BadRequestExceptionHandler {
     private final MessageSource messageSource;
 
+    /**
+     * Handles BusinessBadRequestException and returns a formatted response.
+     *
+     * @param e      the exception
+     * @param locale the locale for message translation
+     * @return ResponseEntity with error details
+     */
     @ExceptionHandler(BusinessBadRequestException.class)
     public ResponseEntity<RestAPIResponse>
             badRequestExceptionHandler(BusinessBadRequestException e, Locale locale) {
@@ -47,6 +57,12 @@ public class BadRequestExceptionHandler {
         log.warn("BadRequest: {}", message);
     }
 
+    /**
+     * Handles missing required request parameters.
+     *
+     * @param e the exception
+     * @return ResponseEntity with error details
+     */
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<RestAPIResponse> missingRequiredParam(MissingServletRequestParameterException e) {
         String messageName = e.getMessage();

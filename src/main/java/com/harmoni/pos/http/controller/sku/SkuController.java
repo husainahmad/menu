@@ -12,15 +12,23 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for managing SKU entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/sku")
-
 public class SkuController {
 
     private final SkuService skuService;
 
+    /**
+     * Creates a new SKU.
+     *
+     * @param skuDto the SKU data transfer object
+     * @return ResponseEntity with creation status
+     */
     @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody SkuAddDto skuDto) {
         int id = skuService.create(skuDto);
@@ -29,6 +37,12 @@ public class SkuController {
                 .builder().httpStatus(HttpStatus.CREATED.value()).build(), HttpStatus.CREATED);
     }
 
+    /**
+     * Deletes a SKU by its ID.
+     *
+     * @param id the SKU ID
+     * @return ResponseEntity with deletion status
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         skuService.deleteSku(id);
@@ -41,6 +55,13 @@ public class SkuController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.NO_CONTENT);
     }
 
+    /**
+     * Retrieves SKU price details by a list of IDs.
+     *
+     * @param authHeader the authorization header
+     * @param ids the list of SKU IDs
+     * @return ResponseEntity containing SKU price details
+     */
     @GetMapping("/price")
     public ResponseEntity<RestAPIResponse> getDetails(@RequestHeader("Authorization") String authHeader,
                                                       @RequestParam List<Integer> ids) {

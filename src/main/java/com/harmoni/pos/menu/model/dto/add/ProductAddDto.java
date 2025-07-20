@@ -9,13 +9,25 @@ import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
+/**
+ * Data transfer object for adding a new Product.
+ * Inherits properties from {@link ProductDto}.
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ProductAddDto extends ProductDto {
 
+    /**
+     * List of SKUs to be added with the product.
+     */
     @JsonProperty("skus")
     private @Valid List<SkuAddDto> skuDtos;
 
+    /**
+     * Converts this DTO to a Product entity.
+     *
+     * @return a Product entity with name and categoryId set
+     */
     public Product toProduct() {
         return new Product()
                 .setName(getName())

@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller for managing Service entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @Slf4j
@@ -18,6 +21,12 @@ public class ServiceController {
 
     private final ServiceService serviceService;
 
+    /**
+     * Creates a new Service.
+     *
+     * @param serviceDto the service data transfer object
+     * @return ResponseEntity with creation status
+     */
     @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ServiceDto serviceDto) {
 
@@ -27,6 +36,11 @@ public class ServiceController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves all Services with their sub-services.
+     *
+     * @return ResponseEntity containing all services
+     */
     @GetMapping("")
     public ResponseEntity<RestAPIResponse> get() {
 

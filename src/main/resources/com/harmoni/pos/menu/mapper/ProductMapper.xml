@@ -159,7 +159,8 @@
 
   <select id="selectByIds" resultMap="BaseResultMap">
     select
-    <include refid="Base_Column_List" />
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List"/>
     from products product
     left join categories category on category.id = product.category_id
     where 1=1

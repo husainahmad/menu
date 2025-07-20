@@ -10,14 +10,30 @@ import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
+/**
+ * Data transfer object for editing a Product.
+ * Inherits properties from {@link ProductDto}.
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ProductEditDto extends ProductDto {
+    /**
+     * The ID of the product to edit.
+     */
     @NotNull(message = "{validation.product.id.NotBlank}")
     private Integer id;
+
+    /**
+     * List of SKUs to edit with the product.
+     */
     @JsonProperty("skus")
     private @Valid List<SkuEditDto> skuDtos;
 
+    /**
+     * Converts this DTO to a Product entity.
+     *
+     * @return a Product entity with updated fields
+     */
     public Product toProduct() {
         return new Product()
                 .setId(id)

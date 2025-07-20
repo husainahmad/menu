@@ -7,10 +7,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * Exception handler for internal server errors.
+ */
 @RestControllerAdvice
 @Slf4j
 public class InternalServerExceptionHandler {
 
+    /**
+     * Handles all uncaught exceptions and returns a generic internal server error response.
+     *
+     * @param exception the exception
+     * @return ResponseEntity with error details
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RestAPIResponse> globalExceptionHandler(Exception exception) {
         log.error("FightBegun: {}", exception.getMessage());

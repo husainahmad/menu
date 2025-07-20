@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Locale;
 
+/**
+ * Exception handler for business operations where a resource is not found.
+ */
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
 @Slf4j
@@ -26,6 +29,13 @@ public class NotFoundRequestExceptionHandler {
         this.messageSource = messageSource;
     }
 
+    /**
+     * Handles {@link BusinessNotFoundRequestException} and returns a formatted not found response.
+     *
+     * @param e the exception thrown when a resource is not found
+     * @param locale the locale for message translation
+     * @return ResponseEntity with error details and HTTP status 400
+     */
     @ExceptionHandler(BusinessNotFoundRequestException.class)
     public ResponseEntity<RestAPIResponse>
             badRequestExceptionHandler(BusinessNotFoundRequestException e, Locale locale) {

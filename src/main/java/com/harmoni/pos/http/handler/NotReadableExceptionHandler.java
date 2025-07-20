@@ -12,11 +12,21 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Locale;
 
+/**
+ * Exception handler for unreadable HTTP messages.
+ */
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RestControllerAdvice
 @Slf4j
 public class NotReadableExceptionHandler {
 
+    /**
+     * Handles {@link HttpMessageNotReadableException} and returns a bad request response.
+     *
+     * @param e the exception thrown when the HTTP message is not readable
+     * @param locale the locale for message translation
+     * @return ResponseEntity with error details and HTTP status 400
+     */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<RestAPIResponse>
     notReadableExceptionHandler(HttpMessageNotReadableException e, Locale locale) {

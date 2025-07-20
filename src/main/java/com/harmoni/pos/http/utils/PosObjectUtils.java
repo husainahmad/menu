@@ -3,14 +3,27 @@ package com.harmoni.pos.http.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 
- public final class PosObjectUtils {
+/**
+ * Utility class for object array operations.
+ */
+public final class PosObjectUtils {
 
-     private PosObjectUtils() {
-     }
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private PosObjectUtils() {
+    }
 
-     public static Object[] appendValue(Object[] obj, String value) {
+    /**
+     * Appends a string value to the given object array.
+     *
+     * @param obj the original object array
+     * @param value the string value to append
+     * @return a new object array with the value appended
+     */
+    public static Object[] appendValue(Object[] obj, String value) {
         ArrayList<Object> temp = new ArrayList<>(Arrays.asList(obj));
         temp.add(value);
         return temp.toArray();
-     }
+    }
 }

@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for managing Tier Menu entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @Slf4j
@@ -20,6 +23,13 @@ public class TierMenuController {
 
     private final TierMenuService tierMenuService;
 
+    /**
+     * Updates Tier Menus for a Tier.
+     *
+     * @param tierId the tier ID
+     * @param tierMenuEditDtos the list of tier menu edit data transfer objects
+     * @return ResponseEntity with update status
+     */
     @PutMapping("/{tierId}/menu")
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer tierId,
                                                   @Valid @RequestBody List<TierMenuEditDto> tierMenuEditDtos) {
@@ -27,6 +37,12 @@ public class TierMenuController {
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves Tier Menus by Brand ID.
+     *
+     * @param brandId the brand ID
+     * @return ResponseEntity containing tier menus for the brand
+     */
     @GetMapping("/menu")
     public ResponseEntity<RestAPIResponse> getByBrandId(@RequestParam(name = "brandId") Integer brandId) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

@@ -7,17 +7,37 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+/**
+ * Data transfer object for Tier.
+ * Used for transferring tier data between layers.
+ */
 @Data
 public class TierDto {
 
+    /**
+     * The name of the tier.
+     */
     @NotBlank(message = "{validation.tier.name.NotBlank}")
     @Size(min = 2, max = 45)
     private String name;
+
+    /**
+     * The brand ID associated with the tier.
+     */
     @NotNull(message = "{validation.tier.brandId.NotNull}")
     private Integer brandId;
+
+    /**
+     * The type of the tier.
+     */
     @NotNull(message = "{validation.tier.type.NotNull}")
     private TierType type;
 
+    /**
+     * Converts this DTO to a Tier entity.
+     *
+     * @return a Tier entity with name, brandId, and type set
+     */
     public Tier toTear() {
         return new Tier()
                 .setName(name)

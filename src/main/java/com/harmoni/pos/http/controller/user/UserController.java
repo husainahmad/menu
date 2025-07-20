@@ -13,6 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller for managing User entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @Slf4j
@@ -22,6 +25,14 @@ public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
+    /**
+     * Creates a new User.
+     *
+     * @param userDto the user data transfer object
+     * @param authHeader the authorization header
+     * @return ResponseEntity with creation status
+     * @throws Exception if an error occurs during creation
+     */
     @PostMapping("")
     public ResponseEntity<RestAPIResponse> createUser(@Valid @RequestBody UserDto userDto,
                                                       @RequestHeader("Authorization") String authHeader) throws Exception {
@@ -30,6 +41,15 @@ public class UserController {
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves Users by Chain ID with pagination and search.
+     *
+     * @param chainId the chain ID
+     * @param page the page number
+     * @param size the page size
+     * @param search the search term
+     * @return ResponseEntity containing users for the chain
+     */
     @GetMapping("/chain/{chainId}")
     public ResponseEntity<RestAPIResponse> getByCategoryBrand(@PathVariable Integer chainId,
                                                               @RequestParam(name = "page") int page,
@@ -45,6 +65,14 @@ public class UserController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Deletes a User by its ID.
+     *
+     * @param id the user ID
+     * @param authHeader the authorization header
+     * @return ResponseEntity with deletion status
+     * @throws Exception if an error occurs during deletion
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> deleteUser(@PathVariable Integer id, @RequestHeader("Authorization") String authHeader) throws Exception {
         int rowCount = this.userService.delete(jwtUtil.getTokenFromBearer(authHeader), id);
@@ -53,6 +81,15 @@ public class UserController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Updates a User by its ID.
+     *
+     * @param id the user ID
+     * @param authHeader the authorization header
+     * @param userEditDto the user edit data transfer object
+     * @return ResponseEntity with update status
+     * @throws Exception if an error occurs during update
+     */
     @PutMapping("/{id}")
     public ResponseEntity<RestAPIResponse> updateUser(@PathVariable Integer id, @RequestHeader("Authorization") String authHeader,
                     @Valid @RequestBody UserEditDto userEditDto) throws Exception {
@@ -62,6 +99,13 @@ public class UserController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves a User by username.
+     *
+     * @param username the username of the user
+     * @return ResponseEntity containing the user data
+     * @throws Exception if an error occurs during retrieval
+     */
     @GetMapping("/{username}")
     public ResponseEntity<RestAPIResponse> detailUser(@PathVariable String username) throws Exception {
         User user = this.userService.selectByUsername(username);

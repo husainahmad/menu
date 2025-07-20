@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST controller for managing SubService entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @Slf4j
@@ -21,6 +24,12 @@ public class SubServiceController {
 
     private final SubServiceService subServiceService;
 
+    /**
+     * Creates a new SubService.
+     *
+     * @param subServiceDto the subservice data transfer object
+     * @return ResponseEntity with creation status
+     */
     @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody SubServiceDto subServiceDto) {
         int id = subServiceService.create(subServiceDto);

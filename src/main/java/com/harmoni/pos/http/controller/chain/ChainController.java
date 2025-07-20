@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller for managing Chain entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/chain")
@@ -18,6 +21,12 @@ public class ChainController {
 
     private final ChainService chainService;
 
+    /**
+     * Creates a new Chain.
+     *
+     * @param chainDto the chain data transfer object
+     * @return ResponseEntity with creation status
+     */
     @PostMapping("")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ChainDto chainDto) {
         int id = chainService.create(chainDto);
@@ -25,6 +34,13 @@ public class ChainController {
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
 
+    /**
+     * Updates an existing Chain.
+     *
+     * @param chainDto the chain data transfer object
+     * @param id the chain ID
+     * @return ResponseEntity with update status
+     */
     @PutMapping("/{id}")
     public ResponseEntity<RestAPIResponse> update(@Valid @RequestBody ChainDto chainDto, @PathVariable Integer id) {
         chainService.update(chainDto, id);
@@ -36,6 +52,12 @@ public class ChainController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.ACCEPTED);
     }
 
+    /**
+     * Retrieves a Chain by its ID.
+     *
+     * @param id the chain ID
+     * @return ResponseEntity containing the chain data
+     */
     @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -45,6 +67,12 @@ public class ChainController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Deletes a Chain by its ID.
+     *
+     * @param id the chain ID
+     * @return ResponseEntity with deletion status
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -54,6 +82,11 @@ public class ChainController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all Chains.
+     *
+     * @return ResponseEntity containing the list of chains
+     */
     @GetMapping("")
     public ResponseEntity<RestAPIResponse> list() {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -63,6 +96,12 @@ public class ChainController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves Chains by Brand ID.
+     *
+     * @param id the brand ID
+     * @return ResponseEntity containing chains for the brand
+     */
     @GetMapping("/brand/{id}")
     public ResponseEntity<RestAPIResponse> listByBrandId(@PathVariable Integer id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

@@ -16,6 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+/**
+ * REST controller for managing Product Image entities.
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/product/image")
@@ -24,6 +27,13 @@ public class ProductImageController {
 
     private final ProductImageService productImageService;
 
+    /**
+     * Uploads a new Product Image.
+     *
+     * @param file the image file to upload
+     * @return ResponseEntity containing the created product image
+     * @throws IOException if an I/O error occurs
+     */
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RestAPIResponse> create(@RequestParam("file") MultipartFile file) throws IOException {
 
@@ -42,6 +52,14 @@ public class ProductImageController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
     }
 
+    /**
+     * Updates the Product Image for a given Product ID.
+     *
+     * @param productId the product ID
+     * @param file the image file to upload
+     * @return ResponseEntity containing the updated product image
+     * @throws IOException if an I/O error occurs
+     */
     @PutMapping(value = "/{productId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer productId,
                                                   @RequestParam("file") MultipartFile file) throws IOException {
@@ -62,6 +80,12 @@ public class ProductImageController {
         return new ResponseEntity<>(restAPIResponse, HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves a Product Image by its ID.
+     *
+     * @param id the product image ID
+     * @return ResponseEntity containing the product image
+     */
     @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
 
