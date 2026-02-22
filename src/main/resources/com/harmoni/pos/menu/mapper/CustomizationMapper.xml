@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.harmoni.pos.menu.mapper.CustomizationMapper">
+
+    <!-- ====== Base Result Map ====== -->
+    <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.Customization">
+        <id column="custom_id" property="id" />
+        <result column="custom_name" property="name" />
+        <result column="custom_selection_type" property="selectionType" />
+        <result column="custom_brand_id" property="brandId" />
+        <result column="custom_is_deleted" property="isDeleted" />
+        <result column="custom_is_required" property="isRequired" />
+        <result column="custom_created_at" property="createdAt" />
+        <result column="custom_updated_at" property="updatedAt" />
+        <result column="custom_deleted_at" property="deletedAt" />
+
+        <!-- Collection for customization options -->
+        <collection property="customizationOptions" ofType="com.harmoni.pos.menu.model.CustomizationOption">
+            <id column="custom_option_id" property="id"/>
+            <result column="custom_option_customization_id" property="customizationId"/>
+            <result column="custom_option_name" property="name"/>
+            <result column="custom_option_is_deleted" property="isDeleted"/>
+            <result column="custom_option_created_at" property="createdAt"/>
+            <result column="custom_option_updated_at" property="updatedAt"/>
+            <result column="custom_option_deleted_at" property="deletedAt"/>
+        </collection>
+    </resultMap>
+
+    <!-- ====== Base Columns ====== -->
+    <sql id="Base_Column_List">
+        custom.id as custom_id,
+        custom.name as custom_name,
+        custom.selection_type as custom_selection_type,
+        custom.brand_id as custom_brand_id,
+        custom.is_deleted as custom_is_deleted,
+        custom.is_required as custom_is_required,
+        custom.created_at as custom_created_at,
+        custom.updated_at as custom_updated_at,
+        custom.deleted_at as custom_deleted_at
+    </sql>
+
+    <sql id="Option_Column_List">
+        co.id as custom_option_id,
+        co.customization_id as custom_option_customization_id,
+        co.name as custom_option_name,
+        co.is_deleted as custom_option_is_deleted,
+        co.created_at as custom_option_created_at,
+        co.updated_at as custom_option_updated_at,
+        co.deleted_at as custom_option_deleted_at
+    </sql>
+
+    <!-- ====== Queries ====== -->
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="int">
+        SELECT
+        <include refid="Base_Column_List"/>,
+        <include refid="Option_Column_List"/>
+        FROM customizations custom
+        LEFT JOIN customization_options co ON co.customization_id = custom.id
+        WHERE custom.id = #{id}
+        AND (custom.is_deleted IS NULL OR custom.is_deleted = 0)
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>,
+        <include refid="Option_Column_List"/>
+        FROM customizations custom
+        LEFT JOIN customization_options co ON co.customization_id = custom.id
+        WHERE custom.is_deleted IS NULL OR custom.is_deleted = 0
+    </select>
+
+    <select id="selectByBrandId" resultMap="BaseResultMap" parameterType="int">
+        SELECT
+        <include refid="Base_Column_List"/>,
+        <include refid="Option_Column_List"/>
+        FROM customizations custom
+        LEFT JOIN customization_options co ON co.customization_id = custom.id
+        WHERE custom.brand_id = #{brandId}
+        AND (custom.is_deleted IS NULL OR custom.is_deleted = 0)
+    </select>
+
+    <!-- ====== Insert / Update / Delete ====== -->
+    <insert id="insert" parameterType="com.harmoni.pos.menu.model.Customization">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO customizations
+        (name, selection_type, brand_id, is_deleted, is_required, created_at, updated_at, deleted_at)
+        VALUES
+        (#{name}, #{selectionType}, #{brandId}, #{isDeleted}, #{isRequired}, #{createdAt}, #{updatedAt}, #{deletedAt})
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Customization">
+        UPDATE customizations
+        SET name = #{name},
+        selection_type = #{selectionType},
+        brand_id = #{brandId},
+        is_deleted = #{isDeleted},
+        is_required = #{isRequired},
+        created_at = #{createdAt},
+        updated_at = #{updatedAt},
+        deleted_at = #{deletedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteByPrimaryKey" parameterType="int">
+        DELETE FROM customizations
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

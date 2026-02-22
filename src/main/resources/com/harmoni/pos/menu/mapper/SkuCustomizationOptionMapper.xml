@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.harmoni.pos.menu.mapper.SkuCustomizationOptionMapper">
+
+    <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.SkuCustomizationOption">
+        <id column="sku_custom_opt_id" property="id"/>
+        <result column="sku_custom_opt_sku_id" property="skuId"/>
+        <result column="sku_custom_opt_customization_option_id" property="customizationOptionId"/>
+        <result column="sku_custom_opt_is_deleted" property="isDeleted"/>
+        <result column="sku_custom_opt_created_at" property="createdAt"/>
+        <result column="sku_custom_opt_updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.harmoni.pos.menu.model.SkuCustomizationOption"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO sku_customization_options
+        (sku_id, customization_option_id, is_deleted, created_at, updated_at)
+        VALUES
+        (#{skuId}, #{customizationOptionId}, #{isDeleted}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.SkuCustomizationOption">
+        UPDATE sku_customization_options AS sku_custom_opt
+        SET sku_custom_opt.sku_id = #{skuId},
+        sku_custom_opt.customization_option_id = #{customizationOptionId},
+        sku_custom_opt.is_deleted = #{isDeleted},
+        sku_custom_opt.created_at = #{createdAt},
+        sku_custom_opt.updated_at = #{updatedAt}
+        WHERE sku_custom_opt.id = #{id}
+    </update>
+
+    <delete id="deleteByPrimaryKey" parameterType="int">
+        DELETE FROM sku_customization_options AS sku_custom_opt
+        WHERE sku_custom_opt.id = #{id}
+    </delete>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="int">
+        SELECT
+        sku_custom_opt.id                     AS sku_custom_opt_id,
+        sku_custom_opt.sku_id                 AS sku_custom_opt_sku_id,
+        sku_custom_opt.customization_option_id AS sku_custom_opt_customization_option_id,
+        sku_custom_opt.is_deleted             AS sku_custom_opt_is_deleted,
+        sku_custom_opt.created_at             AS sku_custom_opt_created_at,
+        sku_custom_opt.updated_at             AS sku_custom_opt_updated_at
+        FROM sku_customization_options AS sku_custom_opt
+        WHERE sku_custom_opt.id = #{id}
+    </select>
+
+    <select id="selectBySkuId" resultMap="BaseResultMap" parameterType="int">
+        SELECT
+        sku_custom_opt.id                     AS sku_custom_opt_id,
+        sku_custom_opt.sku_id                 AS sku_custom_opt_sku_id,
+        sku_custom_opt.customization_option_id AS sku_custom_opt_customization_option_id,
+        sku_custom_opt.is_deleted             AS sku_custom_opt_is_deleted,
+        sku_custom_opt.created_at             AS sku_custom_opt_created_at,
+        sku_custom_opt.updated_at             AS sku_custom_opt_updated_at
+        FROM sku_customization_options AS sku_custom_opt
+        WHERE sku_custom_opt.sku_id = #{skuId}
+        AND (sku_custom_opt.is_deleted IS NULL OR sku_custom_opt.is_deleted = 0)
+    </select>
+
+</mapper>

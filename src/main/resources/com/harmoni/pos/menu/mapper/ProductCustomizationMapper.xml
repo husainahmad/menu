@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.harmoni.pos.menu.mapper.ProductCustomizationMapper">
+
+    <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.ProductCustomization">
+        <id column="id" property="id"/>
+        <result column="product_id" property="productId"/>
+        <result column="customization_id" property="customizationId"/>
+        <result column="is_active" property="isActive"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="deleted_at" property="deletedAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.harmoni.pos.menu.model.ProductCustomization">
+        INSERT INTO product_customizations
+        (product_id, customization_id, is_active, is_deleted, created_at, updated_at, deleted_at)
+        VALUES
+        (#{productId}, #{customizationId}, #{isActive}, #{isDeleted}, #{createdAt}, #{updatedAt}, #{deletedAt})
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.ProductCustomization">
+        UPDATE product_customizations
+        SET product_id = #{productId},
+        customization_id = #{customizationId},
+        is_active = #{isActive},
+        is_deleted = #{isDeleted},
+        created_at = #{createdAt},
+        updated_at = #{updatedAt},
+        deleted_at = #{deletedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteByPrimaryKey" parameterType="int">
+        DELETE FROM product_customizations WHERE id = #{id}
+    </delete>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="int">
+        SELECT * FROM product_customizations WHERE id = #{id}
+    </select>
+
+    <select id="selectByProductId" resultMap="BaseResultMap" parameterType="int">
+        SELECT * FROM product_customizations
+        WHERE product_id = #{productId}
+        AND (is_deleted IS NULL OR is_deleted = 0)
+    </select>
+
+</mapper>
