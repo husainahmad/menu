@@ -36,20 +36,20 @@ public interface CategoryService {
     /**
      * Retrieves a list of categories accessible to the authenticated user.
      *
-     * @param authToken the JWT or access token identifying the user
+     * @param username the username identifying the user
      * @return a list of categories
      */
-    List<Category> getListByUserAuth(String authToken);
+    List<Category> getListByUserAuth(String username);
 
     /**
      * Retrieves a paginated list of categories accessible to the authenticated user.
      *
-     * @param authToken the JWT or access token identifying the user
+     * @param username the username identifying the user
      * @param page      the page number (0-based)
      * @param size      the number of records per page
      * @return a map containing paginated category data (e.g., total count, current page items)
      */
-    Map<String, Object> listPaginated(String authToken, int page, int size);
+    Map<String, Object> listPaginated(String username, int page, int size);
 
     /**
      * Retrieves a list of categories associated with a specific brand.

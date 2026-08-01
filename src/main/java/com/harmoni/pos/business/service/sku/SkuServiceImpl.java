@@ -2,7 +2,6 @@ package com.harmoni.pos.business.service.sku;
 
 import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.business.service.user.UserService;
-import com.harmoni.pos.component.JwtUtil;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
 import com.harmoni.pos.http.utils.PosObjectUtils;
@@ -39,7 +38,6 @@ public class SkuServiceImpl implements SkuService {
     private final SqlSessionFactory sqlSessionFactory;
     private final SkuTierPriceService skuTierPriceService;
     private final UserService userService;
-    private final JwtUtil jwtUtil;
 
     /**
      * Creates a new SKU based on the given SKU DTO.
@@ -109,8 +107,8 @@ public class SkuServiceImpl implements SkuService {
      * @return list of SKUs with prices according to user's tier
      */
     @Override
-    public List<Sku> selectPriceByIds(String jwtToken, List<Integer> ids) {
-        User user = userService.selectByAuthToken(jwtToken);
+    public List<Sku> selectPriceByIds(String username, List<Integer> ids) {
+        User user = userService.selectByUsername(username);
         return this.skuMapper.selectPriceByIdsAndTierId(ids, user.getStore().getTierPriceId());
     }
 

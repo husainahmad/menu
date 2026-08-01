@@ -2,6 +2,7 @@ package com.harmoni.pos.http.controller.product;
 
 import com.harmoni.pos.business.service.product.ProductService;
 import com.harmoni.pos.business.service.product.ProductSkuService;
+import com.harmoni.pos.component.JwtUtil;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.Product;
 import com.harmoni.pos.menu.model.dto.add.ProductAddDto;
@@ -27,6 +28,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final ProductSkuService productSkuService;
+    private final JwtUtil jwtUtil;
 
     /**
      * Creates a new Product.
@@ -62,17 +64,17 @@ public class ProductController {
     /**
      * Retrieves Products by a list of IDs.
      *
-     * @param authHeader the authorization header
+     * @param username the username
      * @param ids the list of product IDs
      * @return ResponseEntity containing the products
      */
     @GetMapping("")
-    public ResponseEntity<RestAPIResponse> getByIds(@RequestHeader("Authorization") String authHeader,
+    public ResponseEntity<RestAPIResponse> getByIds(@RequestHeader("X-Username") String username,
                                                     @RequestParam List<Integer> ids) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(this.productService.getByList(ids, authHeader.substring(7)))
+                .data(this.productService.getByList(ids, username))
                 .error(null)
                 .build();
 
@@ -138,17 +140,17 @@ public class ProductController {
     /**
      * Retrieves Products by Category ID with price information.
      *
-     * @param authHeader the authorization header
+     * @param username the username
      * @param id the category ID
      * @return ResponseEntity containing products with price for the category
      */
     @GetMapping("/category/{id}/price")
-    public ResponseEntity<RestAPIResponse> getByCategoryPrice(@RequestHeader("Authorization") String authHeader,
+    public ResponseEntity<RestAPIResponse> getByCategoryPrice(@RequestHeader("X-Username") String username,
                                                               @PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(this.productService.selectByCategoryPrice(authHeader, id))
+                .data(this.productService.selectByCategoryPrice(username, id))
                 .error(null)
                 .build();
 

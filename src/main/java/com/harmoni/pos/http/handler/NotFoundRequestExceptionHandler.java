@@ -30,15 +30,16 @@ public class NotFoundRequestExceptionHandler {
     }
 
     /**
-     * Handles {@link BusinessNotFoundRequestException} and returns a formatted not found response.
+     * Handles {@link BusinessNotFoundRequestException} and returns
+     * a localized HTTP 404 response.
      *
-     * @param e the exception thrown when a resource is not found
-     * @param locale the locale for message translation
-     * @return ResponseEntity with error details and HTTP status 400
+     * @param e      the exception containing the message code and arguments
+     * @param locale the request locale for message translation
+     * @return a 404 NOT_FOUND response with the error message
      */
     @ExceptionHandler(BusinessNotFoundRequestException.class)
-    public ResponseEntity<RestAPIResponse>
-            badRequestExceptionHandler(BusinessNotFoundRequestException e, Locale locale) {
+    public ResponseEntity<RestAPIResponse> notFoundExceptionHandler(
+            BusinessNotFoundRequestException e, Locale locale) {
 
         String messageName = e.getMessage();
         Object[] args = e.getArgs();
@@ -48,12 +49,12 @@ public class NotFoundRequestExceptionHandler {
         log.warn("NotFoundRequest: {}", message);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .httpStatus(HttpStatus.BAD_REQUEST.value())
+                .httpStatus(HttpStatus.NOT_FOUND.value())
                 .timeStamp(System.currentTimeMillis())
                 .data(null)
                 .error(message)
                 .build();
 
-        return new ResponseEntity<>(restAPIResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.NOT_FOUND);
     }
 }

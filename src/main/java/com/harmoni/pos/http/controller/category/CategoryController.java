@@ -37,18 +37,18 @@ public class CategoryController {
     /**
      * Retrieves paginated list of Categories.
      *
-     * @param authHeader the authorization header
+     * @param username the username
      * @param page the page number
      * @param size the page size
      * @return ResponseEntity containing paginated categories
      */
     @GetMapping("")
-    public ResponseEntity<RestAPIResponse> list(@RequestHeader("Authorization") String authHeader,
+    public ResponseEntity<RestAPIResponse> list(@RequestHeader("X-Username") String username,
                                                 @RequestParam(name = "page") int page,
                                                 @RequestParam(name = "size") int size) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(categoryService.listPaginated(authHeader, page, size))
+                .data(categoryService.listPaginated(username, page, size))
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
@@ -109,14 +109,14 @@ public class CategoryController {
     /**
      * Retrieves all Categories accessible by the authenticated user.
      *
-     * @param authHeader the authorization header
+     * @param username the username
      * @return ResponseEntity containing categories for the user
      */
     @GetMapping("/tier")
-    public ResponseEntity<RestAPIResponse> getAll(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<RestAPIResponse> getAll(@RequestHeader("X-Username") String username) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(categoryService.getListByUserAuth(authHeader))
+                .data(categoryService.getListByUserAuth(username))
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }

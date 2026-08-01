@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /**
  * Main class for launching the Harmoni POS Menu microservice application.
@@ -17,6 +18,7 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
  *
  * <p>It also enables MyBatis encryption via the {@link EnableMybatisEncryption} annotation.
  */
+@ConfigurationPropertiesScan
 @EnableMybatisEncryption
 @SpringBootApplication(exclude = {
 		SecurityAutoConfiguration.class,

@@ -68,12 +68,12 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * Retrieves a list of categories based on the authenticated user's tier.
      *
-     * @param authToken the JWT token of the user
+     * @param username the username
      * @return list of accessible categories
      */
     @Override
-    public List<Category> getListByUserAuth(String authToken) {
-        User user = userService.selectByAuthToken(authToken.substring(7));
+    public List<Category> getListByUserAuth(String username) {
+        User user = userService.selectByUsername(username);
         StoreTier storeTier = storeTierService.selectByStoreId(user.getStore().getId());
         List<TierMenu> tierMenus = tierMenuService.getMenusByTierId(storeTier.getTierMenuId());
         return tierMenus.stream()
@@ -86,15 +86,15 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * Retrieves a paginated list of categories for the brand associated with the authenticated user.
      *
-     * @param authToken the JWT token
+     * @param username the username
      * @param page      page number
      * @param size      page size
      * @return paginated map containing category data and metadata
      */
     @Override
-    public Map<String, Object> listPaginated(String authToken, int page, int size) {
+    public Map<String, Object> listPaginated(String username, int page, int size) {
         PaginationUtils.applyPagination(page, size);
-        User user = userService.selectByAuthToken(authToken.substring(7));
+        User user = userService.selectByUsername(username);
         Map<String, Object> paginationData = new HashMap<>();
         PageInfo<Category> categoryPageInfo = new PageInfo<>(this.selectByBrandId(user.getStore().getChain().getBrandId()));
 

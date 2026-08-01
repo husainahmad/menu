@@ -16,20 +16,20 @@ public interface UserService {
     /**
      * Inserts a new user.
      *
-     * @param token the authentication token of the requester
+     * @param username the username of the requester
      * @param userDto the data transfer object containing user details
      * @return the ID of the inserted user
      */
-    int insert(String token, UserDto userDto);
+    int insert(String username, UserDto userDto);
 
     /**
      * Updates an existing user.
      *
-     * @param token the authentication token of the requester
+     * @param username the username of the requester
      * @param userEditDto the data transfer object containing updated user details
      * @return the number of records updated
      */
-    int update(String token, UserEditDto userEditDto);
+    int update(String username, UserEditDto userEditDto);
 
     /**
      * Retrieves a user by their ID.
@@ -42,11 +42,11 @@ public interface UserService {
     /**
      * Deletes a user by their ID.
      *
-     * @param token the authentication token of the requester
+     * @param username the username of the requester
      * @param id the ID of the user to delete
      * @return the number of records deleted
      */
-    int delete(String token, Integer id);
+    int delete(String username, Integer id);
 
     /**
      * Retrieves a user by their username.

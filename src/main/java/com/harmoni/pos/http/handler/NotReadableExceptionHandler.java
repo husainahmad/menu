@@ -21,21 +21,23 @@ import java.util.Locale;
 public class NotReadableExceptionHandler {
 
     /**
-     * Handles {@link HttpMessageNotReadableException} and returns a bad request response.
+     * Handles exceptions where the HTTP message is not readable,
+     * usually due to malformed JSON or incorrect content types.
      *
-     * @param e the exception thrown when the HTTP message is not readable
-     * @param locale the locale for message translation
-     * @return ResponseEntity with error details and HTTP status 400
+     * @param e      the exception
+     * @param locale the current locale (not used but available for future enhancements)
+     * @return a BAD_REQUEST (400) response with a generic error message
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<RestAPIResponse>
-    notReadableExceptionHandler(HttpMessageNotReadableException e, Locale locale) {
+    public ResponseEntity<RestAPIResponse> notReadableExceptionHandler(
+            HttpMessageNotReadableException e, Locale locale) {
 
-        log.error("NotReadable:", e);
+        log.error("Malformed JSON request", e);
+
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.BAD_REQUEST.value())
                 .timeStamp(System.currentTimeMillis())
-                .error(HttpStatus.BAD_REQUEST)
+                .error("Malformed JSON request")
                 .data(null)
                 .build();
 

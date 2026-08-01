@@ -1,10 +1,11 @@
 package com.harmoni.pos.component;
 
+import com.harmoni.pos.config.JwtProperties;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -14,16 +15,11 @@ import java.util.Date;
  * Utility class for handling JWT operations such as token generation, extraction, and validation.
  */
 @Getter
+@RequiredArgsConstructor
 @Component
 public class JwtUtil {
 
-    private static final long EXPIRATION_TIME = 86400000; // 1 day
-
-    @Value("${harmoni.menu.jwt.secret}")
-    private String secretKey;
-
-    @Value("${harmoni.menu.jwt.expired.time}")
-    private long expiredTime;
+    private final JwtProperties jwtProperties;
 
     /**
      * Generates a JWT token for the specified username.
@@ -36,8 +32,8 @@ public class JwtUtil {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusMillis(expiredTime)))
-                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
+                .expiration(Date.from(now.plusMillis(jwtProperties.getExpiredTime())))
+                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret())))
                 .compact();
     }
 
@@ -49,7 +45,7 @@ public class JwtUtil {
      */
     public String extractUsername(String token) {
         return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
+                .verifyWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret())))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
@@ -75,7 +71,7 @@ public class JwtUtil {
      */
     private boolean isTokenExpired(String token) {
         return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
+                .verifyWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret())))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()

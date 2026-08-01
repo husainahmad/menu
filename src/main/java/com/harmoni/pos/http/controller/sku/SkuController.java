@@ -58,15 +58,15 @@ public class SkuController {
     /**
      * Retrieves SKU price details by a list of IDs.
      *
-     * @param authHeader the authorization header
+     * @param username the username
      * @param ids the list of SKU IDs
      * @return ResponseEntity containing SKU price details
      */
     @GetMapping("/price")
-    public ResponseEntity<RestAPIResponse> getDetails(@RequestHeader("Authorization") String authHeader,
+    public ResponseEntity<RestAPIResponse> getDetails(@RequestHeader("X-Username") String username,
                                                       @RequestParam List<Integer> ids) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .data(skuService.selectPriceByIds(authHeader.substring(7), ids))
+                .data(skuService.selectPriceByIds(username, ids))
                 .httpStatus(HttpStatus.NO_CONTENT.value()).build();
 
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);

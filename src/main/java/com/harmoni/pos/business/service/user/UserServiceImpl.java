@@ -53,8 +53,8 @@ public class UserServiceImpl implements UserService {
      * @throws BusinessNotFoundRequestException if authentication fails or user already exists
      */
     @Override
-    public int insert(String token, UserDto userDto) {
-        if (authService.create(token, userDto)==0) {
+    public int insert(String username, UserDto userDto) {
+        if (authService.create(username, userDto)==0) {
             throw new BusinessNotFoundRequestException(AUTH_FAILED_EXCEPTION, null);
         }
         if ((ObjectUtils.isNotEmpty(this.selectByUsernameAuthIdAndStoreId(userDto.getUsername(), userDto.getAuthId(),
@@ -74,12 +74,12 @@ public class UserServiceImpl implements UserService {
      * @throws BusinessNotFoundRequestException if authentication fails
      */
     @Override
-    public int update(String token, UserEditDto userEditDto) {
+    public int update(String username, UserEditDto userEditDto) {
         User user = selectById(userEditDto.getId());
         user.setUsername(userEditDto.getUsername());
         user.setStoreId(userEditDto.getStoreId());
         user.setAuthId(userEditDto.getAuthId());
-        if (authService.update(token, userEditDto)==0) {
+        if (authService.update(username, userEditDto)==0) {
             throw new BusinessNotFoundRequestException(AUTH_FAILED_EXCEPTION, null);
         }
         return userMapper.updateByPrimaryKey(user);
@@ -110,12 +110,12 @@ public class UserServiceImpl implements UserService {
      * @throws BusinessNotFoundRequestException if the user is not found or authentication fails
      */
     @Override
-    public int delete(String token, Integer id) {
+    public int delete(String username, Integer id) {
         User user = userMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(user)) {
             throw new BusinessNotFoundRequestException(USER_NOT_FOUND_EXCEPTION, null);
         }
-        if (authService.delete(token, user.getUsername())==0) {
+        if (authService.delete(username, user.getUsername())==0) {
             throw new BusinessNotFoundRequestException(AUTH_FAILED_EXCEPTION, null);
         }
         return userMapper.deleteByPrimaryKey(user.getId());

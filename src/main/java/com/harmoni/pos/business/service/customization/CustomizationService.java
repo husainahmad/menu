@@ -11,7 +11,7 @@ import java.util.Optional;
  */
 public interface CustomizationService {
 
-    Map<String, Object> listPaginated(String authToken, int page, int size);
+    Map<String, Object> listPaginated(String username, int page, int size);
 
     /**
      * Retrieves a customization by its ID.
@@ -35,7 +35,7 @@ public interface CustomizationService {
      * @param customization the customization to create
      * @return int if inserted successfully
      */
-    int createCustomization(String authHeader, Customization customization);
+    int createCustomization(String username, Customization customization);
 
     /**
      * Updates an existing customization.

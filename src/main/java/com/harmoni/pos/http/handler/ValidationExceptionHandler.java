@@ -24,34 +24,45 @@ import java.util.List;
 public class ValidationExceptionHandler {
 
     /**
-     * Handles MethodArgumentNotValidException and returns a formatted validation error response.
+     * Handles exceptions thrown when method arguments annotated with {@code @Valid}
+     * fail validation during request body binding.
      *
-     * @param e the exception
-     * @return ResponseEntity with error details
+     * @param e the {@link MethodArgumentNotValidException} containing details about validation failures
+     * @return a {@link ResponseEntity} containing a {@link RestAPIResponse} with a list of validation error messages
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<RestAPIResponse>
-    handleValidationException(MethodArgumentNotValidException e) {
+    public ResponseEntity<RestAPIResponse> handleValidationException(MethodArgumentNotValidException e) {
+        List<String> errors = getErrors(e);
 
-        List<String> errors = new ArrayList<>();
-
-        for (FieldError fieldError: e.getBindingResult().getFieldErrors()) {
-            errors.add(fieldError.getField() + ">" + fieldError.getDefaultMessage());
-        }
-
-        for (ObjectError objectError: e.getBindingResult().getGlobalErrors()) {
-            errors.add(objectError.getObjectName() + ">" + objectError.getDefaultMessage());
-        }
-
-        RestAPIResponse genericResponse = RestAPIResponse.builder()
+        RestAPIResponse validationResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.BAD_REQUEST.value())
                 .timeStamp(System.currentTimeMillis())
                 .data(null)
                 .error(errors)
                 .build();
 
-        log.warn("Validation: {}", e.getMessage());
+        log.warn("Validation failed: {}", errors);
 
-        return new ResponseEntity<>(genericResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(validationResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Extracts field-level and global-level validation errors from the exception.
+     *
+     * @param e the exception containing validation errors
+     * @return a list of formatted error messages
+     */
+    private static List<String> getErrors(MethodArgumentNotValidException e) {
+        List<String> errors = new ArrayList<>();
+
+        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
+            errors.add(String.format("%s: %s", fieldError.getField(), fieldError.getDefaultMessage()));
+        }
+
+        for (ObjectError objectError : e.getBindingResult().getGlobalErrors()) {
+            errors.add(String.format("%s: %s", objectError.getObjectName(), objectError.getDefaultMessage()));
+        }
+
+        return errors;
     }
 }

@@ -28,8 +28,8 @@ public class CustomizationController {
      * @return ResponseEntity with creation result
      */
     @PostMapping("")
-    public ResponseEntity<RestAPIResponse> create(@RequestHeader("Authorization") String authHeader, @Valid @RequestBody CustomizationDto customizationDto) {
-        int id = customizationService.createCustomization(authHeader, customizationDto.toEntity());
+    public ResponseEntity<RestAPIResponse> create(@RequestHeader("X-Username") String username, @Valid @RequestBody CustomizationDto customizationDto) {
+        int id = customizationService.createCustomization(username, customizationDto.toEntity());
         log.debug("Customization created with ID: {}", id);
         return new ResponseEntity<>(RestAPIResponse.builder().httpStatus(HttpStatus.CREATED.value()).build(), HttpStatus.CREATED);
     }
@@ -37,19 +37,19 @@ public class CustomizationController {
     /**
      * Retrieves a paginated list of customizations.
      *
-     * @param authHeader the authorization header
+     * @param username  the username
      * @param page       the page number
      * @param size       the page size
      * @return ResponseEntity with paginated list
      */
     @GetMapping("")
-    public ResponseEntity<RestAPIResponse> list(@RequestHeader("Authorization") String authHeader,
+    public ResponseEntity<RestAPIResponse> list(@RequestHeader("X-Username") String username,
                                                 @RequestParam(name = "page") int page,
                                                 @RequestParam(name = "size") int size) {
         return new ResponseEntity<>(
                 RestAPIResponse.builder()
                         .httpStatus(HttpStatus.OK.value())
-                        .data(customizationService.listPaginated(authHeader, page, size))
+                        .data(customizationService.listPaginated(username, page, size))
                         .build(),
                 HttpStatus.OK
         );

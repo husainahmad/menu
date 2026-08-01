@@ -24,11 +24,11 @@ public interface ProductService {
     /**
      * Retrieves products by category ID and user-based pricing context using the JWT token.
      *
-     * @param authHeader JWT token header (usually "Bearer <token>")
+     * @param username the username
      * @param categoryId the category ID to filter products
      * @return list of products with contextual pricing
      */
-    List<Product> selectByCategoryPrice(String authHeader, Integer categoryId);
+    List<Product> selectByCategoryPrice(String username, Integer categoryId);
 
     /**
      * Retrieves products by category ID.
@@ -65,7 +65,7 @@ public interface ProductService {
      * @param jwtToken JWT token for user-specific data enrichment
      * @return list of products
      */
-    List<Product> getByList(List<Integer> ids, String jwtToken);
+    List<Product> getByList(List<Integer> ids, String username);
 
     /**
      * Validates if a product name already exists in a category (for uniqueness check).

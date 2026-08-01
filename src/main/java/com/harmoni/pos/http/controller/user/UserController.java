@@ -1,7 +1,6 @@
 package com.harmoni.pos.http.controller.user;
 
 import com.harmoni.pos.business.service.user.UserService;
-import com.harmoni.pos.component.JwtUtil;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.User;
 import com.harmoni.pos.menu.model.dto.UserDto;
@@ -23,20 +22,19 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final JwtUtil jwtUtil;
 
     /**
      * Creates a new User.
      *
      * @param userDto the user data transfer object
-     * @param authHeader the authorization header
+     * @param username the username
      * @return ResponseEntity with creation status
      * @throws Exception if an error occurs during creation
      */
     @PostMapping("")
     public ResponseEntity<RestAPIResponse> createUser(@Valid @RequestBody UserDto userDto,
-                                                      @RequestHeader("Authorization") String authHeader) throws Exception {
-        int id = this.userService.insert(jwtUtil.getTokenFromBearer(authHeader), userDto);
+                                                      @RequestHeader("X-Username") String username) throws Exception {
+        int id = this.userService.insert(username, userDto);
         log.debug("tier created {} ", id);
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
@@ -69,13 +67,13 @@ public class UserController {
      * Deletes a User by its ID.
      *
      * @param id the user ID
-     * @param authHeader the authorization header
+     * @param username the username
      * @return ResponseEntity with deletion status
      * @throws Exception if an error occurs during deletion
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<RestAPIResponse> deleteUser(@PathVariable Integer id, @RequestHeader("Authorization") String authHeader) throws Exception {
-        int rowCount = this.userService.delete(jwtUtil.getTokenFromBearer(authHeader), id);
+    public ResponseEntity<RestAPIResponse> deleteUser(@PathVariable Integer id, @RequestHeader("X-Username") String username) throws Exception {
+        int rowCount = this.userService.delete(username, id);
         log.debug("user deleted {} ", rowCount);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
@@ -85,15 +83,15 @@ public class UserController {
      * Updates a User by its ID.
      *
      * @param id the user ID
-     * @param authHeader the authorization header
+     * @param username the username
      * @param userEditDto the user edit data transfer object
      * @return ResponseEntity with update status
      * @throws Exception if an error occurs during update
      */
     @PutMapping("/{id}")
-    public ResponseEntity<RestAPIResponse> updateUser(@PathVariable Integer id, @RequestHeader("Authorization") String authHeader,
+    public ResponseEntity<RestAPIResponse> updateUser(@PathVariable Integer id, @RequestHeader("X-Username") String username,
                     @Valid @RequestBody UserEditDto userEditDto) throws Exception {
-        int rowCount = this.userService.update(jwtUtil.getTokenFromBearer(authHeader), userEditDto);
+        int rowCount = this.userService.update(username, userEditDto);
         log.debug("user updated {} ", rowCount);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);

@@ -38,9 +38,9 @@ public class CustomizationServiceImpl implements CustomizationService {
      * @return a map containing pagination metadata and the list of customizations
      */
     @Override
-    public Map<String, Object> listPaginated(String authToken, int page, int size) {
+    public Map<String, Object> listPaginated(String username, int page, int size) {
         PaginationUtils.applyPagination(page, size);
-        User user = userService.selectByAuthToken(authToken.substring(7));
+        User user = userService.selectByUsername(username);
         Map<String, Object> paginationData = new HashMap<>();
         PageInfo<Customization> categoryPageInfo = new PageInfo<>(getCustomizationsByBrandId(user.getStore().getChain().getBrandId()));
 
@@ -82,8 +82,8 @@ public class CustomizationServiceImpl implements CustomizationService {
      * @return int if creation was successful, 0 otherwise
      */
     @Override
-    public int createCustomization(String authHeader, Customization customization) {
-        User user = userService.selectByAuthToken(authHeader.substring(7));
+    public int createCustomization(String username, Customization customization) {
+        User user = userService.selectByUsername(username);
         customization.setBrandId(user.getStore().getChain().getBrandId());
         customizationMapper.insert(customization);
         return customizationOptionService.createBulk(customization.getCustomizationOptions(), customization.getId());

@@ -48,13 +48,13 @@ public interface SkuService {
 
     /**
      * Retrieves a list of SKUs by their IDs with pricing information,
-     * filtered or adjusted based on the provided JWT token (user context).
+     * filtered or adjusted based on the provided username (user context).
      *
-     * @param jwtToken JWT token representing user authentication
+     * @param username the username
      * @param ids      list of SKU IDs
      * @return list of SKUs with pricing details
      */
-    List<Sku> selectPriceByIds(String jwtToken, List<Integer> ids);
+    List<Sku> selectPriceByIds(String username, List<Integer> ids);
 
     /**
      * Compares the given list of SKUs with a list of IDs,

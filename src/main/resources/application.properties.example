@@ -1,8 +1,9 @@
-server.port=8080
+server.port=8082
+server.address=127.0.0.1
 #Menu configuration properties
 
 harmoni.user.db=pos-user
-harmoni.user.password=forlearn27
+harmoni.user.password=forlearn27!
 
 spring.datasource.menu.mysql.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.datasource.menu.mysql.jdbc-url=jdbc:mysql://localhost:3306/db-harmoni-master?rewriteBatchedStatements=true
@@ -45,7 +46,10 @@ logging.level.org.apache.ibatis=DEBUG
 logging.level.com.harmoni=DEBUG
 
 application.menu.regex=^[a-zA-Z0-9_!#$%&?*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$
-auth.url=http://localhost:8282
+auth.url=http://localhost:8080
 auth.url.register=${auth.url}/api/v1/user
 auth.url.delete=${auth.url}/api/v1/user
 auth.url.update=${auth.url}/api/v1/user
+
+application.properties
+application.yml

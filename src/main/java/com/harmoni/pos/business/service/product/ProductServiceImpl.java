@@ -66,13 +66,13 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Retrieves a list of products in a specific category with pricing based on user's store tier.
      *
-     * @param authHeader JWT token in Authorization header
+     * @param username the username
      * @param categoryId the ID of the category
      * @return list of {@link Product} with pricing information
      */
     @Override
-    public List<Product> selectByCategoryPrice(String authHeader, Integer categoryId) {
-        User user = userService.selectByAuthToken(authHeader.substring(7));
+    public List<Product> selectByCategoryPrice(String username, Integer categoryId) {
+        User user = userService.selectByUsername(username);
         StoreTier storeTier = storeTierService.selectByStoreId(user.getStoreId());
         return productMapper.selectByCategoryIdPrice(categoryId, storeTier.getTierPriceId());
     }
@@ -150,8 +150,8 @@ public class ProductServiceImpl implements ProductService {
      * @return list of {@link Product}
      */
     @Override
-    public List<Product> getByList(List<Integer> ids, String jwtToken) {
-        User user = this.userService.selectByAuthToken(jwtToken);
+    public List<Product> getByList(List<Integer> ids, String username) {
+        User user = this.userService.selectByUsername(username);
         return productMapper.selectByIds(ids, user.getStore().getChain().getBrandId());
     }
 
