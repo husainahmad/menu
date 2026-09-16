@@ -26,6 +26,14 @@ public interface CustomizationOptionService {
     List<CustomizationOption> getByCustomizationId(Integer customizationId);
 
     /**
+     * Gets all options for a list of customization IDs.
+     *
+     * @param customizationIds the parent customization IDs
+     * @return list of options
+     */
+    List<CustomizationOption> getByCustomizationIds(List<Integer> customizationIds);
+
+    /**
      * Creates a new customization option.
      *
      * @param option the option to create

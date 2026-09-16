@@ -100,4 +100,11 @@ public interface ProductService {
      * @return number of rows affected
      */
     int delete(Integer id);
+
+    /**
+     * Search products by product name LIKE (for AI).
+     * @param productName the product name keyword
+     * @return list of matching products
+     */
+    List<Product> searchByProductName(String productName);
 }

@@ -2,6 +2,7 @@ package com.harmoni.pos.menu.mapper;
 
 import com.harmoni.pos.menu.model.Category;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -60,5 +61,12 @@ public interface CategoryMapper {
      * @return number of rows affected
      */
     int updateByPrimaryKey(Category row);
+
+    /**
+     * Search categories by name LIKE (for AI).
+     * @param categoryName the category name keyword
+     * @return list of matching categories
+     */
+    List<Category> searchByCategoryName(@Param("categoryName") String categoryName);
 
 }

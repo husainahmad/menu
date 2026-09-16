@@ -93,8 +93,8 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public Map<String, Object> listPaginated(String username, int page, int size) {
-        PaginationUtils.applyPagination(page, size);
         User user = userService.selectByUsername(username);
+        PaginationUtils.applyPagination(page, size);
         Map<String, Object> paginationData = new HashMap<>();
         PageInfo<Category> categoryPageInfo = new PageInfo<>(this.selectByBrandId(user.getStore().getChain().getBrandId()));
 
@@ -132,5 +132,11 @@ public class CategoryServiceImpl implements CategoryService {
             throw new BusinessBadRequestException("exception.category.id.badRequest.notFound", null);
         }
         return category;
+    }
+
+    @Override
+    public List<Category> searchByCategoryName(String categoryName) {
+        if (categoryName == null || categoryName.isBlank()) return List.of();
+        return categoryMapper.searchByCategoryName(categoryName.trim());
     }
 }

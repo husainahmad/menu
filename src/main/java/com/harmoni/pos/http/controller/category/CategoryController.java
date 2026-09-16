@@ -59,8 +59,8 @@ public class CategoryController {
      * @param id the category ID
      * @return ResponseEntity containing the category data
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
+    @GetMapping("/{id:\\d+}")
+    public ResponseEntity<RestAPIResponse> get(@PathVariable("id") Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -77,7 +77,7 @@ public class CategoryController {
      * @param id the category ID
      * @return ResponseEntity with deletion status
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -102,6 +102,19 @@ public class CategoryController {
                 .httpStatus(HttpStatus.OK.value())
                 .data(this.categoryService.selectByBrandId(brandId))
                 .error(null)
+                .build();
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    /**
+     * Search categories by name LIKE (for AI).
+     * GET /api/v1/category/search?categoryName=Coffee
+     */
+    @GetMapping("/search")
+    public ResponseEntity<RestAPIResponse> search(@RequestParam String categoryName) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(categoryService.searchByCategoryName(categoryName))
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }

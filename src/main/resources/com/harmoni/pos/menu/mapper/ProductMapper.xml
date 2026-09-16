@@ -139,11 +139,9 @@
   <select id="selectByCategoryIdBrandId" resultMap="BaseResultMap">
       select
       <include refid="Base_Column_List" />,
-      <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List"/>,
-      <include refid="com.harmoni.pos.menu.mapper.SkuMapper.Base_Column_List"/>
+      <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List"/>
       from products product
       left join categories category on category.id = product.category_id
-      left join skus sku on sku.product_id = product.id
       where 1=1
       and (product.is_deleted = 0 or product.is_deleted is null)
       <if test="categoryId != -1">
@@ -175,6 +173,22 @@
         #{id}
       </foreach>
     </if>
+  </select>
+
+  <select id="searchByProductName" resultMap="BaseResultMapSkuPriceAsList">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.SkuMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.SkuTierPriceMapper.Base_Column_List"/>
+    from products product
+      left join categories category on category.id = product.category_id
+      left join skus sku on sku.product_id = product.id
+      left join sku_tier_prices stp on stp.sku_id = sku.id
+    where (product.is_deleted = 0 or product.is_deleted is null)
+      and (sku.is_deleted = 0 or sku.is_deleted is null)
+      and (stp.is_deleted = 0 or stp.is_deleted is null)
+      and product.name like concat('%', #{productName,jdbcType=VARCHAR}, '%')
   </select>
 
   <update id="deleteByPrimaryKey">

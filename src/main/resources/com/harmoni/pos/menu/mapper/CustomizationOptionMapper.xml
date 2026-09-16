@@ -81,4 +81,22 @@
         AND (custom_option.is_deleted IS NULL OR custom_option.is_deleted = 0)
     </select>
 
+    <select id="selectByCustomizationIds" resultMap="BaseResultMap">
+        SELECT
+        custom_option.id            AS custom_option_id,
+        custom_option.customization_id AS custom_option_customization_id,
+        custom_option.name          AS custom_option_name,
+        custom_option.created_at    AS custom_option_created_at,
+        custom_option.updated_at    AS custom_option_updated_at,
+        custom_option.deleted_at    AS custom_option_deleted_at,
+        custom_option.is_deleted    AS custom_option_is_deleted
+        FROM customization_options AS custom_option
+        WHERE (custom_option.is_deleted IS NULL OR custom_option.is_deleted = 0)
+        AND custom_option.customization_id in
+        <foreach item="customizationId" index="index" collection="customizationIds"
+                 open="(" separator="," close=")" nullable="true">
+            #{customizationId}
+        </foreach>
+    </select>
+
 </mapper>

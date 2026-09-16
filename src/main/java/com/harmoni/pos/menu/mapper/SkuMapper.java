@@ -82,6 +82,13 @@ public interface SkuMapper {
     List<Sku> selectByIds(List<Integer> ids);
 
     /**
+     * Selects Skus by a list of Product IDs.
+     * @param productIds list of Product IDs
+     * @return list of Sku objects
+     */
+    List<Sku> selectByProductIds(List<Integer> productIds);
+
+    /**
      * Selects Sku prices by a list of IDs and Tier ID.
      * @param ids list of Sku IDs
      * @param tierId the Tier ID

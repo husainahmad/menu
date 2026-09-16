@@ -6,15 +6,14 @@ import com.harmoni.pos.business.service.user.UserService;
 import com.harmoni.pos.http.utils.PaginationUtils;
 import com.harmoni.pos.menu.mapper.CustomizationMapper;
 import com.harmoni.pos.menu.model.Customization;
+import com.harmoni.pos.menu.model.CustomizationOption;
 import com.harmoni.pos.menu.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link CustomizationService} using MyBatis.
@@ -39,10 +38,13 @@ public class CustomizationServiceImpl implements CustomizationService {
      */
     @Override
     public Map<String, Object> listPaginated(String username, int page, int size) {
-        PaginationUtils.applyPagination(page, size);
         User user = userService.selectByUsername(username);
+        PaginationUtils.applyPagination(page, size);
         Map<String, Object> paginationData = new HashMap<>();
-        PageInfo<Customization> categoryPageInfo = new PageInfo<>(getCustomizationsByBrandId(user.getStore().getChain().getBrandId()));
+        List<Customization> customizations = getCustomizationsByBrandId(user.getStore().getChain().getBrandId());
+        PageInfo<Customization> categoryPageInfo = new PageInfo<>(customizations);
+
+        categoryPageInfo.setList(populateCustomizationOptions(customizations));
 
         paginationData.put("page", categoryPageInfo.getPages());
         paginationData.put("size", categoryPageInfo.getSize());
@@ -51,6 +53,36 @@ public class CustomizationServiceImpl implements CustomizationService {
         paginationData.put("navigate", categoryPageInfo.getNavigatepageNums());
 
         return paginationData;
+    }
+
+    /**
+     * Batch-fetches options for the given customizations and attaches them.
+     *
+     * @param customizations list of customizations
+     * @return list of customizations with options populated
+     */
+    private List<Customization> populateCustomizationOptions(List<Customization> customizations) {
+        if (customizations == null || customizations.isEmpty()) {
+            return customizations;
+        }
+
+        List<Integer> customizationIds = customizations.stream()
+                .map(Customization::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (customizationIds.isEmpty()) {
+            return customizations;
+        }
+
+        List<CustomizationOption> options = customizationOptionService.getByCustomizationIds(customizationIds);
+        Map<Integer, List<CustomizationOption>> optionsByCustomizationId = options.stream()
+                .collect(Collectors.groupingBy(CustomizationOption::getCustomizationId));
+
+        customizations.forEach(customization -> customization.setCustomizationOptions(
+                optionsByCustomizationId.getOrDefault(customization.getId(), Collections.emptyList())));
+
+        return customizations;
     }
 
     /**

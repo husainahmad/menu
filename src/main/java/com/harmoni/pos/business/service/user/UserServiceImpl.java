@@ -190,9 +190,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Map<String, Object> selectByChainId(Integer chainId, int page, int size, String search) {
+        List<Store> stores = this.storeService.getAllStoresByChainId(chainId, "");
         PaginationUtils.applyPagination(page, size);
 
-        List<Store> stores = this.storeService.getAllStoresByChainId(chainId, "");
         Map<String, Object> paginationData = new HashMap<>();
         PageInfo<User> productPageInfo = new PageInfo<>(selectByStoreIds(stores, search));
 

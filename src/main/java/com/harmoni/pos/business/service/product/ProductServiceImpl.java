@@ -23,6 +23,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 /**
  * Implementation of the {@link ProductService} that handles product management operations.
  * <p>
@@ -85,6 +86,7 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     public List<Product> selectByCategory(Integer categoryId) {
+        com.github.pagehelper.PageHelper.clearPage();
         return productMapper.selectByCategoryId(categoryId);
     }
 
@@ -102,7 +104,10 @@ public class ProductServiceImpl implements ProductService {
     public Map<String, Object> selectByCategoryBrand(Integer categoryId, Integer brandId, int page, int size, String search) {
         PaginationUtils.applyPagination(page, size);
         Map<String, Object> paginationData = new HashMap<>();
-        PageInfo<Product> productPageInfo = new PageInfo<>(getProducts(categoryId, brandId, search));
+        List<Product> products = getProducts(categoryId, brandId, search);
+        PageInfo<Product> productPageInfo = new PageInfo<>(products);
+
+        productPageInfo.setList(populateSkus(products));
 
         paginationData.put("page", productPageInfo.getPages());
         paginationData.put("size", productPageInfo.getSize());
@@ -123,6 +128,36 @@ public class ProductServiceImpl implements ProductService {
      */
     private List<Product> getProducts(Integer categoryId, Integer brandId, String search) {
         return productMapper.selectByCategoryIdBrandId(categoryId, brandId, search);
+    }
+
+    /**
+     * Batch-fetches SKUs for the given products and attaches them.
+     *
+     * @param products list of products
+     * @return list of products with SKUs populated
+     */
+    private List<Product> populateSkus(List<Product> products) {
+        if (ObjectUtils.isEmpty(products)) {
+            return products;
+        }
+
+        List<Integer> productIds = products.stream()
+                .map(Product::getId)
+                .filter(id -> !ObjectUtils.isEmpty(id))
+                .collect(Collectors.toList());
+
+        if (ObjectUtils.isEmpty(productIds)) {
+            return products;
+        }
+
+        List<Sku> skus = skuService.selectByProductIds(productIds);
+        Map<Integer, List<Sku>> skusByProductId = skus.stream()
+                .collect(Collectors.groupingBy(Sku::getProductId));
+
+        products.forEach(product -> product.setSkus(
+                skusByProductId.getOrDefault(product.getId(), Collections.emptyList())));
+
+        return products;
     }
 
     /**
@@ -250,6 +285,12 @@ public class ProductServiceImpl implements ProductService {
     public int delete(Integer id) {
         skuService.deleteSkuByProductId(id);
         return productMapper.deleteByPrimaryKey(id, true, new Date(System.currentTimeMillis()));
+    }
+
+    @Override
+    public List<Product> searchByProductName(String productName) {
+        if (productName == null || productName.isBlank()) return List.of();
+        return productMapper.searchByProductName(productName.trim());
     }
 
     /**

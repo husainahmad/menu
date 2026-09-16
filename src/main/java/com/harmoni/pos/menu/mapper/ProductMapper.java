@@ -2,6 +2,7 @@ package com.harmoni.pos.menu.mapper;
 
 import com.harmoni.pos.menu.model.Product;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.List;
@@ -87,5 +88,12 @@ public interface ProductMapper {
      * @return number of rows affected
      */
     int updateByPrimaryKey(Product row);
+
+    /**
+     * Search products by product name LIKE (for AI).
+     * @param productName the product name keyword
+     * @return list of matching products
+     */
+    List<Product> searchByProductName(@Param("productName") String productName);
 
 }

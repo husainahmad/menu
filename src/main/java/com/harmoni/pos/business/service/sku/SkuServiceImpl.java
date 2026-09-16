@@ -88,6 +88,20 @@ public class SkuServiceImpl implements SkuService {
     }
 
     /**
+     * Retrieves all SKUs associated with the given product IDs.
+     *
+     * @param productIds list of product IDs to find SKUs for
+     * @return list of SKUs belonging to the products
+     */
+    @Override
+    public List<Sku> selectByProductIds(List<Integer> productIds) {
+        if (ObjectUtils.isEmpty(productIds)) {
+            return new ArrayList<>();
+        }
+        return skuMapper.selectByProductIds(productIds);
+    }
+
+    /**
      * Retrieves SKUs by their list of IDs.
      *
      * @param ids list of SKU IDs to retrieve

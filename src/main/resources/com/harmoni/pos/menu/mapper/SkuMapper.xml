@@ -87,6 +87,18 @@
     </foreach>
   </select>
 
+  <select id="selectByProductIds" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from skus sku
+    where (sku.is_deleted = 0 or sku.is_deleted is null)
+    and sku.product_id in
+    <foreach item="productId" index="index" collection="productIds"
+             open="(" separator="," close=")" nullable="true">
+        #{productId}
+    </foreach>
+  </select>
+
   <select id="selectPriceByIdsAndTierId" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />,

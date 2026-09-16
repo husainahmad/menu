@@ -39,6 +39,14 @@ public interface SkuService {
     List<Sku> selectByProductId(Integer productId);
 
     /**
+     * Retrieves a list of SKUs belonging to the given product IDs.
+     *
+     * @param productIds list of product IDs
+     * @return list of SKUs for the given products
+     */
+    List<Sku> selectByProductIds(List<Integer> productIds);
+
+    /**
      * Retrieves a list of SKUs by their IDs.
      *
      * @param ids list of SKU IDs

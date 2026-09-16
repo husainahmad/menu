@@ -30,6 +30,14 @@ public class CustomizationOptionServiceImpl implements CustomizationOptionServic
     }
 
     @Override
+    public List<CustomizationOption> getByCustomizationIds(List<Integer> customizationIds) {
+        if (customizationIds == null || customizationIds.isEmpty()) {
+            return List.of();
+        }
+        return optionMapper.selectByCustomizationIds(customizationIds);
+    }
+
+    @Override
     public boolean create(CustomizationOption option) {
         return optionMapper.insert(option) > 0;
     }

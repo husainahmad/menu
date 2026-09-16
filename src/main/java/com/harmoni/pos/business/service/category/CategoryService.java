@@ -67,4 +67,11 @@ public interface CategoryService {
      * @throws com.harmoni.pos.exception.BusinessNotFoundRequestException if the category does not exist
      */
     Category get(Integer id);
+
+    /**
+     * Search categories by name LIKE (for AI).
+     * @param categoryName the category name keyword
+     * @return list of matching categories
+     */
+    List<Category> searchByCategoryName(String categoryName);
 }

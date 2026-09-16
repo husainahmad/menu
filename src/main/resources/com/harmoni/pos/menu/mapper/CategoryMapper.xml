@@ -60,6 +60,15 @@
     where category.brand_id = #{brandId,jdbcType=INTEGER}
   </select>
 
+  <select id="searchByCategoryName" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.BrandMapper.Base_Column_List"/>
+    from categories category
+    left join brands brand on brand.id = category.brand_id
+    where category.name like concat('%', #{categoryName,jdbcType=VARCHAR}, '%')
+  </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from categories
     where id = #{id,jdbcType=INTEGER}

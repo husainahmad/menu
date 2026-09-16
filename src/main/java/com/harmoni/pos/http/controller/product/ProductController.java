@@ -49,8 +49,8 @@ public class ProductController {
      * @param id the product ID
      * @return ResponseEntity containing the product data
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
+    @GetMapping("/{id:\\d+}")
+    public ResponseEntity<RestAPIResponse> get(@PathVariable("id") Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -106,7 +106,7 @@ public class ProductController {
      * @param id the product ID
      * @return ResponseEntity with deletion status
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
 
         this.productService.delete(id);
@@ -154,6 +154,19 @@ public class ProductController {
                 .error(null)
                 .build();
 
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    /**
+     * Search products by product name LIKE (for AI).
+     * GET /api/v1/product/search?productName=latte
+     */
+    @GetMapping("/search")
+    public ResponseEntity<RestAPIResponse> searchByProductName(@RequestParam String productName) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(productService.searchByProductName(productName))
+                .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 

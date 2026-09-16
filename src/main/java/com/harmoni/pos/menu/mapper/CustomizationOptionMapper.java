@@ -22,5 +22,7 @@ public interface CustomizationOptionMapper {
 
     List<CustomizationOption> selectByCustomizationId(Integer customizationId);
 
+    List<CustomizationOption> selectByCustomizationIds(List<Integer> customizationIds);
+
 }
 
