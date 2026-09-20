@@ -1,6 +1,7 @@
 package com.harmoni.pos.business.service.customization;
 
 import com.harmoni.pos.business.service.customizationoption.CustomizationOptionService;
+import com.harmoni.pos.business.service.customizationoptiontierprice.CustomizationOptionTierPriceService;
 import com.harmoni.pos.business.service.user.UserService;
 import com.harmoni.pos.menu.mapper.CustomizationMapper;
 import com.harmoni.pos.menu.model.*;
@@ -28,6 +29,9 @@ class CustomizationServiceImplTest {
 
     @Mock
     private CustomizationOptionService customizationOptionService;
+
+    @Mock
+    private CustomizationOptionTierPriceService customizationOptionTierPriceService;
 
     @InjectMocks
     private CustomizationServiceImpl customizationService;

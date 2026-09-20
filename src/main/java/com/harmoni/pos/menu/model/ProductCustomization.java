@@ -16,6 +16,10 @@ public class ProductCustomization {
     private Integer id;
     private Integer productId;
     private Integer customizationId;
+    private Integer sortOrder;
+    private Boolean requiredOverride;
+    private Integer minSelectionOverride;
+    private Integer maxSelectionOverride;
     private Boolean isActive;
     private Boolean isDeleted;
     private Date createdAt;

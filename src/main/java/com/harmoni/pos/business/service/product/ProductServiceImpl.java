@@ -46,14 +46,19 @@ public class ProductServiceImpl implements ProductService {
     private final SkuTierPriceService skuTierPriceService;
     private final CategoryService categoryService;
     private final ProductImageService productImageService;
+    private final CustomizationMapper customizationMapper;
+    private final CustomizationOptionMapper customizationOptionMapper;
+    private final ProductCustomizationService productCustomizationService;
     private final UserService userService;
     private final StoreTierService storeTierService;
+    private final CustomizationOptionTierPriceMapper customizationOptionTierPriceMapper;
 
     /**
-     * Creates a new product.
+     * Creates a new product, including any SKU and customization configuration.
      *
-     * @param productDto the DTO containing product information
+     * @param productDto the DTO containing product details to be added
      * @return the created {@link Product}
+     * @throws BusinessBadRequestException if a duplicate product exists or customizations are invalid
      */
     @Override
     public Product create(ProductAddDto productDto) {
@@ -61,6 +66,10 @@ public class ProductServiceImpl implements ProductService {
         Product product = productDto.toProduct();
         product.setCreatedAt(new Date(System.currentTimeMillis()));
         productMapper.insert(product);
+        if (productDto.getCustomizationIds() != null) {
+            this.validateCustomizations(productDto.getCustomizationIds(), productDto.getCategoryId());
+            this.productCustomizationService.replaceByProductId(productDto.getCustomizationIds(), product.getId());
+        }
         return product;
     }
 
@@ -75,7 +84,8 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> selectByCategoryPrice(String username, Integer categoryId) {
         User user = userService.selectByUsername(username);
         StoreTier storeTier = storeTierService.selectByStoreId(user.getStoreId());
-        return productMapper.selectByCategoryIdPrice(categoryId, storeTier.getTierPriceId());
+        List<Product> products = productMapper.selectByCategoryIdPrice(categoryId, storeTier.getTierPriceId());
+        return attachCustomizations(products, storeTier.getTierPriceId());
     }
 
     /**
@@ -107,7 +117,7 @@ public class ProductServiceImpl implements ProductService {
         List<Product> products = getProducts(categoryId, brandId, search);
         PageInfo<Product> productPageInfo = new PageInfo<>(products);
 
-        productPageInfo.setList(populateSkus(products));
+        productPageInfo.setList(attachCustomizations(populateSkus(products), null));
 
         paginationData.put("page", productPageInfo.getPages());
         paginationData.put("size", productPageInfo.getSize());
@@ -161,6 +171,124 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
+     * Batch-fetches the customizations assigned to the given products and attaches them.
+     * Option tier prices are attached as well: when {@code tierId} is non-null, only prices
+     * matching that Tier are included (POS ordering path); otherwise all tier prices are returned
+     * (admin management paths).
+     *
+     * @param products list of products
+     * @param tierId   optional Tier ID to filter option tier prices; {@code null} returns all tier prices
+     * @return list of products with customizations populated
+     */
+    private List<Product> attachCustomizations(List<Product> products, Integer tierId) {
+        if (ObjectUtils.isEmpty(products)) {
+            return products;
+        }
+
+        List<Integer> productIds = products.stream()
+                .map(Product::getId)
+                .filter(id -> !ObjectUtils.isEmpty(id))
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (ObjectUtils.isEmpty(productIds)) {
+            return products;
+        }
+
+        List<ProductCustomization> links = productCustomizationService.getByProductIds(productIds);
+        Map<Integer, List<Integer>> customizationIdsByProductId = links.stream()
+                .collect(Collectors.groupingBy(ProductCustomization::getProductId,
+                        Collectors.mapping(ProductCustomization::getCustomizationId, Collectors.toList())));
+
+        List<Integer> customizationIds = links.stream()
+                .map(ProductCustomization::getCustomizationId)
+                .filter(id -> !ObjectUtils.isEmpty(id))
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<Integer, Customization> customizationsById = ObjectUtils.isEmpty(customizationIds)
+                ? Collections.emptyMap()
+                : customizationMapper.selectByIds(customizationIds).stream()
+                        .collect(Collectors.toMap(Customization::getId, c -> c));
+
+        if (!customizationsById.isEmpty()) {
+            List<CustomizationOption> options =
+                    customizationOptionMapper.selectByCustomizationIds(new ArrayList<>(customizationsById.keySet()));
+
+            List<Integer> optionIds = options.stream()
+                    .map(CustomizationOption::getId)
+                    .filter(id -> !ObjectUtils.isEmpty(id))
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            if (!optionIds.isEmpty()) {
+                List<CustomizationOptionTierPrice> tierPrices = (tierId == null)
+                        ? customizationOptionTierPriceMapper.selectByOptionIds(optionIds)
+                        : customizationOptionTierPriceMapper.selectByOptionIdsAndTierId(optionIds, tierId);
+                Map<Integer, List<CustomizationOptionTierPrice>> tierPricesByOptionId = tierPrices.stream()
+                        .collect(Collectors.groupingBy(CustomizationOptionTierPrice::getCustomizationOptionId));
+                options.forEach(option -> option.setTierPrices(
+                        tierPricesByOptionId.getOrDefault(option.getId(), Collections.emptyList())));
+            }
+
+            Map<Integer, List<CustomizationOption>> optionsByCustomizationId =
+                    options.stream().collect(Collectors.groupingBy(CustomizationOption::getCustomizationId));
+            customizationsById.values().forEach(customization ->
+                    customization.setCustomizationOptions(
+                            optionsByCustomizationId.getOrDefault(customization.getId(), Collections.emptyList())));
+        }
+
+        products.forEach(product -> {
+            List<Customization> customizations = customizationIdsByProductId
+                    .getOrDefault(product.getId(), Collections.emptyList())
+                    .stream()
+                    .map(customizationsById::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            product.setCustomizations(customizations);
+        });
+
+        return products;
+    }
+
+    /**
+     * Validates that all customization IDs exist and belong to the same brand as the product's category.
+     *
+     * @param customizationIds the customization IDs to validate
+     * @param categoryId       the category ID of the product
+     * @throws BusinessBadRequestException if a customization is missing or belongs to another brand
+     */
+    private void validateCustomizations(List<Integer> customizationIds, Integer categoryId) {
+        if (ObjectUtils.isEmpty(customizationIds)) {
+            return;
+        }
+
+        List<Integer> distinctIds = customizationIds.stream()
+                .filter(id -> !ObjectUtils.isEmpty(id))
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (distinctIds.isEmpty()) {
+            return;
+        }
+
+        List<Customization> customizations = customizationMapper.selectByIds(distinctIds);
+        Set<Integer> foundIds = customizations.stream()
+                .map(Customization::getId)
+                .collect(Collectors.toSet());
+        if (foundIds.size() != distinctIds.size()) {
+            throw new BusinessBadRequestException("exception.customization.id.badRequest.notFound", null);
+        }
+
+        Integer brandId = categoryService.get(categoryId).getBrandId();
+        boolean brandMismatch = customizations.stream()
+                .anyMatch(customization -> !brandId.equals(customization.getBrandId()));
+        if (brandMismatch) {
+            throw new BusinessBadRequestException("exception.customization.brand.badRequest.mismatch", null);
+        }
+    }
+
+    /**
      * Retrieves a single product by its ID.
      *
      * @param id the product ID
@@ -174,7 +302,7 @@ public class ProductServiceImpl implements ProductService {
             throw new BusinessBadRequestException("exception.product.id.badRequest.notFound", null);
         }
         product.setProductImage(this.productImageService.selectByProductId(id));
-        return product;
+        return attachCustomizations(List.of(product), null).get(0);
     }
 
     /**
@@ -187,7 +315,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> getByList(List<Integer> ids, String username) {
         User user = this.userService.selectByUsername(username);
-        return productMapper.selectByIds(ids, user.getStore().getChain().getBrandId());
+        List<Product> products = productMapper.selectByIds(ids, user.getStore().getChain().getBrandId());
+        return attachCustomizations(products, null);
     }
 
     /**
@@ -261,10 +390,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Updates product information such as name and category.
+     * Updates a product including name, category, and customization assignments.
+     * Passing {@code customizationIds: null} leaves existing customization links unchanged;
+     * passing an empty list clears all links.
      *
-     * @param productEditDto DTO containing updated product info
+     * @param productEditDto the DTO containing updated product info
      * @return the updated {@link Product}
+     * @throws BusinessBadRequestException if a duplicate name exists or customizations are invalid
      */
     @Override
     public Product update(ProductEditDto productEditDto) {
@@ -272,6 +404,10 @@ public class ProductServiceImpl implements ProductService {
         Product product = productEditDto.toProduct();
         product.setUpdatedAt(new Date(System.currentTimeMillis()));
         productMapper.updateByPrimaryKey(product);
+        if (productEditDto.getCustomizationIds() != null) {
+            this.validateCustomizations(productEditDto.getCustomizationIds(), productEditDto.getCategoryId());
+            this.productCustomizationService.replaceByProductId(productEditDto.getCustomizationIds(), productEditDto.getId());
+        }
         return product;
     }
 

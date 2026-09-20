@@ -24,6 +24,12 @@ public class ProductAddDto extends ProductDto {
     private @Valid List<SkuAddDto> skuDtos;
 
     /**
+     * List of customization IDs to be assigned to the product.
+     */
+    @JsonProperty("customizationIds")
+    private List<Integer> customizationIds;
+
+    /**
      * Converts this DTO to a Product entity.
      *
      * @return a Product entity with name and categoryId set

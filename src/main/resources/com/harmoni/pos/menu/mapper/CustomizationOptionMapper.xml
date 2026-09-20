@@ -22,14 +22,11 @@
     </insert>
 
     <insert id="insertOrUpdateBulk"
-            parameterType="map"
-            useGeneratedKeys="true"
-            keyProperty="customizationOptions.id"
-            keyColumn="id">
-        INSERT INTO customization_options (customization_id, name, created_at, updated_at, deleted_at, is_deleted)
+            parameterType="map">
+        INSERT INTO customization_options (id, customization_id, name, created_at, updated_at, deleted_at, is_deleted)
         VALUES
         <foreach collection="customizationOptions" item="item" separator=",">
-            (#{customizationId}, #{item.name}, #{item.createdAt}, #{item.updatedAt}, #{item.deletedAt}, #{item.isDeleted})
+            (#{item.id}, #{customizationId}, #{item.name}, #{item.createdAt}, #{item.updatedAt}, #{item.deletedAt}, #{item.isDeleted})
         </foreach>
         ON DUPLICATE KEY UPDATE
         name = VALUES(name),

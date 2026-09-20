@@ -9,6 +9,10 @@
         <id column="id" property="id"/>
         <result column="product_id" property="productId"/>
         <result column="customization_id" property="customizationId"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="required_override" property="requiredOverride"/>
+        <result column="min_selection_override" property="minSelectionOverride"/>
+        <result column="max_selection_override" property="maxSelectionOverride"/>
         <result column="is_active" property="isActive"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="created_at" property="createdAt"/>
@@ -18,15 +22,28 @@
 
     <insert id="insert" parameterType="com.harmoni.pos.menu.model.ProductCustomization">
         INSERT INTO product_customizations
-        (product_id, customization_id, is_active, is_deleted, created_at, updated_at, deleted_at)
+        (product_id, customization_id, sort_order, required_override, min_selection_override, max_selection_override, is_active, is_deleted, created_at, updated_at, deleted_at)
         VALUES
-        (#{productId}, #{customizationId}, #{isActive}, #{isDeleted}, #{createdAt}, #{updatedAt}, #{deletedAt})
+        (#{productId}, #{customizationId}, #{sortOrder}, #{requiredOverride}, #{minSelectionOverride}, #{maxSelectionOverride}, #{isActive}, #{isDeleted}, #{createdAt}, #{updatedAt}, #{deletedAt})
+    </insert>
+
+    <insert id="insertBulk" parameterType="list">
+        INSERT INTO product_customizations
+        (product_id, customization_id, sort_order, required_override, min_selection_override, max_selection_override, is_active, is_deleted, created_at, updated_at, deleted_at)
+        VALUES
+        <foreach collection="list" item="pc" separator=",">
+            (#{pc.productId}, #{pc.customizationId}, #{pc.sortOrder}, #{pc.requiredOverride}, #{pc.minSelectionOverride}, #{pc.maxSelectionOverride}, #{pc.isActive}, #{pc.isDeleted}, #{pc.createdAt}, #{pc.updatedAt}, #{pc.deletedAt})
+        </foreach>
     </insert>
 
     <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.ProductCustomization">
         UPDATE product_customizations
         SET product_id = #{productId},
         customization_id = #{customizationId},
+        sort_order = #{sortOrder},
+        required_override = #{requiredOverride},
+        min_selection_override = #{minSelectionOverride},
+        max_selection_override = #{maxSelectionOverride},
         is_active = #{isActive},
         is_deleted = #{isDeleted},
         created_at = #{createdAt},
@@ -35,8 +52,22 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateConfigurationById" parameterType="com.harmoni.pos.menu.model.ProductCustomization">
+        UPDATE product_customizations
+        SET sort_order = #{sortOrder},
+        required_override = #{requiredOverride},
+        min_selection_override = #{minSelectionOverride},
+        max_selection_override = #{maxSelectionOverride},
+        updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
     <delete id="deleteByPrimaryKey" parameterType="int">
         DELETE FROM product_customizations WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByProductId" parameterType="int">
+        DELETE FROM product_customizations WHERE product_id = #{productId}
     </delete>
 
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="int">
@@ -47,6 +78,18 @@
         SELECT * FROM product_customizations
         WHERE product_id = #{productId}
         AND (is_deleted IS NULL OR is_deleted = 0)
+        ORDER BY sort_order ASC, id ASC
+    </select>
+
+    <select id="selectByProductIds" resultMap="BaseResultMap">
+        SELECT * FROM product_customizations
+        WHERE (is_deleted IS NULL OR is_deleted = 0)
+        AND product_id IN
+        <foreach item="productId" index="index" collection="productIds"
+                 open="(" separator="," close=")" nullable="true">
+            #{productId}
+        </foreach>
+        ORDER BY product_id ASC, sort_order ASC, id ASC
     </select>
 
 </mapper>

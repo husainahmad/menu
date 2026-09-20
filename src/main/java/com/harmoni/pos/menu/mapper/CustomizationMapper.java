@@ -36,7 +36,7 @@ public interface CustomizationMapper {
     /**
      * Retrieves a customization by its primary key.
      *
-     * @param id the ID of the customization
+     * @param id the customization ID
      * @return the found customization or null if not found
      */
     Customization selectByPrimaryKey(Integer id);
@@ -55,4 +55,12 @@ public interface CustomizationMapper {
      * @return list of customizations belonging to the brand
      */
     List<Customization> selectByBrandId(Integer brandId);
+
+    /**
+     * Retrieves customizations by a list of IDs, excluding deleted records.
+     *
+     * @param ids list of customization IDs to retrieve
+     * @return list of non-deleted customizations matching the provided IDs
+     */
+    List<Customization> selectByIds(List<Integer> ids);
 }

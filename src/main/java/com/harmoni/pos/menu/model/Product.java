@@ -42,6 +42,12 @@ public class Product {
     private Category category;
 
     /**
+     * The list of customizations assigned to the product.
+     */
+    @JsonProperty("customizations")
+    private List<Customization> customizations;
+
+    /**
      * The list of SKUs for the product.
      */
     @JsonProperty("skus")

@@ -77,9 +77,23 @@ class CustomizationControllerTest {
 
     @Test
     void delete_shouldReturn200() throws Exception {
-        when(customizationService.getCustomizationById(1)).thenReturn(Optional.of(new Customization().setId(1)));
+        when(customizationService.deleteCustomization(1)).thenReturn(1);
 
         mockMvc.perform(delete("/api/v1/customization/1"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void update_shouldReturn200() throws Exception {
+        CustomizationDto dto = new CustomizationDto();
+        dto.setName("Extra Cheese");
+        dto.setSelectionType(SelectionType.SINGLE);
+        dto.setCustomizationOptions(new ArrayList<>());
+        when(customizationService.updateCustomization(any(Customization.class))).thenReturn(1);
+
+        mockMvc.perform(put("/api/v1/customization/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk());
     }
 

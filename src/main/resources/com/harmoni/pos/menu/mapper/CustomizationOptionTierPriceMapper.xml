@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.CustomizationOptionTierPriceMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.CustomizationOptionTierPrice">
+    <id column="cotp_id" jdbcType="INTEGER" property="id" />
+    <result column="cotp_customization_option_id" jdbcType="INTEGER" property="customizationOptionId" />
+    <result column="cotp_tier_id" jdbcType="INTEGER" property="tierId" />
+    <result column="cotp_price" jdbcType="DECIMAL" property="price" />
+    <result column="cotp_is_deleted" jdbcType="BOOLEAN" property="deleted" />
+    <result column="cotp_created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="cotp_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <association property="tier" javaType="com.harmoni.pos.menu.model.Tier">
+      <id column="tier_id" jdbcType="INTEGER" property="id" />
+      <result column="tier_name" jdbcType="VARCHAR" property="name" />
+    </association>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    cotp.id as cotp_id,
+    cotp.customization_option_id as cotp_customization_option_id,
+    cotp.tier_id as cotp_tier_id,
+    cotp.price as cotp_price,
+    cotp.is_deleted as cotp_is_deleted,
+    cotp.created_at as cotp_created_at,
+    cotp.updated_at as cotp_updated_at
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List"/>
+    from customization_option_tier_prices cotp
+        left join tiers tier on tier.id = cotp.tier_id
+    where cotp.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByOptionIds" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List"/>
+    from customization_option_tier_prices cotp
+    left join tiers tier on tier.id = cotp.tier_id
+    where (cotp.is_deleted = 0 or cotp.is_deleted is null)
+    and cotp.customization_option_id in
+    <foreach item="optionId" index="index" collection="optionIds"
+             open="(" separator="," close=")" nullable="true">
+      #{optionId}
+    </foreach>
+  </select>
+
+  <select id="selectByOptionIdsAndTierId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.TierMapper.Base_Column_List"/>
+    from customization_option_tier_prices cotp
+    left join tiers tier on tier.id = cotp.tier_id
+    where (cotp.is_deleted = 0 or cotp.is_deleted is null)
+    and cotp.tier_id = #{tierId,jdbcType=INTEGER}
+    and cotp.customization_option_id in
+    <foreach item="optionId" index="index" collection="optionIds"
+             open="(" separator="," close=")" nullable="true">
+      #{optionId}
+    </foreach>
+  </select>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.CustomizationOptionTierPrice">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into customization_option_tier_prices (customization_option_id, tier_id, price,
+      created_at, updated_at)
+    values (#{customizationOptionId,jdbcType=INTEGER}, #{tierId,jdbcType=INTEGER}, #{price,jdbcType=DECIMAL},
+      #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
+  </insert>
+
+  <insert id="insertOrUpdate" parameterType="com.harmoni.pos.menu.model.CustomizationOptionTierPrice">
+    insert into customization_option_tier_prices (customization_option_id, tier_id, price,
+        created_at, updated_at)
+    values (#{customizationOptionId,jdbcType=INTEGER}, #{tierId,jdbcType=INTEGER}, #{price,jdbcType=DECIMAL},
+    #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
+    on duplicate key update price = #{price,jdbcType=DECIMAL}
+  </insert>
+
+  <insert id="insertOrUpdateBulk">
+    insert into customization_option_tier_prices (customization_option_id, tier_id, price,
+        created_at, updated_at)
+    values
+    <foreach item="tierPrice" index="index" collection="tierPrices" separator=",">
+      (#{tierPrice.customizationOptionId,jdbcType=INTEGER},
+      #{tierPrice.tierId,jdbcType=INTEGER},
+      #{tierPrice.price,jdbcType=DECIMAL},
+      #{tierPrice.createdAt,jdbcType=TIMESTAMP},
+      #{tierPrice.updatedAt,jdbcType=TIMESTAMP})
+    </foreach>
+    on duplicate key update
+    price = values(price),
+    created_at = values(created_at),
+    updated_at = values(updated_at)
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.CustomizationOptionTierPrice">
+    update customization_option_tier_prices
+    set customization_option_id = #{customizationOptionId,jdbcType=INTEGER},
+      tier_id = #{tierId,jdbcType=INTEGER},
+      price = #{price,jdbcType=DECIMAL},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

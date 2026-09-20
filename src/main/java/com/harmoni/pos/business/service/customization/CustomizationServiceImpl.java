@@ -2,15 +2,18 @@ package com.harmoni.pos.business.service.customization;
 
 import com.github.pagehelper.PageInfo;
 import com.harmoni.pos.business.service.customizationoption.CustomizationOptionService;
+import com.harmoni.pos.business.service.customizationoptiontierprice.CustomizationOptionTierPriceService;
 import com.harmoni.pos.business.service.user.UserService;
 import com.harmoni.pos.http.utils.PaginationUtils;
 import com.harmoni.pos.menu.mapper.CustomizationMapper;
 import com.harmoni.pos.menu.model.Customization;
 import com.harmoni.pos.menu.model.CustomizationOption;
+import com.harmoni.pos.menu.model.CustomizationOptionTierPrice;
 import com.harmoni.pos.menu.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,6 +30,7 @@ public class CustomizationServiceImpl implements CustomizationService {
     private final CustomizationMapper customizationMapper;
     private final UserService userService;
     private final CustomizationOptionService customizationOptionService;
+    private final CustomizationOptionTierPriceService customizationOptionTierPriceService;
 
     /**
      * Retrieves a paginated list of customizations for the brand associated with the authenticated user.
@@ -79,6 +83,21 @@ public class CustomizationServiceImpl implements CustomizationService {
         Map<Integer, List<CustomizationOption>> optionsByCustomizationId = options.stream()
                 .collect(Collectors.groupingBy(CustomizationOption::getCustomizationId));
 
+        List<Integer> optionIds = options.stream()
+                .map(CustomizationOption::getId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (!optionIds.isEmpty()) {
+            List<CustomizationOptionTierPrice> tierPrices =
+                    customizationOptionTierPriceService.selectByOptionIds(optionIds);
+            Map<Integer, List<CustomizationOptionTierPrice>> tierPricesByOptionId = tierPrices.stream()
+                    .collect(Collectors.groupingBy(CustomizationOptionTierPrice::getCustomizationOptionId));
+            options.forEach(option -> option.setTierPrices(
+                    tierPricesByOptionId.getOrDefault(option.getId(), Collections.emptyList())));
+        }
+
         customizations.forEach(customization -> customization.setCustomizationOptions(
                 optionsByCustomizationId.getOrDefault(customization.getId(), Collections.emptyList())));
 
@@ -93,7 +112,12 @@ public class CustomizationServiceImpl implements CustomizationService {
      */
     @Override
     public Optional<Customization> getCustomizationById(Integer id) {
-        return Optional.ofNullable(customizationMapper.selectByPrimaryKey(id));
+        Customization customization = customizationMapper.selectByPrimaryKey(id);
+        if (customization == null) {
+            return Optional.empty();
+        }
+        List<Customization> populated = populateCustomizationOptions(List.of(customization));
+        return Optional.of(populated == null || populated.isEmpty() ? customization : populated.get(0));
     }
 
     /**
@@ -122,14 +146,19 @@ public class CustomizationServiceImpl implements CustomizationService {
     }
 
     /**
-     * Updates an existing customization.
+     * Updates an existing customization and its options (including tier-based prices).
      *
      * @param customization the Customization entity to update
      * @return int if update was successful, 0 otherwise
      */
     @Override
     public int updateCustomization(Customization customization) {
-        return customizationMapper.updateByPrimaryKey(customization);
+        customization.setUpdatedAt(new Date(System.currentTimeMillis()));
+        int rows = customizationMapper.updateByPrimaryKey(customization);
+        if (customization.getCustomizationOptions() != null) {
+            customizationOptionService.createBulk(customization.getCustomizationOptions(), customization.getId());
+        }
+        return rows;
     }
 
     /**

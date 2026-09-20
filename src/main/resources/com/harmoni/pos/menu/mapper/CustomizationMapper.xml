@@ -9,10 +9,13 @@
     <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.Customization">
         <id column="custom_id" property="id" />
         <result column="custom_name" property="name" />
+        <result column="custom_description" property="description" />
+        <result column="custom_minimum_selection" property="minimumSelection" />
+        <result column="custom_maximum_selection" property="maximumSelection" />
         <result column="custom_selection_type" property="selectionType" />
         <result column="custom_brand_id" property="brandId" />
         <result column="custom_is_deleted" property="isDeleted" />
-        <result column="custom_is_required" property="isRequired" />
+        <result column="custom_is_required" property="required" />
         <result column="custom_created_at" property="createdAt" />
         <result column="custom_updated_at" property="updatedAt" />
         <result column="custom_deleted_at" property="deletedAt" />
@@ -33,6 +36,9 @@
     <sql id="Base_Column_List">
         custom.id as custom_id,
         custom.name as custom_name,
+        custom.description as custom_description,
+        custom.minimum_selection as custom_minimum_selection,
+        custom.maximum_selection as custom_maximum_selection,
         custom.selection_type as custom_selection_type,
         custom.brand_id as custom_brand_id,
         custom.is_deleted as custom_is_deleted,
@@ -80,27 +86,38 @@
         AND (custom.is_deleted IS NULL OR custom.is_deleted = 0)
     </select>
 
+    <select id="selectByIds" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM customizations custom
+        WHERE (custom.is_deleted IS NULL OR custom.is_deleted = 0)
+        AND custom.id IN
+        <foreach item="id" index="index" collection="ids"
+                 open="(" separator="," close=")" nullable="true">
+            #{id}
+        </foreach>
+    </select>
+
     <!-- ====== Insert / Update / Delete ====== -->
     <insert id="insert" parameterType="com.harmoni.pos.menu.model.Customization">
         <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
             SELECT LAST_INSERT_ID()
         </selectKey>
         INSERT INTO customizations
-        (name, selection_type, brand_id, is_deleted, is_required, created_at, updated_at, deleted_at)
+        (name, description, selection_type, brand_id, is_deleted, is_required, minimum_selection, maximum_selection, created_at, updated_at, deleted_at)
         VALUES
-        (#{name}, #{selectionType}, #{brandId}, #{isDeleted}, #{isRequired}, #{createdAt}, #{updatedAt}, #{deletedAt})
+        (#{name}, #{description}, #{selectionType}, #{brandId}, #{isDeleted}, #{required}, #{minimumSelection}, #{maximumSelection}, #{createdAt}, #{updatedAt}, #{deletedAt})
     </insert>
 
     <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Customization">
         UPDATE customizations
         SET name = #{name},
+        description = #{description},
         selection_type = #{selectionType},
-        brand_id = #{brandId},
-        is_deleted = #{isDeleted},
-        is_required = #{isRequired},
-        created_at = #{createdAt},
-        updated_at = #{updatedAt},
-        deleted_at = #{deletedAt}
+        is_required = #{required},
+        minimum_selection = #{minimumSelection},
+        maximum_selection = #{maximumSelection},
+        updated_at = #{updatedAt}
         WHERE id = #{id}
     </update>
 

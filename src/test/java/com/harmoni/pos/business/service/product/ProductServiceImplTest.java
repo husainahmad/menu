@@ -51,6 +51,18 @@ class ProductServiceImplTest {
     private ProductImageService productImageService;
 
     @Mock
+    private com.harmoni.pos.menu.mapper.CustomizationMapper customizationMapper;
+
+    @Mock
+    private com.harmoni.pos.menu.mapper.CustomizationOptionMapper customizationOptionMapper;
+
+    @Mock
+    private com.harmoni.pos.menu.mapper.CustomizationOptionTierPriceMapper customizationOptionTierPriceMapper;
+
+    @Mock
+    private ProductCustomizationService productCustomizationService;
+
+    @Mock
     private UserService userService;
 
     @Mock

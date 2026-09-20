@@ -73,6 +73,22 @@ public class CustomizationController {
     }
 
     /**
+     * Updates an existing customization, including its options and tier-based prices.
+     *
+     * @param id the customization ID
+     * @param customizationDto the customization DTO
+     * @return ResponseEntity with update result
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<RestAPIResponse> update(@PathVariable Integer id,
+                                                  @Valid @RequestBody CustomizationDto customizationDto) {
+        customizationDto.setId(id);
+        int rows = customizationService.updateCustomization(customizationDto.toEntity());
+        log.debug("Customization updated with ID: {}, rows: {}", id, rows);
+        return new ResponseEntity<>(RestAPIResponse.builder().httpStatus(HttpStatus.OK.value()).build(), HttpStatus.OK);
+    }
+
+    /**
      * Deletes a customization by its ID.
      *
      * @param id the customization ID
@@ -80,10 +96,11 @@ public class CustomizationController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
+        int rows = customizationService.deleteCustomization(id);
+        log.debug("Customization deleted with ID: {}, rows: {}", id, rows);
         return new ResponseEntity<>(
                 RestAPIResponse.builder()
                         .httpStatus(HttpStatus.OK.value())
-                        .data(customizationService.getCustomizationById(id))
                         .build(),
                 HttpStatus.OK
         );

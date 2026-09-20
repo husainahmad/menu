@@ -25,6 +25,21 @@ public class Customization {
     private String name;
 
     /**
+     * Description of the customization.
+     */
+    private String description;
+
+    /**
+     * Minimum number of options that must be selected.
+     */
+    private Integer minimumSelection;
+
+    /**
+     * Maximum number of options that can be selected.
+     */
+    private Integer maximumSelection;
+
+    /**
      * Type of selection (e.g., single, multiple). Use Enum if needed.
      */
     private SelectionType selectionType;
@@ -42,7 +57,7 @@ public class Customization {
     /**
      * Indicates if the customization is required.
      */
-    private Boolean isRequired;
+    private Boolean required;
 
     /**
      * Timestamp when the customization was created.
