@@ -29,6 +29,7 @@
     <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>
     from tables tbl
     left join stores store on store.id = tbl.store_id
+    left join store_tiers store_tier on store_tier.store_id = store.id
     where tbl.id = #{id,jdbcType=INTEGER}
           and tbl.deleted_at is null
   </select>
@@ -48,6 +49,7 @@
     <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>
     from tables tbl
     left join stores store on store.id = tbl.store_id
+    left join store_tiers store_tier on store_tier.store_id = store.id
     where tbl.deleted_at is null
   </select>
 
@@ -57,6 +59,7 @@
     <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>
     from tables tbl
     left join stores store on store.id = tbl.store_id
+    left join store_tiers store_tier on store_tier.store_id = store.id
     where tbl.store_id = #{storeId,jdbcType=INTEGER}
           and tbl.deleted_at is null
   </select>

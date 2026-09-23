@@ -30,12 +30,19 @@ public class SkuTierPriceServiceImpl implements SkuTierPriceService {
     /**
      * {@inheritDoc}
      * <p>
-     * Currently not implemented (returns 0).
+     * Inserts a single SKU tier price or updates the price when a row for the
+     * same {@code skuId} and {@code tierId} already exists.
      */
     @Override
     public int create(SkuTierPriceDto skuTierPriceDto) {
-        // Implementation pending
-        return 0;
+        if (skuTierPriceDto == null) {
+            return 0;
+        }
+        SkuTierPrice skuTierPrice = skuTierPriceDto.toSkuTierPrice();
+        long now = System.currentTimeMillis();
+        skuTierPrice.setCreatedAt(new Date(now));
+        skuTierPrice.setUpdatedAt(new Date(now));
+        return skuTierPriceMapper.insertOrUpdate(skuTierPrice);
     }
 
     /**

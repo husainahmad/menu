@@ -3,12 +3,14 @@ package com.harmoni.pos.business.service.skutierprice;
 import com.harmoni.pos.menu.mapper.SkuTierPriceMapper;
 import com.harmoni.pos.menu.model.Sku;
 import com.harmoni.pos.menu.model.SkuTierPrice;
+import com.harmoni.pos.menu.model.dto.SkuTierPriceDto;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,6 +51,26 @@ class SkuTierPriceServiceImplTest {
     @Test
     void create_shouldReturnZero() {
         assertEquals(0, skuTierPriceService.create(null));
+    }
+
+    @Test
+    void create_shouldInsertWithTimestamps() {
+        SkuTierPriceDto dto = new SkuTierPriceDto();
+        dto.setSkuId(1);
+        dto.setTierId(10);
+        dto.setPrice(BigDecimal.TEN);
+        when(skuTierPriceMapper.insertOrUpdate(any(SkuTierPrice.class))).thenReturn(1);
+
+        assertEquals(1, skuTierPriceService.create(dto));
+
+        ArgumentCaptor<SkuTierPrice> captor = ArgumentCaptor.forClass(SkuTierPrice.class);
+        verify(skuTierPriceMapper).insertOrUpdate(captor.capture());
+        SkuTierPrice saved = captor.getValue();
+        assertEquals(1, saved.getSkuId());
+        assertEquals(10, saved.getTierId());
+        assertEquals(BigDecimal.TEN, saved.getPrice());
+        assertNotNull(saved.getCreatedAt());
+        assertNotNull(saved.getUpdatedAt());
     }
 
     @Test
