@@ -6,8 +6,8 @@
     <id column="product_image_id" jdbcType="INTEGER" property="id" />
     <result column="product_image_product_id" jdbcType="INTEGER" property="productId" />
     <result column="product_image_file_name" jdbcType="VARCHAR" property="fileName" />
-    <result column="product_image_image_blob" jdbcType="BLOB" property="imageBlob" />
-    <result column="product_image_mime_type" jdbcType="BLOB" property="mimeType" />
+    <result column="product_image_url" jdbcType="VARCHAR" property="url" />
+    <result column="product_image_mime_type" jdbcType="VARCHAR" property="mimeType" />
     <result column="product_image_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="product_image_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
   </resultMap>
@@ -16,7 +16,7 @@
       product_image.id as product_image_id,
       product_image.product_id as product_image_product_id,
       product_image.file_name as product_image_file_name,
-      product_image.image_blob as product_image_image_blob,
+      product_image.url as product_image_url,
       product_image.mime_type as product_image_mime_type,
       product_image.created_at as product_image_created_at,
       product_image.updated_at as product_image_updated_at
@@ -45,9 +45,9 @@
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into product_images (product_id, file_name, image_blob, mime_type, created_at,
+    insert into product_images (product_id, file_name, url, mime_type, created_at,
       updated_at)
-    values (#{productId,jdbcType=INTEGER}, #{fileName,jdbcType=VARCHAR}, #{imageBlob,jdbcType=BLOB},
+    values (#{productId,jdbcType=INTEGER}, #{fileName,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR},
     #{mimeType,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
   </insert>
 
@@ -55,7 +55,7 @@
     update product_images
     set product_id = #{productId,jdbcType=INTEGER},
       file_name = #{fileName,jdbcType=VARCHAR},
-      image_blob = #{imageBlob,jdbcType=BLOB},
+      url = #{url,jdbcType=VARCHAR},
       mime_type = #{mimeType,jdbcType=VARCHAR},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP}
@@ -71,7 +71,7 @@
   <update id="updateImageByProductKey" parameterType="com.harmoni.pos.menu.model.ProductImage">
     update product_images
     set file_name = #{fileName,jdbcType=VARCHAR},
-        image_blob = #{imageBlob,jdbcType=BLOB},
+        url = #{url,jdbcType=VARCHAR},
         mime_type = #{mimeType,jdbcType=VARCHAR},
         created_at = #{createdAt,jdbcType=TIMESTAMP},
         updated_at = #{updatedAt,jdbcType=TIMESTAMP}

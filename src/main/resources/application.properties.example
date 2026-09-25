@@ -2,6 +2,10 @@ server.port=8082
 server.address=127.0.0.1
 #Menu configuration properties
 
+#ImgBB image-hosting configuration
+imgbb.url=https://api.imgbb.com/1/upload
+imgbb.apiKey=${IMGGB_API_KEY:}
+
 harmoni.user.db=pos-user
 harmoni.user.password=forlearn27!
 
@@ -50,6 +54,3 @@ auth.url=http://localhost:8080
 auth.url.register=${auth.url}/api/v1/user
 auth.url.delete=${auth.url}/api/v1/user
 auth.url.update=${auth.url}/api/v1/user
-
-application.properties
-application.yml

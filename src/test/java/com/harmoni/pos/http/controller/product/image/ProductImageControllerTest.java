@@ -37,7 +37,7 @@ class ProductImageControllerTest {
     @Test
     void create_shouldReturn201() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "image.png", "image/png", "test-image-content".getBytes());
-        when(productImageService.insert(any(ProductImageDto.class))).thenReturn(new ProductImage().setId(1));
+        when(productImageService.insert(any(ProductImageDto.class), any(byte[].class))).thenReturn(new ProductImage().setId(1));
 
         mockMvc.perform(multipart("/api/v1/product/image/upload")
                         .file(file))
@@ -47,7 +47,7 @@ class ProductImageControllerTest {
     @Test
     void update_shouldReturn201() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "image.png", "image/png", "test-image-content".getBytes());
-        when(productImageService.updateImageByProductId(eq(1), any(ProductImageEditDto.class)))
+        when(productImageService.updateImageByProductId(eq(1), any(ProductImageEditDto.class), any(byte[].class)))
                 .thenReturn(new ProductImage().setId(1).setProductId(1));
 
         mockMvc.perform(multipart("/api/v1/product/image/1/upload")

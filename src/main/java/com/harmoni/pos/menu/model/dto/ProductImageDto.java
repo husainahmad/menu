@@ -31,10 +31,9 @@ public class ProductImageDto {
     private String fileName;
 
     /**
-     * The image data as a byte array.
+     * The hosted image URL as returned by ImgBB.
      */
-    @NotNull(message = "{validation.product.image.byte.NotNull}")
-    private byte[] imageBlob;
+    private String url;
 
     /**
      * The MIME type of the image.
@@ -50,7 +49,7 @@ public class ProductImageDto {
     public ProductImage toProductImage() {
         return new ProductImage()
                 .setProductId(productId)
-                .setImageBlob(imageBlob)
+                .setUrl(url)
                 .setFileName(fileName)
                 .setMimeType(mimeType);
     }

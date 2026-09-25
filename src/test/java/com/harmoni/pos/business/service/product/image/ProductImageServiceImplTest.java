@@ -12,15 +12,24 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Base64;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductImageServiceImplTest {
 
+    private static final byte[] IMAGE_BYTES = Base64.getDecoder().decode(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==");
+
     @Mock
     private ProductImageMapper productImageMapper;
+
+    @Mock
+    private ImgbbUploadService imgbbUploadService;
 
     @InjectMocks
     private ProductImageServiceImpl productImageService;
@@ -32,7 +41,7 @@ class ProductImageServiceImplTest {
         productImage = new ProductImage()
                 .setId(1).setProductId(10)
                 .setFileName("test.jpg")
-                .setImageBlob(new byte[]{1, 2, 3});
+                .setUrl("http://imgbb.test/x.jpg");
     }
 
     @Test
@@ -57,6 +66,21 @@ class ProductImageServiceImplTest {
     void selectByProductId_shouldReturnImage() {
         when(productImageMapper.selectByProductKey(10)).thenReturn(productImage);
         assertNotNull(productImageService.selectByProductId(10));
+    }
+
+    @Test
+    void insert_shouldUploadToImgbbAndReturnProductImage() throws Exception {
+        ProductImageDto dto = new ProductImageDto();
+        dto.setProductId(10);
+        dto.setFileName("x.jpg");
+        dto.setMimeType("image/jpeg");
+        when(imgbbUploadService.upload(any(byte[].class), anyString())).thenReturn("http://imgbb.test/y.jpg");
+        when(productImageMapper.insert(any(ProductImage.class))).thenReturn(1);
+
+        ProductImage result = productImageService.insert(dto, IMAGE_BYTES);
+
+        assertEquals("http://imgbb.test/y.jpg", result.getUrl());
+        verify(productImageMapper).insert(any(ProductImage.class));
     }
 
     @Test
@@ -88,10 +112,14 @@ class ProductImageServiceImplTest {
     @Test
     void updateImageByProductId_shouldUpdate_whenExisting() throws Exception {
         ProductImageEditDto editDto = new ProductImageEditDto();
+        editDto.setFileName("x.jpg");
+        editDto.setMimeType("image/jpeg");
         when(productImageMapper.selectByProductKey(10)).thenReturn(productImage);
         when(productImageMapper.updateImageByProductKey(any(ProductImage.class))).thenReturn(1);
+        when(imgbbUploadService.upload(any(byte[].class), anyString())).thenReturn("http://imgbb.test/x.jpg");
 
-        ProductImage result = productImageService.updateImageByProductId(10, editDto);
+        ProductImage result = productImageService.updateImageByProductId(10, editDto, IMAGE_BYTES);
         assertNotNull(result);
+        assertEquals("http://imgbb.test/x.jpg", result.getUrl());
     }
 }

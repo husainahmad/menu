@@ -18,6 +18,7 @@ import java.util.Date;
 public class ProductImageServiceImpl implements ProductImageService {
 
     private final ProductImageMapper productImageMapper;
+    private final ImgbbUploadService imgbbUploadService;
 
     @Override
     public int deleteByPrimaryKey(Integer id) {
@@ -25,10 +26,9 @@ public class ProductImageServiceImpl implements ProductImageService {
     }
 
     @Override
-    public ProductImage insert(ProductImageDto productImageDto) throws IOException {
+    public ProductImage insert(ProductImageDto productImageDto, byte[] imageBytes) throws IOException {
         ProductImage productImage = productImageDto.toProductImage();
-        byte[] compressedImage = ImageUtils.compressImage(productImage.getImageBlob());
-        productImage.setImageBlob(compressedImage);
+        productImage.setUrl(imgbbUploadService.upload(ImageUtils.compressImage(imageBytes), productImageDto.getFileName()));
         productImageMapper.insert(productImage);
         return productImage;
     }
@@ -67,25 +67,24 @@ public class ProductImageServiceImpl implements ProductImageService {
     }
 
     @Override
-    public ProductImage updateImageByProductId(Integer productId, ProductImageEditDto productImageEditDto) throws IOException {
+    public ProductImage updateImageByProductId(Integer productId, ProductImageEditDto productImageEditDto, byte[] imageBytes) throws IOException {
         ProductImage productImage = productImageEditDto.toProductImage();
         productImage.setProductId(productId);
+        productImage.setUrl(imgbbUploadService.upload(ImageUtils.compressImage(imageBytes), productImageEditDto.getFileName()));
 
         if (ObjectUtils.isNotEmpty(productImageMapper.selectByProductKey(productId))) {
             productImageMapper.updateImageByProductKey(productImage);
             return productImage;
         }
 
-        return insert(productImageEditDto);
-
+        productImageMapper.insert(productImage);
+        return productImage;
     }
 
     @Override
-    public int updateByPrimaryKey(Integer id, ProductImageDto productImageDto) throws IOException {
+    public int updateByPrimaryKey(Integer id, ProductImageDto productImageDto) {
         ProductImage productImage = productImageDto.toProductImage();
         productImage.setId(id);
-        byte[] compressedImage = ImageUtils.compressImage(productImage.getImageBlob());
-        productImage.setImageBlob(compressedImage);
         return productImageMapper.updateByPrimaryKey(productImage);
     }
 }

@@ -30,9 +30,9 @@ public class ProductImage {
     private String fileName;
 
     /**
-     * The image data as a byte array.
+     * The hosted image URL as returned by ImgBB.
      */
-    private byte[] imageBlob;
+    private String url;
 
     /**
      * The MIME type of the image.

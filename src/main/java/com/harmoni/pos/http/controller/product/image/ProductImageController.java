@@ -28,7 +28,7 @@ public class ProductImageController {
     private final ProductImageService productImageService;
 
     /**
-     * Uploads a new Product Image.
+     * Uploads a new Product Image; the menu service hosts it on ImgBB.
      *
      * @param file the image file to upload
      * @return ResponseEntity containing the created product image
@@ -40,9 +40,8 @@ public class ProductImageController {
         ProductImageDto productImageDto = new ProductImageDto();
         productImageDto.setFileName(file.getOriginalFilename());
         productImageDto.setMimeType(file.getContentType());
-        productImageDto.setImageBlob(file.getBytes());
 
-        ProductImage productImage = productImageService.insert(productImageDto);
+        ProductImage productImage = productImageService.insert(productImageDto, file.getBytes());
 
         log.debug("Product image created {} ", ObjectUtils.getDisplayString(productImage));
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -53,7 +52,8 @@ public class ProductImageController {
     }
 
     /**
-     * Updates the Product Image for a given Product ID.
+     * Updates the Product Image for a given Product ID; the menu service hosts
+     * the new image on ImgBB.
      *
      * @param productId the product ID
      * @param file the image file to upload
@@ -68,9 +68,8 @@ public class ProductImageController {
         productImageDto.setProductId(productId);
         productImageDto.setFileName(file.getOriginalFilename());
         productImageDto.setMimeType(file.getContentType());
-        productImageDto.setImageBlob(file.getBytes());
 
-        ProductImage productImage = productImageService.updateImageByProductId(productId, productImageDto);
+        ProductImage productImage = productImageService.updateImageByProductId(productId, productImageDto, file.getBytes());
 
         log.debug("Product image updated {} ", ObjectUtils.getDisplayString(productImage));
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
