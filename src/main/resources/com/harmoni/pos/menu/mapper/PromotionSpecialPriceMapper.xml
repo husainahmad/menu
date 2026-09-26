@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.PromotionSpecialPriceMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.PromotionSpecialPrice">
+    <id column="psp_id" jdbcType="BIGINT" property="id" />
+    <result column="psp_promotion_id" jdbcType="BIGINT" property="promotionId" />
+    <result column="psp_sku_id" jdbcType="BIGINT" property="skuId" />
+    <result column="psp_special_price" jdbcType="DECIMAL" property="specialPrice" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    psp.id as psp_id,
+    psp.promotion_id as psp_promotion_id,
+    psp.sku_id as psp_sku_id,
+    psp.special_price as psp_special_price
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_special_prices psp
+    where psp.id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectByPromotionIdAndSkuId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_special_prices psp
+    where psp.promotion_id = #{promotionId,jdbcType=BIGINT}
+      and psp.sku_id = #{skuId,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectByPromotionId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_special_prices psp
+    where psp.promotion_id = #{promotionId,jdbcType=BIGINT}
+    order by psp.sku_id asc
+  </select>
+
+  <select id="selectBySkuIds" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_special_prices psp
+    where psp.sku_id in
+    <foreach item="skuId" index="index" collection="skuIds" separator="," open="(" close=")">
+      #{skuId,jdbcType=BIGINT}
+    </foreach>
+  </select>
+
+  <select id="selectEffectiveBySkuId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_special_prices psp
+        inner join promotions pr on pr.id = psp.promotion_id
+    where psp.sku_id = #{skuId,jdbcType=BIGINT}
+      and pr.status in ('ACTIVE', 'SCHEDULED')
+    order by pr.priority asc, psp.id asc
+    limit 1
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from promotion_special_prices
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <delete id="deleteByPromotionId" parameterType="java.lang.Long">
+    delete from promotion_special_prices
+    where promotion_id = #{promotionId,jdbcType=BIGINT}
+  </delete>
+
+  <insert id="insertOrUpdate" parameterType="com.harmoni.pos.menu.model.PromotionSpecialPrice">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into promotion_special_prices (promotion_id, sku_id, special_price)
+    values (#{promotionId,jdbcType=BIGINT}, #{skuId,jdbcType=BIGINT}, #{specialPrice,jdbcType=DECIMAL})
+    on duplicate key update special_price = #{specialPrice,jdbcType=DECIMAL}
+  </insert>
+
+  <insert id="insertOrUpdateBatch">
+    insert into promotion_special_prices (promotion_id, sku_id, special_price)
+    values
+    <foreach item="specialPrice" index="index" collection="specialPrices" separator=",">
+      (#{specialPrice.promotionId,jdbcType=BIGINT}, #{specialPrice.skuId,jdbcType=BIGINT},
+      #{specialPrice.specialPrice,jdbcType=DECIMAL})
+    </foreach>
+    on duplicate key update
+    special_price = values(special_price)
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.PromotionSpecialPrice">
+    update promotion_special_prices
+    set promotion_id = #{promotionId,jdbcType=BIGINT},
+      sku_id = #{skuId,jdbcType=BIGINT},
+      special_price = #{specialPrice,jdbcType=DECIMAL}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

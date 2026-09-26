@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.PromotionRuleMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.PromotionRule">
+    <id column="prl_id" jdbcType="BIGINT" property="id" />
+    <result column="prl_promotion_id" jdbcType="BIGINT" property="promotionId" />
+    <result column="prl_rule_type" jdbcType="VARCHAR" property="ruleType"
+            javaType="com.harmoni.pos.menu.model.PromotionRuleType" />
+    <result column="prl_discount_value" jdbcType="DECIMAL" property="discountValue" />
+    <result column="prl_max_discount_amount" jdbcType="DECIMAL" property="maxDiscountAmount" />
+    <result column="prl_min_quantity" jdbcType="DECIMAL" property="minQuantity" />
+    <result column="prl_min_amount" jdbcType="DECIMAL" property="minAmount" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    prl.id as prl_id,
+    prl.promotion_id as prl_promotion_id,
+    prl.rule_type as prl_rule_type,
+    prl.discount_value as prl_discount_value,
+    prl.max_discount_amount as prl_max_discount_amount,
+    prl.min_quantity as prl_min_quantity,
+    prl.min_amount as prl_min_amount
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_rules prl
+    where prl.id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectByPromotionId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_rules prl
+    where prl.promotion_id = #{promotionId,jdbcType=BIGINT}
+    order by prl.id asc
+  </select>
+
+  <select id="selectByPromotionIdAndType" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_rules prl
+    where prl.promotion_id = #{promotionId,jdbcType=BIGINT}
+      and prl.rule_type = #{ruleType,jdbcType=VARCHAR}
+    order by prl.id asc
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from promotion_rules
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <delete id="deleteByPromotionId" parameterType="java.lang.Long">
+    delete from promotion_rules
+    where promotion_id = #{promotionId,jdbcType=BIGINT}
+  </delete>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.PromotionRule">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into promotion_rules (promotion_id, rule_type, discount_value, max_discount_amount,
+      min_quantity, min_amount)
+    values (#{promotionId,jdbcType=BIGINT}, #{ruleType,jdbcType=VARCHAR},
+      #{discountValue,jdbcType=DECIMAL}, #{maxDiscountAmount,jdbcType=DECIMAL},
+      #{minQuantity,jdbcType=DECIMAL}, #{minAmount,jdbcType=DECIMAL})
+  </insert>
+
+  <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+    insert into promotion_rules (promotion_id, rule_type, discount_value, max_discount_amount,
+      min_quantity, min_amount)
+    values
+    <foreach item="rule" index="index" collection="rules" separator=",">
+      (#{rule.promotionId,jdbcType=BIGINT}, #{rule.ruleType,jdbcType=VARCHAR},
+      #{rule.discountValue,jdbcType=DECIMAL}, #{rule.maxDiscountAmount,jdbcType=DECIMAL},
+      #{rule.minQuantity,jdbcType=DECIMAL}, #{rule.minAmount,jdbcType=DECIMAL})
+    </foreach>
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.PromotionRule">
+    update promotion_rules
+    set promotion_id = #{promotionId,jdbcType=BIGINT},
+      rule_type = #{ruleType,jdbcType=VARCHAR},
+      discount_value = #{discountValue,jdbcType=DECIMAL},
+      max_discount_amount = #{maxDiscountAmount,jdbcType=DECIMAL},
+      min_quantity = #{minQuantity,jdbcType=DECIMAL},
+      min_amount = #{minAmount,jdbcType=DECIMAL}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.PromotionScheduleMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.PromotionSchedule">
+    <id column="ps_id" jdbcType="BIGINT" property="id" />
+    <result column="ps_promotion_id" jdbcType="BIGINT" property="promotionId" />
+    <result column="ps_day_of_week" jdbcType="TINYINT" property="dayOfWeek"
+            javaType="java.time.DayOfWeek"
+            typeHandler="com.harmoni.pos.menu.typehandler.DayOfWeekTypeHandler" />
+    <result column="ps_start_time" jdbcType="TIME" property="startTime"
+            javaType="java.time.LocalTime"
+            typeHandler="org.apache.ibatis.type.LocalTimeTypeHandler" />
+    <result column="ps_end_time" jdbcType="TIME" property="endTime"
+            javaType="java.time.LocalTime"
+            typeHandler="org.apache.ibatis.type.LocalTimeTypeHandler" />
+    <result column="ps_enabled" jdbcType="BOOLEAN" property="enabled" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    ps.id as ps_id,
+    ps.promotion_id as ps_promotion_id,
+    ps.day_of_week as ps_day_of_week,
+    ps.start_time as ps_start_time,
+    ps.end_time as ps_end_time,
+    ps.enabled as ps_enabled
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_schedules ps
+    where ps.id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectByPromotionId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_schedules ps
+    where ps.promotion_id = #{promotionId,jdbcType=BIGINT}
+    order by ps.day_of_week asc, ps.start_time asc
+  </select>
+
+  <select id="selectActiveWindow" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_schedules ps
+    where ps.promotion_id = #{promotionId,jdbcType=BIGINT}
+      and ps.enabled = 1
+      and ps.day_of_week = #{dayOfWeek,jdbcType=TINYINT}
+      and (
+        (ps.start_time &lt;= ps.end_time
+          and #{startTime,jdbcType=TIME} &gt;= ps.start_time
+          and #{startTime,jdbcType=TIME} &lt; ps.end_time)
+        or
+        (ps.start_time &gt; ps.end_time
+          and (#{startTime,jdbcType=TIME} &gt;= ps.start_time or #{startTime,jdbcType=TIME} &lt; ps.end_time))
+      )
+    order by ps.start_time asc
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from promotion_schedules
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <delete id="deleteByPromotionId" parameterType="java.lang.Long">
+    delete from promotion_schedules
+    where promotion_id = #{promotionId,jdbcType=BIGINT}
+  </delete>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.PromotionSchedule">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into promotion_schedules (promotion_id, day_of_week, start_time, end_time, enabled)
+    values (#{promotionId,jdbcType=BIGINT},
+      #{dayOfWeek,jdbcType=TINYINT,typeHandler=com.harmoni.pos.menu.typehandler.DayOfWeekTypeHandler},
+      #{startTime,jdbcType=TIME,typeHandler=org.apache.ibatis.type.LocalTimeTypeHandler},
+      #{endTime,jdbcType=TIME,typeHandler=org.apache.ibatis.type.LocalTimeTypeHandler},
+      #{enabled,jdbcType=BOOLEAN})
+  </insert>
+
+  <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+    insert into promotion_schedules (promotion_id, day_of_week, start_time, end_time, enabled)
+    values
+    <foreach item="schedule" index="index" collection="schedules" separator=",">
+      (#{schedule.promotionId,jdbcType=BIGINT},
+      #{schedule.dayOfWeek,jdbcType=TINYINT,typeHandler=com.harmoni.pos.menu.typehandler.DayOfWeekTypeHandler},
+      #{schedule.startTime,jdbcType=TIME,typeHandler=org.apache.ibatis.type.LocalTimeTypeHandler},
+      #{schedule.endTime,jdbcType=TIME,typeHandler=org.apache.ibatis.type.LocalTimeTypeHandler},
+      #{schedule.enabled,jdbcType=BOOLEAN})
+    </foreach>
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.PromotionSchedule">
+    update promotion_schedules
+    set promotion_id = #{promotionId,jdbcType=BIGINT},
+      day_of_week = #{dayOfWeek,jdbcType=TINYINT,typeHandler=com.harmoni.pos.menu.typehandler.DayOfWeekTypeHandler},
+      start_time = #{startTime,jdbcType=TIME,typeHandler=org.apache.ibatis.type.LocalTimeTypeHandler},
+      end_time = #{endTime,jdbcType=TIME,typeHandler=org.apache.ibatis.type.LocalTimeTypeHandler},
+      enabled = #{enabled,jdbcType=BOOLEAN}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

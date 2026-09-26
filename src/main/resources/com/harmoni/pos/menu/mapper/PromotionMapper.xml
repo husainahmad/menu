@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.PromotionMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.Promotion">
+    <id column="pr_id" jdbcType="BIGINT" property="id" />
+    <result column="pr_code" jdbcType="VARCHAR" property="code" />
+    <result column="pr_name" jdbcType="VARCHAR" property="name" />
+    <result column="pr_description" jdbcType="VARCHAR" property="description" />
+    <result column="pr_promotion_type" jdbcType="VARCHAR" property="promotionType"
+            javaType="com.harmoni.pos.menu.model.PromotionType" />
+    <result column="pr_status" jdbcType="VARCHAR" property="status"
+            javaType="com.harmoni.pos.menu.model.PromotionStatus" />
+    <result column="pr_priority" jdbcType="INTEGER" property="priority" />
+    <result column="pr_start_date" jdbcType="DATE" property="startDate" />
+    <result column="pr_end_date" jdbcType="DATE" property="endDate" />
+    <result column="pr_created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="pr_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    pr.id as pr_id,
+    pr.code as pr_code,
+    pr.name as pr_name,
+    pr.description as pr_description,
+    pr.promotion_type as pr_promotion_type,
+    pr.status as pr_status,
+    pr.priority as pr_priority,
+    pr.start_date as pr_start_date,
+    pr.end_date as pr_end_date,
+    pr.created_at as pr_created_at,
+    pr.updated_at as pr_updated_at
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotions pr
+    where pr.id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectByCode" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotions pr
+    where pr.code = #{code,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectByFilter" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotions pr
+    where 1 = 1
+    <if test="status != null">
+      and pr.status = #{status,jdbcType=VARCHAR}
+    </if>
+    <if test="promotionType != null">
+      and pr.promotion_type = #{promotionType,jdbcType=VARCHAR}
+    </if>
+    <if test="search != null and search != ''">
+      and (pr.code like concat('%', #{search,jdbcType=VARCHAR}, '%')
+        or pr.name like concat('%', #{search,jdbcType=VARCHAR}, '%'))
+    </if>
+    order by pr.priority asc, pr.code asc
+  </select>
+
+  <select id="selectRedeemableOn" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotions pr
+    where pr.status in
+    <foreach item="status" index="index" collection="statuses" separator="," open="(" close=")">
+      #{status,jdbcType=VARCHAR}
+    </foreach>
+    <if test="onDate != null">
+      and (pr.start_date is null or pr.start_date &lt;= #{onDate,jdbcType=DATE})
+      and (pr.end_date is null or pr.end_date &gt;= #{onDate,jdbcType=DATE})
+    </if>
+    order by pr.priority asc, pr.id asc
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from promotions
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <delete id="deleteByFilter">
+    delete from promotions
+    where 1 = 1
+    <if test="status != null">
+      and status = #{status,jdbcType=VARCHAR}
+    </if>
+    <if test="promotionType != null">
+      and promotion_type = #{promotionType,jdbcType=VARCHAR}
+    </if>
+    <if test="search != null and search != ''">
+      and (code like concat('%', #{search,jdbcType=VARCHAR}, '%')
+        or name like concat('%', #{search,jdbcType=VARCHAR}, '%'))
+    </if>
+  </delete>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.Promotion">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into promotions (code, name, description, promotion_type, status, priority,
+      start_date, end_date, created_at, updated_at)
+    values (#{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR},
+      #{promotionType,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{priority,jdbcType=INTEGER},
+      #{startDate,jdbcType=DATE}, #{endDate,jdbcType=DATE},
+      #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Promotion">
+    update promotions
+    set code = #{code,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
+      promotion_type = #{promotionType,jdbcType=VARCHAR},
+      status = #{status,jdbcType=VARCHAR},
+      priority = #{priority,jdbcType=INTEGER},
+      start_date = #{startDate,jdbcType=DATE},
+      end_date = #{endDate,jdbcType=DATE},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <update id="updateStatus">
+    update promotions
+    set status = #{status,jdbcType=VARCHAR},
+      updated_at = now()
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

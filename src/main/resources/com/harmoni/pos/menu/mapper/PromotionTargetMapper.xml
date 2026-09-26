@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.PromotionTargetMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.PromotionTarget">
+    <id column="pt_id" jdbcType="BIGINT" property="id" />
+    <result column="pt_promotion_id" jdbcType="BIGINT" property="promotionId" />
+    <result column="pt_target_type" jdbcType="VARCHAR" property="targetType"
+            javaType="com.harmoni.pos.menu.model.PromotionTargetType" />
+    <result column="pt_product_id" jdbcType="BIGINT" property="productId" />
+    <result column="pt_sku_id" jdbcType="BIGINT" property="skuId" />
+    <result column="pt_category_id" jdbcType="BIGINT" property="categoryId" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    pt.id as pt_id,
+    pt.promotion_id as pt_promotion_id,
+    pt.target_type as pt_target_type,
+    pt.product_id as pt_product_id,
+    pt.sku_id as pt_sku_id,
+    pt.category_id as pt_category_id
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_targets pt
+    where pt.id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectByPromotionId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_targets pt
+    where pt.promotion_id = #{promotionId,jdbcType=BIGINT}
+    order by pt.target_type asc, pt.id asc
+  </select>
+
+  <select id="selectByPromotionIdAndType" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_targets pt
+    where pt.promotion_id = #{promotionId,jdbcType=BIGINT}
+      and pt.target_type = #{targetType,jdbcType=VARCHAR}
+    order by pt.id asc
+  </select>
+
+  <select id="selectByCatalogRefs" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_targets pt
+    where 1 = 1
+    <if test="promotionIds != null">
+      and pt.promotion_id in
+      <foreach item="promotionId" index="index" collection="promotionIds" separator="," open="(" close=")">
+        #{promotionId,jdbcType=BIGINT}
+      </foreach>
+    </if>
+    <if test="productIds != null">
+      and pt.product_id in
+      <foreach item="productId" index="index" collection="productIds" separator="," open="(" close=")">
+        #{productId,jdbcType=BIGINT}
+      </foreach>
+    </if>
+    <if test="skuIds != null">
+      and pt.sku_id in
+      <foreach item="skuId" index="index" collection="skuIds" separator="," open="(" close=")">
+        #{skuId,jdbcType=BIGINT}
+      </foreach>
+    </if>
+    <if test="categoryIds != null">
+      and pt.category_id in
+      <foreach item="categoryId" index="index" collection="categoryIds" separator="," open="(" close=")">
+        #{categoryId,jdbcType=BIGINT}
+      </foreach>
+    </if>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from promotion_targets
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <delete id="deleteByPromotionId" parameterType="java.lang.Long">
+    delete from promotion_targets
+    where promotion_id = #{promotionId,jdbcType=BIGINT}
+  </delete>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.PromotionTarget">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into promotion_targets (promotion_id, target_type, product_id, sku_id, category_id)
+    values (#{promotionId,jdbcType=BIGINT}, #{targetType,jdbcType=VARCHAR},
+      #{productId,jdbcType=BIGINT}, #{skuId,jdbcType=BIGINT}, #{categoryId,jdbcType=BIGINT})
+  </insert>
+
+  <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+    insert into promotion_targets (promotion_id, target_type, product_id, sku_id, category_id)
+    values
+    <foreach item="target" index="index" collection="targets" separator=",">
+      (#{target.promotionId,jdbcType=BIGINT}, #{target.targetType,jdbcType=VARCHAR},
+      #{target.productId,jdbcType=BIGINT}, #{target.skuId,jdbcType=BIGINT},
+      #{target.categoryId,jdbcType=BIGINT})
+    </foreach>
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.PromotionTarget">
+    update promotion_targets
+    set promotion_id = #{promotionId,jdbcType=BIGINT},
+      target_type = #{targetType,jdbcType=VARCHAR},
+      product_id = #{productId,jdbcType=BIGINT},
+      sku_id = #{skuId,jdbcType=BIGINT},
+      category_id = #{categoryId,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>
