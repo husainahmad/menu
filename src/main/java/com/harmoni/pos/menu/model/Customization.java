@@ -60,6 +60,14 @@ public class Customization {
     private Boolean required;
 
     /**
+     * Whether an option in this customization may be chosen with a quantity greater
+     * than one (e.g. three extra shots). When {@code false} or {@code null}, every
+     * choice carries exactly one unit; a larger quantity is rejected at validation
+     * and pricing time.
+     */
+    private Boolean allowQuantity;
+
+    /**
      * Timestamp when the customization was created.
      */
     private Date createdAt;

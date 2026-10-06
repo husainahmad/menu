@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -55,6 +56,7 @@ class ProductCustomizationServiceImplTest {
                 .setSelectionType(SelectionType.MULTIPLE)
                 .setBrandId(1)
                 .setRequired(true)
+                .setAllowQuantity(true)
                 .setMinimumSelection(1)
                 .setMaximumSelection(3);
     }
@@ -173,7 +175,7 @@ class ProductCustomizationServiceImplTest {
         option1.setId(101);
         customization.setCustomizationOptions(List.of(option1));
 
-        when(mapper.selectByProductId(10)).thenReturn(List.of(pc));
+        when(mapper.selectByProductIds(List.of(10))).thenReturn(List.of(pc));
         when(customizationMapper.selectByIds(List.of(20))).thenReturn(List.of(customization));
         when(customizationOptionMapper.selectByCustomizationIds(List.of(20))).thenReturn(List.of(option1));
         when(customizationOptionTierPriceMapper.selectByOptionIds(List.of(101))).thenReturn(option1.getTierPrices());
@@ -185,6 +187,7 @@ class ProductCustomizationServiceImplTest {
         assertEquals(1, dto.getId());
         assertEquals("Topping", dto.getName());
         assertEquals(false, dto.getRequired());
+        assertEquals(true, dto.getAllowQuantity());
         assertEquals(2, dto.getMinSelection());
         assertEquals(4, dto.getMaxSelection());
         assertEquals(0, dto.getSortOrder());
@@ -194,8 +197,57 @@ class ProductCustomizationServiceImplTest {
 
     @Test
     void getDetailedByProductId_shouldReturnEmptyWhenNoLinks() {
-        when(mapper.selectByProductId(10)).thenReturn(List.of());
+        when(mapper.selectByProductIds(List.of(10))).thenReturn(List.of());
         assertTrue(productCustomizationService.getDetailedByProductId(10).isEmpty());
+    }
+
+    /**
+     * The batch form exists so a basket does not cost a query per product. It has to key its
+     * answer by product, or a caller holding a map of everything would still have to go back
+     * to the database to find out which groups belonged to which product.
+     */
+    @Test
+    void getDetailedByProductIds_shouldKeyEachProductsGroupsAndNotAskOncePerProduct() {
+        ProductCustomization first = new ProductCustomization().setId(1).setProductId(10)
+                .setCustomizationId(20).setSortOrder(0);
+        ProductCustomization second = new ProductCustomization().setId(2).setProductId(11)
+                .setCustomizationId(20).setSortOrder(0);
+        customization.setCustomizationOptions(List.of());
+
+        when(mapper.selectByProductIds(List.of(10, 11))).thenReturn(List.of(first, second));
+        when(customizationMapper.selectByIds(List.of(20))).thenReturn(List.of(customization));
+        when(customizationOptionMapper.selectByCustomizationIds(List.of(20))).thenReturn(List.of());
+
+        Map<Integer, List<ProductCustomizationResponseDto>> result =
+                productCustomizationService.getDetailedByProductIds(List.of(10, 11));
+
+        assertEquals(List.of(10, 11), List.copyOf(result.keySet()));
+        assertEquals(1, result.get(10).size());
+        assertEquals(1, result.get(11).size());
+        assertEquals(10, result.get(10).get(0).getProductId());
+        assertEquals(11, result.get(11).get(0).getProductId());
+        // One read of the links and one of the customizations for the whole set, rather than
+        // each of those repeated per product.
+        verify(mapper).selectByProductIds(List.of(10, 11));
+        verify(customizationMapper, times(1)).selectByIds(List.of(20));
+    }
+
+    @Test
+    void getDetailedByProductIds_shouldAskNothingForAnEmptyRequest() {
+        assertTrue(productCustomizationService.getDetailedByProductIds(List.of()).isEmpty());
+        verify(mapper, never()).selectByProductIds(anyList());
+    }
+
+    @Test
+    void getDetailedByProductIds_shouldOmitAProductWithNoCustomizations() {
+        when(mapper.selectByProductIds(List.of(10, 11)))
+                .thenReturn(List.of(new ProductCustomization().setId(1).setProductId(10).setCustomizationId(20)));
+
+        Map<Integer, List<ProductCustomizationResponseDto>> result =
+                productCustomizationService.getDetailedByProductIds(List.of(10, 11));
+
+        assertTrue(result.containsKey(10));
+        assertFalse(result.containsKey(11));
     }
 
     @Test

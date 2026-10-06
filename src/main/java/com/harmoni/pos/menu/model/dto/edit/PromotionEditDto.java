@@ -6,6 +6,7 @@ import com.harmoni.pos.menu.model.dto.PromotionDto;
 import com.harmoni.pos.menu.model.dto.PromotionRuleDto;
 import com.harmoni.pos.menu.model.dto.PromotionScheduleDto;
 import com.harmoni.pos.menu.model.dto.PromotionSpecialPriceDto;
+import com.harmoni.pos.menu.model.dto.PromotionScopeDto;
 import com.harmoni.pos.menu.model.dto.PromotionTargetDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -54,6 +55,12 @@ public class PromotionEditDto extends PromotionDto {
      */
     @JsonProperty("specialPrices")
     private @Valid List<PromotionSpecialPriceDto> specialPriceDtos;
+
+    /**
+     * The scope definitions replacing the current ones.
+     */
+    @JsonProperty("scopes")
+    private @Valid List<PromotionScopeDto> scopeDtos;
 
     /**
      * Converts this DTO to a Promotion entity, without the child collections.

@@ -29,6 +29,6 @@
     </typeAliases>
     <mappers>
 
-        <mapper resource="pos/menu/dao/menu/mapper/BrandMapper.xml" />
+        <mapper resource="com/harmoni/pos/menu/mapper/BrandMapper.xml" />
     </mappers>
 </configuration>

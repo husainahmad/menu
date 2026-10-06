@@ -85,6 +85,12 @@ public class Promotion {
     private List<PromotionTarget> targets;
 
     /**
+     * The scope definitions the promotion applies to (tenant, brand, chain, store).
+     */
+    @JsonProperty("scopes")
+    private List<PromotionScope> scopes;
+
+    /**
      * The conditions and caps applied when resolving the discount.
      */
     @JsonProperty("rules")

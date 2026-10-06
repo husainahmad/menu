@@ -61,6 +61,17 @@ public interface CustomizationOptionMapper {
     List<CustomizationOption> selectByCustomizationId(Integer customizationId);
 
     /**
+     * Selects the customization options with the given IDs, skipping soft deleted rows.
+     * <p>
+     * Needed when the caller already knows which option IDs it wants (for example the
+     * options a customer picked) and only needs their names and groups back.
+     *
+     * @param ids the option IDs
+     * @return the matching options
+     */
+    List<CustomizationOption> selectByIds(List<Integer> ids);
+
+    /**
      * Retrieves all non-deleted options for a list of customizations.
      * Used for batch-loading options across multiple customizations.
      *

@@ -98,6 +98,70 @@ class ProductControllerTest {
                 .andExpect(status().isOk());
     }
 
+
+    private static com.harmoni.pos.menu.model.CustomizationOption option(String name,
+                                                                         java.math.BigDecimal price) {
+        var tierPrice = new com.harmoni.pos.menu.model.CustomizationOptionTierPrice();
+        tierPrice.setTierId(20);
+        tierPrice.setPrice(price);
+        var option = new com.harmoni.pos.menu.model.CustomizationOption();
+        option.setId(1001);
+        option.setName(name);
+        option.setTierPrices(List.of(tierPrice));
+        return option;
+    }
+
+    private static Product productWithCustomization() {
+        var customization = new com.harmoni.pos.menu.model.Customization();
+        customization.setId(100);
+        customization.setName("Toppings");
+        customization.setRequired(true);
+        customization.setMinimumSelection(2);
+        customization.setCustomizationOptions(List.of(option("Cheese", new java.math.BigDecimal("1.50"))));
+        return new Product().setId(1).setName("Burger").setCustomizations(List.of(customization));
+    }
+
+    @Test
+    void getByCategory_shouldReturnCustomizationsAndOptions() throws Exception {
+        when(productService.selectByCategory(1)).thenReturn(List.of(productWithCustomization()));
+
+        mockMvc.perform(get("/api/v1/product/category/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].customizations[0].name").value("Toppings"))
+                .andExpect(jsonPath("$.data[0].customizations[0].required").value(true))
+                .andExpect(jsonPath("$.data[0].customizations[0].minimumSelection").value(2))
+                .andExpect(jsonPath("$.data[0].customizations[0].customizationOptions[0].name").value("Cheese"))
+                .andExpect(jsonPath("$.data[0].customizations[0].customizationOptions[0].tierPrices[0].price")
+                        .value(1.50));
+    }
+
+    @Test
+    void getByCategoryPrice_shouldReturnCustomizationsAndOptions() throws Exception {
+        when(productService.selectByCategoryPrice("ahmad.husain", 1))
+                .thenReturn(List.of(productWithCustomization()));
+
+        mockMvc.perform(get("/api/v1/product/category/1/price")
+                        .header("X-Username", "ahmad.husain"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].customizations[0].name").value("Toppings"))
+                .andExpect(jsonPath("$.data[0].customizations[0].customizationOptions[0].name").value("Cheese"))
+                .andExpect(jsonPath("$.data[0].customizations[0].customizationOptions[0].tierPrices[0].price")
+                        .value(1.50));
+    }
+
+    @Test
+    void getByCategoryBrand_shouldReturnCustomizationsAndOptions() throws Exception {
+        var pagination = new java.util.HashMap<String, Object>();
+        pagination.put("data", List.of(productWithCustomization()));
+        when(productService.selectByCategoryBrand(1, 2, 1, 10, "search")).thenReturn(pagination);
+
+        mockMvc.perform(get("/api/v1/product/category/1/2")
+                        .param("page", "1").param("size", "10").param("search", "search"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.data[0].customizations[0].customizationOptions[0].name")
+                        .value("Cheese"));
+    }
+
     @Test
     void getByCategory_shouldReturn200() throws Exception {
         when(productService.selectByCategory(1)).thenReturn(List.of(new Product().setId(1)));

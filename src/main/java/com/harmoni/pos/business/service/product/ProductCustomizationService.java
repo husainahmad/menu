@@ -5,6 +5,7 @@ import com.harmoni.pos.menu.model.dto.product.ProductCustomizationConfigDto;
 import com.harmoni.pos.menu.model.dto.product.ProductCustomizationResponseDto;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -53,6 +54,20 @@ public interface ProductCustomizationService {
      * @return ordered list of product-customization details
      */
     List<ProductCustomizationResponseDto> getDetailedByProductId(Integer productId);
+
+    /**
+     * Retrieves the customizations of several products with their per-product configuration
+     * and options, in one pass.
+     * <p>
+     * Reading a basket one product at a time costs four queries per product, so a forty line
+     * order spends most of its time waiting on the database rather than answering. This reads
+     * the links, the customizations, the options and the option prices once for the whole set.
+     *
+     * @param productIds the product IDs
+     * @return each product's ordered details, keyed by product ID; a product with no
+     *         customizations is absent rather than mapped to an empty list
+     */
+    Map<Integer, List<ProductCustomizationResponseDto>> getDetailedByProductIds(List<Integer> productIds);
 
     /**
      * Updates the per-product override configuration of a single link.

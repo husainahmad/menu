@@ -38,6 +38,17 @@
     order by prl.id asc
   </select>
 
+  <select id="selectByPromotionIds" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_rules prl
+    where prl.promotion_id in
+    <foreach item="promotionId" index="index" collection="promotionIds" separator="," open="(" close=")">
+      #{promotionId,jdbcType=BIGINT}
+    </foreach>
+    order by prl.promotion_id asc, prl.id asc
+  </select>
+
   <select id="selectByPromotionIdAndType" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />

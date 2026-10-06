@@ -39,6 +39,17 @@
     order by psp.sku_id asc
   </select>
 
+  <select id="selectByPromotionIds" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_special_prices psp
+    where psp.promotion_id in
+    <foreach item="promotionId" index="index" collection="promotionIds" separator="," open="(" close=")">
+      #{promotionId,jdbcType=BIGINT}
+    </foreach>
+    order by psp.promotion_id asc, psp.sku_id asc
+  </select>
+
   <select id="selectBySkuIds" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />

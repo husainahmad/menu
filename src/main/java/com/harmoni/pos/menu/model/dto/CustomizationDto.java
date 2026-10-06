@@ -51,6 +51,13 @@ public class CustomizationDto {
      */
     private Boolean required;
 
+    /**
+     * Whether an option in this customization may be chosen with a quantity greater
+     * than one. Absent means the master default applies on read (treated as not
+     * allowed); stored as-is.
+     */
+    private Boolean allowQuantity;
+
     private SelectionType selectionType;
 
     private List<CustomizationOptionDto> customizationOptions;
@@ -67,6 +74,7 @@ public class CustomizationDto {
                 .setMinimumSelection(minimumSelection)
                 .setMaximumSelection(maximumSelection)
                 .setRequired(required)
+                .setAllowQuantity(allowQuantity)
                 .setSelectionType(selectionType)
                 .setCustomizationOptions(customizationOptions == null
                         ? Collections.emptyList()

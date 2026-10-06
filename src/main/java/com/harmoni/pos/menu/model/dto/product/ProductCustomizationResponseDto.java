@@ -55,6 +55,13 @@ public class ProductCustomizationResponseDto {
     private Boolean required;
 
     /**
+     * Whether options in this group may be chosen with a quantity greater than one.
+     * Carries the customization master value (there is no per-product override);
+     * {@code null} is treated as not allowed by validation and pricing.
+     */
+    private Boolean allowQuantity;
+
+    /**
      * Effective minimum selection for this product.
      */
     private Integer minSelection;

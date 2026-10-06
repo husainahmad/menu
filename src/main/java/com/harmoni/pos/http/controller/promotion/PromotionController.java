@@ -1,12 +1,14 @@
 package com.harmoni.pos.http.controller.promotion;
 
 import com.harmoni.pos.business.service.promotion.PromotionService;
+import com.harmoni.pos.business.service.promotion.pricing.PromotionPricingService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.Promotion;
 import com.harmoni.pos.menu.model.PromotionStatus;
 import com.harmoni.pos.menu.model.PromotionType;
 import com.harmoni.pos.menu.model.dto.add.PromotionAddDto;
 import com.harmoni.pos.menu.model.dto.edit.PromotionEditDto;
+import com.harmoni.pos.menu.model.dto.pricing.PromotionPriceRequestDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PromotionController {
 
     private final PromotionService promotionService;
+    private final PromotionPricingService promotionPricingService;
 
     /**
      * Creates a promotion along with its schedules, targets, rules and special prices.
@@ -150,6 +153,25 @@ public class PromotionController {
                 .httpStatus(HttpStatus.OK.value())
                 .data(promotionService.updateStatus(id, status))
                 .error(null)
+                .build();
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    /**
+     * Prices a basket of sale lines against the live promotion catalogue.
+     * <p>
+     * This is what an order service calls when a customer confirms a basket. It is a
+     * pure price request: nothing is persisted, and the request cannot influence what
+     * the promotions are worth. The caller supplies only what it is selling.
+     *
+     * @param request the cart lines and the store, chain and zone the sale is in
+     * @return one priced line per requested line, plus the order wide saving
+     */
+    @PostMapping("/price")
+    public ResponseEntity<RestAPIResponse> price(@Valid @RequestBody PromotionPriceRequestDto request) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(promotionPricingService.price(request))
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }

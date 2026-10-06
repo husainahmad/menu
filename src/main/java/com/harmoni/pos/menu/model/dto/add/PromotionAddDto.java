@@ -1,11 +1,11 @@
 package com.harmoni.pos.menu.model.dto.add;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.harmoni.pos.menu.model.Promotion;
 import com.harmoni.pos.menu.model.dto.PromotionDto;
 import com.harmoni.pos.menu.model.dto.PromotionRuleDto;
 import com.harmoni.pos.menu.model.dto.PromotionScheduleDto;
 import com.harmoni.pos.menu.model.dto.PromotionSpecialPriceDto;
+import com.harmoni.pos.menu.model.dto.PromotionScopeDto;
 import com.harmoni.pos.menu.model.dto.PromotionTargetDto;
 import jakarta.validation.Valid;
 import lombok.Data;
@@ -47,11 +47,9 @@ public class PromotionAddDto extends PromotionDto {
     private @Valid List<PromotionSpecialPriceDto> specialPriceDtos;
 
     /**
-     * Converts this DTO to a Promotion entity, without the child collections.
-     *
-     * @return a Promotion entity carrying the scalar attributes
+     * The scope definitions to create with the promotion (tenant, brand, chain, store).
      */
-    public Promotion toPromotion() {
-        return super.toPromotion();
-    }
+    @JsonProperty("scopes")
+    private @Valid List<PromotionScopeDto> scopeDtos;
+
 }

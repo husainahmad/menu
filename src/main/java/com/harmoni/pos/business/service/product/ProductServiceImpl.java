@@ -89,7 +89,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Retrieves all products in a specific category.
+     * Retrieves all products in a specific category, with their customizations.
+     * <p>
+     * Customizations and their options are attached, including every tier's price rather
+     * than one store's: this endpoint carries no operator, so there is no tier to filter
+     * by, and it feeds the management screens where seeing all of them is the point. This
+     * matches the paginated {@code /category/{categoryId}/{brandId}} endpoint. An ordering
+     * screen wants the other one, {@code /category/{id}/price}, which resolves the
+     * operator's tier.
      *
      * @param categoryId the ID of the category
      * @return list of {@link Product}
@@ -97,7 +104,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> selectByCategory(Integer categoryId) {
         com.github.pagehelper.PageHelper.clearPage();
-        return productMapper.selectByCategoryId(categoryId);
+        return attachCustomizations(productMapper.selectByCategoryId(categoryId), null);
     }
 
     /**
@@ -196,9 +203,8 @@ public class ProductServiceImpl implements ProductService {
         }
 
         List<ProductCustomization> links = productCustomizationService.getByProductIds(productIds);
-        Map<Integer, List<Integer>> customizationIdsByProductId = links.stream()
-                .collect(Collectors.groupingBy(ProductCustomization::getProductId,
-                        Collectors.mapping(ProductCustomization::getCustomizationId, Collectors.toList())));
+        Map<Integer, List<ProductCustomization>> linksByProductId = links.stream()
+                .collect(Collectors.groupingBy(ProductCustomization::getProductId));
 
         List<Integer> customizationIds = links.stream()
                 .map(ProductCustomization::getCustomizationId)
@@ -238,17 +244,77 @@ public class ProductServiceImpl implements ProductService {
                             optionsByCustomizationId.getOrDefault(customization.getId(), Collections.emptyList())));
         }
 
-        products.forEach(product -> {
-            List<Customization> customizations = customizationIdsByProductId
-                    .getOrDefault(product.getId(), Collections.emptyList())
-                    .stream()
-                    .map(customizationsById::get)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-            product.setCustomizations(customizations);
-        });
+        products.forEach(product -> product.setCustomizations(withEffectiveRules(
+                linksByProductId.getOrDefault(product.getId(), Collections.emptyList()),
+                customizationsById)));
 
         return products;
+    }
+
+    /**
+     * Rewrites a product's customizations so each one carries the rules that actually apply
+     * to that product.
+     * <p>
+     * A customization has its own defaults, and the link to a product can override them. A
+     * menu showing "pick a size, one only" for a product configured to demand three
+     * toppings lets the customer complete the sale wrongly and then have it rejected at
+     * confirmation, so the effective rules are what a caller needs to see.
+     * <p>
+     * The rewrite produces new {@link Customization} instances rather than mutating the
+     * shared ones. The same customization is commonly attached to many products, each with
+     * its own overrides, and mutating in place would make the last product visited rewrite
+     * the answer for all the others. The options list is shared deliberately: it is the
+     * same set of options and the same tier prices, only the rules differ per product.
+     *
+     * @param links    the customization assignments for this product, carrying any overrides
+     * @param byId     the customizations those links point at
+     * @return the customizations to attach to this product, with effective rules applied
+     */
+    private static List<Customization> withEffectiveRules(List<ProductCustomization> links,
+                                                           Map<Integer, Customization> byId) {
+        return links.stream()
+                .map(ProductCustomization::getCustomizationId)
+                .map(byId::get)
+                .filter(Objects::nonNull)
+                .map(customization -> withEffectiveRules(linkFor(links, customization), customization))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Applies one product's overrides to a copy of the customization's defaults.
+     *
+     * @param link           the assignment carrying the overrides, possibly {@code null}
+     * @param customization  the customization's own defaults
+     * @return a copy carrying the rules that apply to this product
+     */
+    private static Customization withEffectiveRules(ProductCustomization link,
+                                                    Customization customization) {
+        Customization effective = new Customization();
+        effective.setId(customization.getId());
+        effective.setName(customization.getName());
+        effective.setDescription(customization.getDescription());
+        effective.setSelectionType(customization.getSelectionType());
+        effective.setBrandId(customization.getBrandId());
+        effective.setIsDeleted(customization.getIsDeleted());
+        effective.setCreatedAt(customization.getCreatedAt());
+        effective.setUpdatedAt(customization.getUpdatedAt());
+        effective.setDeletedAt(customization.getDeletedAt());
+        effective.setCustomizationOptions(customization.getCustomizationOptions());
+
+        if (link == null) {
+            return effective;
+        }
+        effective.setRequired(ProductCustomizationServiceImpl.effectiveRequired(link, customization));
+        effective.setMinimumSelection(ProductCustomizationServiceImpl.effectiveMin(link, customization));
+        effective.setMaximumSelection(ProductCustomizationServiceImpl.effectiveMax(link, customization));
+        return effective;
+    }
+
+    private static ProductCustomization linkFor(List<ProductCustomization> links, Customization customization) {
+        return links.stream()
+                .filter(link -> customization.getId().equals(link.getCustomizationId()))
+                .findFirst()
+                .orElse(null);
     }
 
     /**

@@ -16,6 +16,7 @@
         <result column="custom_brand_id" property="brandId" />
         <result column="custom_is_deleted" property="isDeleted" />
         <result column="custom_is_required" property="required" />
+        <result column="custom_allow_quantity" property="allowQuantity" />
         <result column="custom_created_at" property="createdAt" />
         <result column="custom_updated_at" property="updatedAt" />
         <result column="custom_deleted_at" property="deletedAt" />
@@ -43,6 +44,7 @@
         custom.brand_id as custom_brand_id,
         custom.is_deleted as custom_is_deleted,
         custom.is_required as custom_is_required,
+        custom.allow_quantity as custom_allow_quantity,
         custom.created_at as custom_created_at,
         custom.updated_at as custom_updated_at,
         custom.deleted_at as custom_deleted_at
@@ -104,9 +106,9 @@
             SELECT LAST_INSERT_ID()
         </selectKey>
         INSERT INTO customizations
-        (name, description, selection_type, brand_id, is_deleted, is_required, minimum_selection, maximum_selection, created_at, updated_at, deleted_at)
+        (name, description, selection_type, brand_id, is_deleted, is_required, allow_quantity, minimum_selection, maximum_selection, created_at, updated_at, deleted_at)
         VALUES
-        (#{name}, #{description}, #{selectionType}, #{brandId}, #{isDeleted}, #{required}, #{minimumSelection}, #{maximumSelection}, #{createdAt}, #{updatedAt}, #{deletedAt})
+        (#{name}, #{description}, #{selectionType}, #{brandId}, #{isDeleted}, #{required}, #{allowQuantity}, #{minimumSelection}, #{maximumSelection}, #{createdAt}, #{updatedAt}, #{deletedAt})
     </insert>
 
     <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Customization">
@@ -115,6 +117,7 @@
         description = #{description},
         selection_type = #{selectionType},
         is_required = #{required},
+        allow_quantity = #{allowQuantity},
         minimum_selection = #{minimumSelection},
         maximum_selection = #{maximumSelection},
         updated_at = #{updatedAt}

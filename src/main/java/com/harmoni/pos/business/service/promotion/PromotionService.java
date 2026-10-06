@@ -6,6 +6,7 @@ import com.harmoni.pos.menu.model.PromotionType;
 import com.harmoni.pos.menu.model.dto.add.PromotionAddDto;
 import com.harmoni.pos.menu.model.dto.edit.PromotionEditDto;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -90,6 +91,22 @@ public interface PromotionService {
      * @return list of promotions ordered by priority
      */
     List<Promotion> listRedeemable();
+
+    /**
+     * Retrieves the promotions that may be priced into a cart, with all five child
+     * collections populated.
+     * <p>
+     * This is the entry point the pricing engine uses, and it is deliberately narrower
+     * than {@link #listRedeemable()}: only {@link PromotionStatus#ACTIVE} promotions
+     * qualify. A {@link PromotionStatus#SCHEDULED} promotion has not been approved for
+     * live trading, so reaching a customer must never make it live as a side effect.
+     * Callers must still check each promotion's schedules against the current time and
+     * its scopes against the store, neither of which is resolvable from a date alone.
+     *
+     * @param onDate the local date the cart is being priced on, in the store's own zone
+     * @return list of promotions ordered by priority then id, each with children populated
+     */
+    List<Promotion> listEvaluableOn(LocalDate onDate);
 
     /**
      * Moves a promotion to a new lifecycle state.

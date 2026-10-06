@@ -3,11 +3,20 @@ package com.harmoni.pos.http.controller.promotion;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.harmoni.pos.business.service.promotion.PromotionService;
+import com.harmoni.pos.business.service.promotion.engine.TargetMatch;
+import com.harmoni.pos.business.service.promotion.pricing.PromotionPricingService;
+import com.harmoni.pos.menu.model.DiscountType;
 import com.harmoni.pos.menu.model.Promotion;
 import com.harmoni.pos.menu.model.PromotionStatus;
 import com.harmoni.pos.menu.model.PromotionType;
 import com.harmoni.pos.menu.model.dto.add.PromotionAddDto;
 import com.harmoni.pos.menu.model.dto.edit.PromotionEditDto;
+import com.harmoni.pos.menu.model.dto.pricing.AppliedDiscountDto;
+import com.harmoni.pos.menu.model.dto.pricing.CartLineDto;
+import com.harmoni.pos.menu.model.dto.pricing.PricedLineDto;
+import com.harmoni.pos.menu.model.dto.pricing.PromotionContextDto;
+import com.harmoni.pos.menu.model.dto.pricing.PromotionPriceRequestDto;
+import com.harmoni.pos.menu.model.dto.pricing.PromotionPriceResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +40,9 @@ class PromotionControllerTest {
 
     @Mock
     private PromotionService promotionService;
+
+    @Mock
+    private PromotionPricingService promotionPricingService;
 
     @InjectMocks
     private PromotionController promotionController;
@@ -204,5 +217,76 @@ class PromotionControllerTest {
                         .param("search", "old"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value(3));
+    }
+
+    @Test
+    void price_shouldReturn200WithAPriceForEveryLine() throws Exception {
+        when(promotionPricingService.price(any())).thenReturn(priceResponse());
+
+        mockMvc.perform(post("/api/v1/promotion/price")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(priceRequest())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.httpStatus").value(200))
+                .andExpect(jsonPath("$.data.lines.length()").value(1))
+                .andExpect(jsonPath("$.data.lines[0].netAmount").value(18.0))
+                .andExpect(jsonPath("$.data.totalDiscount").value(2.0));
+    }
+
+    @Test
+    void price_shouldRejectABasketWithNoLines() throws Exception {
+        PromotionPriceRequestDto request = priceRequest();
+        request.setLines(List.of());
+
+        mockMvc.perform(post("/api/v1/promotion/price")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        verify(promotionPricingService, never()).price(any());
+    }
+
+    private static PromotionPriceRequestDto priceRequest() {
+        CartLineDto line = new CartLineDto();
+        line.setLineIndex(0);
+        line.setProductId(10L);
+        line.setSkuId(20L);
+        line.setCategoryId(30L);
+        line.setUnitPrice(new BigDecimal("20.00"));
+        line.setQuantity(new BigDecimal("1"));
+
+        PromotionContextDto context = new PromotionContextDto();
+        context.setStoreId(7L);
+        context.setZone("Australia/Sydney");
+
+        PromotionPriceRequestDto request = new PromotionPriceRequestDto();
+        request.setLines(List.of(line));
+        request.setContext(context);
+        return request;
+    }
+
+    private static PromotionPriceResponseDto priceResponse() {
+        AppliedDiscountDto discount = new AppliedDiscountDto();
+        discount.setPromotionId(99L);
+        discount.setPromotionCode("HAPPY10");
+        discount.setPromotionName("Happy Hour");
+        discount.setDiscountType(DiscountType.PERCENTAGE);
+        discount.setDiscountValue(new BigDecimal("10.00"));
+        discount.setDiscountAmount(new BigDecimal("2.00"));
+        discount.setTargetMatch(TargetMatch.SKU);
+
+        PricedLineDto line = new PricedLineDto();
+        line.setLineIndex(0);
+        line.setGrossAmount(new BigDecimal("20.00"));
+        line.setDiscountAmount(new BigDecimal("2.00"));
+        line.setNetAmount(new BigDecimal("18.00"));
+        line.setDiscounted(true);
+        line.setDiscounts(List.of(discount));
+
+        PromotionPriceResponseDto response = new PromotionPriceResponseDto();
+        response.setLines(List.of(line));
+        response.setTotalDiscount(new BigDecimal("2.00"));
+        response.setTotalNet(new BigDecimal("18.00"));
+        return response;
     }
 }

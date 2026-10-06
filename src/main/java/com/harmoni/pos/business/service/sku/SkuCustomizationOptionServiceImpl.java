@@ -50,6 +50,11 @@ public class SkuCustomizationOptionServiceImpl implements SkuCustomizationOption
     }
 
     @Override
+    public List<SkuCustomizationOption> getBySkuIds(List<Integer> skuIds) {
+        return ObjectUtils.isEmpty(skuIds) ? List.of() : mapper.selectBySkuIds(skuIds);
+    }
+
+    @Override
     public int create(SkuCustomizationOption option) {
         validateOptionBelongsToProduct(option);
         return mapper.insert(option);

@@ -23,6 +23,7 @@ import org.springframework.util.ObjectUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -156,9 +157,18 @@ public class ProductCustomizationServiceImpl implements ProductCustomizationServ
 
     @Override
     public List<ProductCustomizationResponseDto> getDetailedByProductId(Integer productId) {
-        List<ProductCustomization> links = mapper.selectByProductId(productId);
+        return getDetailedByProductIds(List.of(productId)).getOrDefault(productId, List.of());
+    }
+
+    @Override
+    public Map<Integer, List<ProductCustomizationResponseDto>> getDetailedByProductIds(List<Integer> productIds) {
+        if (ObjectUtils.isEmpty(productIds)) {
+            return Map.of();
+        }
+
+        List<ProductCustomization> links = mapper.selectByProductIds(productIds);
         if (ObjectUtils.isEmpty(links)) {
-            return List.of();
+            return Map.of();
         }
 
         List<Integer> customizationIds = links.stream()
@@ -176,15 +186,25 @@ public class ProductCustomizationServiceImpl implements ProductCustomizationServ
             populateOptionsAndTierPrices(customizationsById);
         }
 
-        List<ProductCustomizationResponseDto> response = new ArrayList<>();
-        for (ProductCustomization link : links) {
-            Customization customization = customizationsById.get(link.getCustomizationId());
-            if (customization == null) {
-                continue;
+        // Keyed by product so a caller working through a basket can look each one up, and
+        // grouped rather than resolved one product at a time: the customizations and their
+        // options are read once for the whole set, which is the difference between four
+        // queries for a basket and four per line in it.
+        Map<Integer, List<ProductCustomizationResponseDto>> grouped = new LinkedHashMap<>();
+        for (Map.Entry<Integer, List<ProductCustomization>> entry : links.stream()
+                .collect(Collectors.groupingBy(ProductCustomization::getProductId,
+                        LinkedHashMap::new, Collectors.toList())).entrySet()) {
+            List<ProductCustomizationResponseDto> response = new ArrayList<>();
+            for (ProductCustomization link : entry.getValue()) {
+                Customization customization = customizationsById.get(link.getCustomizationId());
+                if (customization == null) {
+                    continue;
+                }
+                response.add(toResponseDto(link, customization));
             }
-            response.add(toResponseDto(link, customization));
+            grouped.put(entry.getKey(), response);
         }
-        return response;
+        return grouped;
     }
 
     /**
@@ -227,6 +247,7 @@ public class ProductCustomizationServiceImpl implements ProductCustomizationServ
         dto.setSelectionType(customization.getSelectionType());
         dto.setBrandId(customization.getBrandId());
         dto.setRequired(effectiveRequired(link, customization));
+        dto.setAllowQuantity(customization.getAllowQuantity());
         dto.setMinSelection(effectiveMin(link, customization));
         dto.setMaxSelection(effectiveMax(link, customization));
         dto.setRequiredOverride(link.getRequiredOverride());
@@ -301,14 +322,14 @@ public class ProductCustomizationServiceImpl implements ProductCustomizationServ
     /**
      * Returns the effective required flag (override wins over the master value).
      */
-    private static Boolean effectiveRequired(ProductCustomization link, Customization customization) {
+    static Boolean effectiveRequired(ProductCustomization link, Customization customization) {
         return link.getRequiredOverride() != null ? link.getRequiredOverride() : customization.getRequired();
     }
 
     /**
      * Returns the effective minimum selection (override wins over the master value).
      */
-    private static Integer effectiveMin(ProductCustomization link, Customization customization) {
+    static Integer effectiveMin(ProductCustomization link, Customization customization) {
         return link.getMinSelectionOverride() != null
                 ? link.getMinSelectionOverride() : customization.getMinimumSelection();
     }
@@ -316,7 +337,7 @@ public class ProductCustomizationServiceImpl implements ProductCustomizationServ
     /**
      * Returns the effective maximum selection (override wins over the master value).
      */
-    private static Integer effectiveMax(ProductCustomization link, Customization customization) {
+    static Integer effectiveMax(ProductCustomization link, Customization customization) {
         return link.getMaxSelectionOverride() != null
                 ? link.getMaxSelectionOverride() : customization.getMaximumSelection();
     }

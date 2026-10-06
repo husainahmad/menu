@@ -72,6 +72,16 @@ public interface PromotionSpecialPriceMapper {
     List<PromotionSpecialPrice> selectByPromotionId(Long promotionId);
 
     /**
+     * Selects every special price belonging to any of the given promotions in one
+     * round trip. Used by the promotion engine to load the whole candidate set
+     * without issuing one query per promotion.
+     *
+     * @param promotionIds the Promotion IDs to load, must not be empty
+     * @return list of PromotionSpecialPrice objects
+     */
+    List<PromotionSpecialPrice> selectByPromotionIds(@Param("promotionIds") List<Long> promotionIds);
+
+    /**
      * Selects the promotional price of a SKU, preferring the most specific match:
      * the row of the promotion with the highest priority, then the lowest id.
      *

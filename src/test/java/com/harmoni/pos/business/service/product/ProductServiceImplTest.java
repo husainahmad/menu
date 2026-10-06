@@ -139,6 +139,197 @@ class ProductServiceImplTest {
         assertEquals(1, result.size());
     }
 
+
+    private static Customization customization(Integer id, String name, Boolean required,
+                                               Integer min, Integer max) {
+        return new Customization()
+                .setId(id)
+                .setName(name)
+                .setSelectionType(SelectionType.MULTIPLE)
+                .setRequired(required)
+                .setMinimumSelection(min)
+                .setMaximumSelection(max);
+    }
+
+    private static ProductCustomization link(Integer productId, Integer customizationId,
+                                             Boolean requiredOverride, Integer minOverride,
+                                             Integer maxOverride) {
+        return new ProductCustomization()
+                .setProductId(productId)
+                .setCustomizationId(customizationId)
+                .setRequiredOverride(requiredOverride)
+                .setMinSelectionOverride(minOverride)
+                .setMaxSelectionOverride(maxOverride);
+    }
+
+    private void givenCategoryPricing(List<Product> products) {
+        User user = new User().setId(1).setStoreId(5);
+        StoreTier storeTier = new StoreTier().setTierPriceId(20);
+        when(userService.selectByUsername("cashier")).thenReturn(user);
+        when(storeTierService.selectByStoreId(5)).thenReturn(storeTier);
+        when(productMapper.selectByCategoryIdPrice(10, 20)).thenReturn(products);
+    }
+
+    @Test
+    void selectByCategoryPrice_shouldAttachCustomizationsWithTheirOptions() {
+        var burger = new Product().setId(1).setName("Burger").setCategoryId(10);
+        givenCategoryPricing(List.of(burger));
+        when(productCustomizationService.getByProductIds(List.of(1)))
+                .thenReturn(List.of(link(1, 100, null, null, null)));
+        when(customizationMapper.selectByIds(List.of(100)))
+                .thenReturn(List.of(customization(100, "Toppings", false, 0, 4)));
+        var option = new CustomizationOption().setId(1001).setCustomizationId(100).setName("Cheese");
+        when(customizationOptionMapper.selectByCustomizationIds(List.of(100)))
+                .thenReturn(List.of(option));
+
+        List<Product> result = productService.selectByCategoryPrice("cashier", 10);
+
+        var attached = result.get(0).getCustomizations();
+        assertEquals(1, attached.size());
+        assertEquals("Toppings", attached.get(0).getName());
+        assertEquals(1, attached.get(0).getCustomizationOptions().size());
+        assertEquals("Cheese", attached.get(0).getCustomizationOptions().get(0).getName());
+    }
+
+    @Test
+    void selectByCategoryPrice_shouldApplyTheProductLevelOverrides() {
+        var burger = new Product().setId(1).setName("Burger").setCategoryId(10);
+        givenCategoryPricing(List.of(burger));
+        when(productCustomizationService.getByProductIds(List.of(1)))
+                .thenReturn(List.of(link(1, 100, true, 3, 5)));
+        when(customizationMapper.selectByIds(List.of(100)))
+                .thenReturn(List.of(customization(100, "Toppings", false, 0, 1)));
+        when(customizationOptionMapper.selectByCustomizationIds(List.of(100)))
+                .thenReturn(List.of(new CustomizationOption().setId(1001).setCustomizationId(100).setName("Cheese")));
+
+        List<Product> result = productService.selectByCategoryPrice("cashier", 10);
+
+        var attached = result.get(0).getCustomizations().get(0);
+        assertTrue(attached.getRequired(), "the product override must win over the customization default");
+        assertEquals(3, attached.getMinimumSelection());
+        assertEquals(5, attached.getMaximumSelection());
+    }
+
+    @Test
+    void selectByCategoryPrice_shouldFallBackToTheCustomizationDefaultsWhenNoOverride() {
+        var burger = new Product().setId(1).setName("Burger").setCategoryId(10);
+        givenCategoryPricing(List.of(burger));
+        when(productCustomizationService.getByProductIds(List.of(1)))
+                .thenReturn(List.of(link(1, 100, null, null, null)));
+        when(customizationMapper.selectByIds(List.of(100)))
+                .thenReturn(List.of(customization(100, "Toppings", true, 1, 2)));
+        when(customizationOptionMapper.selectByCustomizationIds(List.of(100)))
+                .thenReturn(List.of(new CustomizationOption().setId(1001).setCustomizationId(100).setName("Cheese")));
+
+        List<Product> result = productService.selectByCategoryPrice("cashier", 10);
+
+        var attached = result.get(0).getCustomizations().get(0);
+        assertTrue(attached.getRequired());
+        assertEquals(1, attached.getMinimumSelection());
+        assertEquals(2, attached.getMaximumSelection());
+    }
+
+    @Test
+    void selectByCategoryPrice_shouldNotLeakOneProductsOverrideOntoAnother() {
+        var burger = new Product().setId(1).setName("Burger").setCategoryId(10);
+        var wrap = new Product().setId(2).setName("Wrap").setCategoryId(10);
+        givenCategoryPricing(List.of(burger, wrap));
+        when(productCustomizationService.getByProductIds(List.of(1, 2)))
+                .thenReturn(List.of(link(1, 100, true, 3, 5), link(2, 100, null, null, null)));
+        when(customizationMapper.selectByIds(List.of(100)))
+                .thenReturn(List.of(customization(100, "Toppings", false, 0, 1)));
+        when(customizationOptionMapper.selectByCustomizationIds(List.of(100)))
+                .thenReturn(List.of(new CustomizationOption().setId(1001).setCustomizationId(100).setName("Cheese")));
+
+        List<Product> result = productService.selectByCategoryPrice("cashier", 10);
+
+        var forBurger = result.get(0).getCustomizations().get(0);
+        var forWrap = result.get(1).getCustomizations().get(0);
+        assertTrue(forBurger.getRequired(), "the burger demands three toppings");
+        assertEquals(3, forBurger.getMinimumSelection());
+        assertFalse(forWrap.getRequired(), "the wrap keeps the customization's own default");
+        assertEquals(0, forWrap.getMinimumSelection());
+        assertEquals(1, forWrap.getMaximumSelection());
+    }
+
+    @Test
+    void selectByCategoryPrice_shouldAttachOnlyTheOperatorsTierPrices() {
+        var burger = new Product().setId(1).setName("Burger").setCategoryId(10);
+        givenCategoryPricing(List.of(burger));
+        when(productCustomizationService.getByProductIds(List.of(1)))
+                .thenReturn(List.of(link(1, 100, null, null, null)));
+        when(customizationMapper.selectByIds(List.of(100)))
+                .thenReturn(List.of(customization(100, "Toppings", false, 0, 1)));
+        when(customizationOptionMapper.selectByCustomizationIds(List.of(100)))
+                .thenReturn(List.of(new CustomizationOption().setId(1001).setCustomizationId(100).setName("Cheese")));
+        var tierPrice = new CustomizationOptionTierPrice()
+                .setCustomizationOptionId(1001).setTierId(20).setPrice(new BigDecimal("1.50"));
+        when(customizationOptionTierPriceMapper.selectByOptionIdsAndTierId(List.of(1001), 20))
+                .thenReturn(List.of(tierPrice));
+
+        List<Product> result = productService.selectByCategoryPrice("cashier", 10);
+
+        var option = result.get(0).getCustomizations().get(0).getCustomizationOptions().get(0);
+        assertEquals(1, option.getTierPrices().size());
+        assertEquals(0, new BigDecimal("1.50").compareTo(option.getTierPrices().get(0).getPrice()));
+    }
+
+    @Test
+    void selectByCategoryPrice_shouldAttachAnEmptyListForAProductWithNoCustomizations() {
+        var burger = new Product().setId(1).setName("Burger").setCategoryId(10);
+        givenCategoryPricing(List.of(burger));
+        when(productCustomizationService.getByProductIds(List.of(1))).thenReturn(List.of());
+
+        List<Product> result = productService.selectByCategoryPrice("cashier", 10);
+
+        assertNotNull(result.get(0).getCustomizations());
+        assertTrue(result.get(0).getCustomizations().isEmpty());
+    }
+
+
+    @Test
+    void selectByCategory_shouldAttachCustomizationsWithEveryTierPrice() {
+        var burger = new Product().setId(1).setName("Burger").setCategoryId(10);
+        when(productMapper.selectByCategoryId(10)).thenReturn(List.of(burger));
+        when(productCustomizationService.getByProductIds(List.of(1)))
+                .thenReturn(List.of(link(1, 100, null, null, null)));
+        when(customizationMapper.selectByIds(List.of(100)))
+                .thenReturn(List.of(customization(100, "Toppings", false, 0, 1)));
+        when(customizationOptionMapper.selectByCustomizationIds(List.of(100)))
+                .thenReturn(List.of(new CustomizationOption().setId(1001).setCustomizationId(100).setName("Cheese")));
+        when(customizationOptionTierPriceMapper.selectByOptionIds(List.of(1001)))
+                .thenReturn(List.of(
+                        new CustomizationOptionTierPrice()
+                                .setCustomizationOptionId(1001).setTierId(20).setPrice(new BigDecimal("1.50")),
+                        new CustomizationOptionTierPrice()
+                                .setCustomizationOptionId(1001).setTierId(21).setPrice(new BigDecimal("2.00"))));
+
+        List<Product> result = productService.selectByCategory(10);
+
+        var option = result.get(0).getCustomizations().get(0).getCustomizationOptions().get(0);
+        assertEquals(2, option.getTierPrices().size(),
+                "this endpoint has no operator, so every tier's price belongs in the answer");
+    }
+
+    @Test
+    void selectByCategory_shouldApplyTheProductLevelOverrides() {
+        var burger = new Product().setId(1).setName("Burger").setCategoryId(10);
+        when(productMapper.selectByCategoryId(10)).thenReturn(List.of(burger));
+        when(productCustomizationService.getByProductIds(List.of(1)))
+                .thenReturn(List.of(link(1, 100, true, 2, 4)));
+        when(customizationMapper.selectByIds(List.of(100)))
+                .thenReturn(List.of(customization(100, "Toppings", false, 0, 1)));
+        when(customizationOptionMapper.selectByCustomizationIds(List.of(100)))
+                .thenReturn(List.of(new CustomizationOption().setId(1001).setCustomizationId(100).setName("Cheese")));
+
+        List<Product> result = productService.selectByCategory(10);
+
+        var attached = result.get(0).getCustomizations().get(0);
+        assertTrue(attached.getRequired());
+        assertEquals(2, attached.getMinimumSelection());
+        assertEquals(4, attached.getMaximumSelection());
+    }
+
     @Test
     void delete_shouldSucceed() {
         doNothing().when(skuService).deleteSkuByProductId(1);

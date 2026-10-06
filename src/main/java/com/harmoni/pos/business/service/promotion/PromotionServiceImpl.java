@@ -7,6 +7,9 @@ import com.harmoni.pos.menu.mapper.PromotionMapper;
 import com.harmoni.pos.menu.mapper.PromotionRuleMapper;
 import com.harmoni.pos.menu.mapper.PromotionScheduleMapper;
 import com.harmoni.pos.menu.mapper.PromotionSpecialPriceMapper;
+import com.harmoni.pos.menu.mapper.PromotionScopeMapper;
+import com.harmoni.pos.menu.model.dto.PromotionScopeDto;
+import com.harmoni.pos.menu.model.PromotionScope;
 import com.harmoni.pos.menu.mapper.PromotionTargetMapper;
 import com.harmoni.pos.menu.model.Promotion;
 import com.harmoni.pos.menu.model.PromotionRule;
@@ -34,6 +37,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link PromotionService}.
@@ -52,11 +57,25 @@ public class PromotionServiceImpl implements PromotionService {
     private static final List<PromotionStatus> REDEEMABLE_STATUSES =
             List.of(PromotionStatus.ACTIVE, PromotionStatus.SCHEDULED);
 
+    /**
+     * The only lifecycle state a cart may be priced against.
+     * <p>
+     * Narrower than {@link #REDEEMABLE_STATUSES} on purpose. The list endpoint wants to
+     * show operators what is coming up, so it includes {@link PromotionStatus#SCHEDULED}.
+     * Pricing must not: a scheduled promotion has not been approved for live trading,
+     * and {@link Promotion} documents that evaluation happens only when the status is
+     * {@link PromotionStatus#ACTIVE}. Letting a promotion go live as a side effect of a
+     * customer reaching the till would make the lifecycle meaningless.
+     */
+    private static final List<PromotionStatus> EVALUABLE_STATUSES =
+            List.of(PromotionStatus.ACTIVE);
+
     private final PromotionMapper promotionMapper;
     private final PromotionScheduleMapper promotionScheduleMapper;
     private final PromotionTargetMapper promotionTargetMapper;
     private final PromotionRuleMapper promotionRuleMapper;
     private final PromotionSpecialPriceMapper promotionSpecialPriceMapper;
+    private final PromotionScopeMapper promotionScopeMapper;
 
     /**
      * {@inheritDoc}
@@ -81,6 +100,7 @@ public class PromotionServiceImpl implements PromotionService {
         insertSchedules(promotion.getId(), promotionAddDto.getScheduleDtos());
         insertTargets(promotion.getId(), promotionAddDto.getTargetDtos());
         insertRules(promotion.getId(), promotionAddDto.getRuleDtos());
+        insertScopes(promotion.getId(), promotionAddDto.getScopeDtos());
         upsertSpecialPrices(promotion.getId(), promotionAddDto.getSpecialPriceDtos());
 
         return attach(promotion);
@@ -122,6 +142,10 @@ public class PromotionServiceImpl implements PromotionService {
             promotionRuleMapper.deleteByPromotionId(promotionId);
             insertRules(promotionId, promotionEditDto.getRuleDtos());
         }
+        if (promotionEditDto.getScopeDtos() != null) {
+            promotionScopeMapper.deleteByPromotionId(promotionId);
+            insertScopes(promotionId, promotionEditDto.getScopeDtos());
+        }
         if (promotionEditDto.getSpecialPriceDtos() != null) {
             promotionSpecialPriceMapper.deleteByPromotionId(promotionId);
             upsertSpecialPrices(promotionId, promotionEditDto.getSpecialPriceDtos());
@@ -142,6 +166,7 @@ public class PromotionServiceImpl implements PromotionService {
         promotionTargetMapper.deleteByPromotionId(promotionId);
         promotionRuleMapper.deleteByPromotionId(promotionId);
         promotionSpecialPriceMapper.deleteByPromotionId(promotionId);
+        promotionScopeMapper.deleteByPromotionId(promotionId);
         return promotionMapper.deleteByPrimaryKey(promotionId);
     }
 
@@ -158,6 +183,7 @@ public class PromotionServiceImpl implements PromotionService {
             promotionTargetMapper.deleteByPromotionId(promotionId);
             promotionRuleMapper.deleteByPromotionId(promotionId);
             promotionSpecialPriceMapper.deleteByPromotionId(promotionId);
+            promotionScopeMapper.deleteByPromotionId(promotionId);
         });
         return promotionMapper.deleteByFilter(status, promotionType, search);
     }
@@ -214,9 +240,85 @@ public class PromotionServiceImpl implements PromotionService {
      * {@inheritDoc}
      */
     @Override
+    public List<Promotion> listEvaluableOn(LocalDate onDate) {
+        List<Promotion> promotions = promotionMapper.selectRedeemableOn(EVALUABLE_STATUSES, onDate);
+        if (ObjectUtils.isEmpty(promotions)) {
+            return List.of();
+        }
+        List<Long> promotionIds = promotions.stream()
+                .map(Promotion::getId)
+                .toList();
+
+        Map<Long, List<PromotionSchedule>> schedules = groupByPromotionId(
+                promotionScheduleMapper.selectByPromotionIds(promotionIds), PromotionServiceImpl::promotionIdOf);
+        Map<Long, List<PromotionTarget>> targets = groupByPromotionId(
+                promotionTargetMapper.selectByPromotionIds(promotionIds), PromotionServiceImpl::promotionIdOf);
+        Map<Long, List<PromotionRule>> rules = groupByPromotionId(
+                promotionRuleMapper.selectByPromotionIds(promotionIds), PromotionServiceImpl::promotionIdOf);
+        Map<Long, List<PromotionSpecialPrice>> specialPrices = groupByPromotionId(
+                promotionSpecialPriceMapper.selectByPromotionIds(promotionIds), PromotionServiceImpl::promotionIdOf);
+        Map<Long, List<PromotionScope>> scopes = groupByPromotionId(
+                promotionScopeMapper.selectByPromotionIds(promotionIds), PromotionServiceImpl::promotionIdOf);
+
+        List<Promotion> candidates = new ArrayList<>(promotions.size());
+        for (Promotion promotion : promotions) {
+            Long promotionId = promotion.getId();
+            candidates.add(promotion
+                    .setSchedules(orEmpty(schedules.get(promotionId)))
+                    .setTargets(orEmpty(targets.get(promotionId)))
+                    .setRules(orEmpty(rules.get(promotionId)))
+                    .setSpecialPrices(orEmpty(specialPrices.get(promotionId)))
+                    .setScopes(orEmpty(scopes.get(promotionId))));
+        }
+        return candidates;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public int updateStatus(Long id, PromotionStatus status) {
         this.getHeader(id);
         return promotionMapper.updateStatus(id, status);
+    }
+
+    /**
+     * Buckets child rows by their owning promotion.
+     *
+     * @param rows     the child rows, may be null or empty
+     * @param keyOf    extracts the owning promotion ID from a row
+     * @param <T>      the child row type
+     * @return the rows keyed by promotion ID
+     */
+    private static <T> Map<Long, List<T>> groupByPromotionId(List<T> rows, Function<T, Long> keyOf) {
+        if (ObjectUtils.isEmpty(rows)) {
+            return Map.of();
+        }
+        return rows.stream().collect(Collectors.groupingBy(keyOf));
+    }
+
+    private static Long promotionIdOf(PromotionSchedule row) {
+        return row.getPromotionId();
+    }
+
+    private static Long promotionIdOf(PromotionTarget row) {
+        return row.getPromotionId();
+    }
+
+    private static Long promotionIdOf(PromotionRule row) {
+        return row.getPromotionId();
+    }
+
+    private static Long promotionIdOf(PromotionSpecialPrice row) {
+        return row.getPromotionId();
+    }
+
+    private static Long promotionIdOf(PromotionScope row) {
+        return row.getPromotionId();
+    }
+
+    private static <T> List<T> orEmpty(List<T> rows) {
+        return rows == null ? List.of() : rows;
     }
 
     /**
@@ -245,10 +347,12 @@ public class PromotionServiceImpl implements PromotionService {
         List<PromotionTarget> targets = promotionTargetMapper.selectByPromotionId(promotionId);
         List<PromotionRule> rules = promotionRuleMapper.selectByPromotionId(promotionId);
         List<PromotionSpecialPrice> specialPrices = promotionSpecialPriceMapper.selectByPromotionId(promotionId);
+        List<PromotionScope> scopes = promotionScopeMapper.selectByPromotionId(promotionId);
         return promotion.setSchedules(schedules)
                 .setTargets(targets)
                 .setRules(rules)
-                .setSpecialPrices(specialPrices);
+                .setSpecialPrices(specialPrices)
+                .setScopes(scopes);
     }
 
     /**
@@ -342,6 +446,25 @@ public class PromotionServiceImpl implements PromotionService {
             rules.add(rule);
         });
         promotionRuleMapper.insertBatch(rules);
+    }
+
+    /**
+     * Inserts the scopes of a promotion in one statement.
+     *
+     * @param promotionId the promotion ID
+     * @param dtos        the scope DTOs, may be null or empty
+     */
+    private void insertScopes(Long promotionId, List<PromotionScopeDto> dtos) {
+        if (ObjectUtils.isEmpty(dtos)) {
+            return;
+        }
+        List<PromotionScope> scopes = new ArrayList<>(dtos.size());
+        dtos.forEach(dto -> {
+            PromotionScope scope = dto.toPromotionScope();
+            scope.setPromotionId(promotionId);
+            scopes.add(scope);
+        });
+        promotionScopeMapper.insertBatch(scopes);
     }
 
     /**

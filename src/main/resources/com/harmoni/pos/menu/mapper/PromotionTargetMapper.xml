@@ -36,6 +36,17 @@
     order by pt.target_type asc, pt.id asc
   </select>
 
+  <select id="selectByPromotionIds" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_targets pt
+    where pt.promotion_id in
+    <foreach item="promotionId" index="index" collection="promotionIds" separator="," open="(" close=")">
+      #{promotionId,jdbcType=BIGINT}
+    </foreach>
+    order by pt.promotion_id asc, pt.target_type asc, pt.id asc
+  </select>
+
   <select id="selectByPromotionIdAndType" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />

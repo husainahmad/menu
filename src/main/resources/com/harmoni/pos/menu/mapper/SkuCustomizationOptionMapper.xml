@@ -62,4 +62,21 @@
         AND (sku_custom_opt.is_deleted IS NULL OR sku_custom_opt.is_deleted = 0)
     </select>
 
+    <select id="selectBySkuIds" resultMap="BaseResultMap">
+        SELECT
+        sku_custom_opt.id                     AS sku_custom_opt_id,
+        sku_custom_opt.sku_id                 AS sku_custom_opt_sku_id,
+        sku_custom_opt.customization_option_id AS sku_custom_opt_customization_option_id,
+        sku_custom_opt.is_deleted             AS sku_custom_opt_is_deleted,
+        sku_custom_opt.created_at             AS sku_custom_opt_created_at,
+        sku_custom_opt.updated_at             AS sku_custom_opt_updated_at
+        FROM sku_customization_options AS sku_custom_opt
+        WHERE (sku_custom_opt.is_deleted IS NULL OR sku_custom_opt.is_deleted = 0)
+        AND sku_custom_opt.sku_id IN
+        <foreach item="skuId" index="index" collection="skuIds"
+                 open="(" separator="," close=")" nullable="true">
+            #{skuId}
+        </foreach>
+    </select>
+
 </mapper>

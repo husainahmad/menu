@@ -5,6 +5,7 @@ import com.harmoni.pos.exception.BusinessNoContentRequestException;
 import com.harmoni.pos.menu.mapper.PromotionMapper;
 import com.harmoni.pos.menu.mapper.PromotionRuleMapper;
 import com.harmoni.pos.menu.mapper.PromotionScheduleMapper;
+import com.harmoni.pos.menu.mapper.PromotionScopeMapper;
 import com.harmoni.pos.menu.mapper.PromotionSpecialPriceMapper;
 import com.harmoni.pos.menu.mapper.PromotionTargetMapper;
 import com.harmoni.pos.menu.model.Promotion;
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,6 +58,9 @@ class PromotionServiceImplTest {
 
     @Mock
     private PromotionSpecialPriceMapper promotionSpecialPriceMapper;
+
+    @Mock
+    private PromotionScopeMapper promotionScopeMapper;
 
     @InjectMocks
     private PromotionServiceImpl promotionService;
@@ -410,6 +415,71 @@ class PromotionServiceImplTest {
         ArgumentCaptor<List<PromotionStatus>> captor = ArgumentCaptor.forClass(List.class);
         verify(promotionMapper).selectRedeemableOn(captor.capture(), any(LocalDate.class));
         assertEquals(List.of(PromotionStatus.ACTIVE, PromotionStatus.SCHEDULED), captor.getValue());
+    }
+
+    @Test
+    void listEvaluableOn_shouldOnlyQueryActivePromotions() {
+        LocalDate today = LocalDate.of(2026, 6, 1);
+        when(promotionMapper.selectRedeemableOn(anyList(), eq(today))).thenReturn(List.of());
+
+        promotionService.listEvaluableOn(today);
+
+        ArgumentCaptor<List<PromotionStatus>> captor = ArgumentCaptor.forClass(List.class);
+        verify(promotionMapper).selectRedeemableOn(captor.capture(), eq(today));
+        assertEquals(List.of(PromotionStatus.ACTIVE), captor.getValue());
+    }
+
+    @Test
+    void listRedeemable_shouldStillExposeScheduledPromotionsToOperators() {
+        when(promotionMapper.selectRedeemableOn(anyList(), any(LocalDate.class)))
+                .thenReturn(List.of(promotion));
+
+        assertEquals(1, promotionService.listRedeemable().size());
+
+        ArgumentCaptor<List<PromotionStatus>> captor = ArgumentCaptor.forClass(List.class);
+        verify(promotionMapper).selectRedeemableOn(captor.capture(), any(LocalDate.class));
+        assertEquals(List.of(PromotionStatus.ACTIVE, PromotionStatus.SCHEDULED), captor.getValue());
+    }
+
+    @Test
+    void listEvaluableOn_shouldAttachEveryChildInBatchedQueries() {
+        LocalDate today = LocalDate.of(2026, 6, 1);
+        Promotion second = new Promotion().setId(2L);
+        when(promotionMapper.selectRedeemableOn(anyList(), eq(today))).thenReturn(List.of(promotion, second));
+        when(promotionScheduleMapper.selectByPromotionIds(List.of(1L, 2L)))
+                .thenReturn(List.of(new com.harmoni.pos.menu.model.PromotionSchedule().setId(10L).setPromotionId(1L)));
+        when(promotionTargetMapper.selectByPromotionIds(List.of(1L, 2L)))
+                .thenReturn(List.of(new com.harmoni.pos.menu.model.PromotionTarget().setId(20L).setPromotionId(2L)));
+        when(promotionRuleMapper.selectByPromotionIds(List.of(1L, 2L)))
+                .thenReturn(List.of(new com.harmoni.pos.menu.model.PromotionRule().setId(30L).setPromotionId(1L)));
+        when(promotionSpecialPriceMapper.selectByPromotionIds(List.of(1L, 2L)))
+                .thenReturn(List.of(new com.harmoni.pos.menu.model.PromotionSpecialPrice().setId(40L).setPromotionId(2L)));
+        when(promotionScopeMapper.selectByPromotionIds(List.of(1L, 2L)))
+                .thenReturn(List.of(new com.harmoni.pos.menu.model.PromotionScope().setId(50L).setPromotionId(1L)));
+
+        List<Promotion> result = promotionService.listEvaluableOn(today);
+
+        assertEquals(2, result.size());
+        assertEquals(1, result.get(0).getSchedules().size());
+        assertEquals(1, result.get(1).getTargets().size());
+        assertEquals(1, result.get(0).getRules().size());
+        assertEquals(1, result.get(1).getSpecialPrices().size());
+        assertEquals(1, result.get(0).getScopes().size());
+        assertTrue(result.get(1).getSchedules().isEmpty());
+        assertTrue(result.get(0).getTargets().isEmpty());
+    }
+
+    @Test
+    void listEvaluableOn_shouldReturnEmptyWithoutTouchingChildMappers() {
+        when(promotionMapper.selectRedeemableOn(anyList(), any(LocalDate.class))).thenReturn(List.of());
+
+        assertTrue(promotionService.listEvaluableOn(LocalDate.of(2026, 6, 1)).isEmpty());
+
+        verify(promotionScheduleMapper, never()).selectByPromotionIds(anyList());
+        verify(promotionTargetMapper, never()).selectByPromotionIds(anyList());
+        verify(promotionRuleMapper, never()).selectByPromotionIds(anyList());
+        verify(promotionSpecialPriceMapper, never()).selectByPromotionIds(anyList());
+        verify(promotionScopeMapper, never()).selectByPromotionIds(anyList());
     }
 
     @Test

@@ -62,6 +62,16 @@ public interface PromotionRuleMapper {
     List<PromotionRule> selectByPromotionId(Long promotionId);
 
     /**
+     * Selects every rule belonging to any of the given promotions in one round trip.
+     * Used by the promotion engine to load the whole candidate set without issuing
+     * one query per promotion.
+     *
+     * @param promotionIds the Promotion IDs to load, must not be empty
+     * @return list of PromotionRule objects
+     */
+    List<PromotionRule> selectByPromotionIds(@Param("promotionIds") List<Long> promotionIds);
+
+    /**
      * Selects the rules of a given type belonging to a promotion.
      *
      * @param promotionId the Promotion ID

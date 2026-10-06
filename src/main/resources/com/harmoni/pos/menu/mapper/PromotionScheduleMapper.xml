@@ -41,6 +41,17 @@
     order by ps.day_of_week asc, ps.start_time asc
   </select>
 
+  <select id="selectByPromotionIds" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from promotion_schedules ps
+    where ps.promotion_id in
+    <foreach item="promotionId" index="index" collection="promotionIds" separator="," open="(" close=")">
+      #{promotionId,jdbcType=BIGINT}
+    </foreach>
+    order by ps.promotion_id asc, ps.day_of_week asc, ps.start_time asc
+  </select>
+
   <select id="selectActiveWindow" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />

@@ -61,6 +61,16 @@ public interface PromotionScheduleMapper {
     List<PromotionSchedule> selectByPromotionId(Long promotionId);
 
     /**
+     * Selects every schedule belonging to any of the given promotions in one round
+     * trip. Used by the promotion engine to load the whole candidate set without
+     * issuing one query per promotion.
+     *
+     * @param promotionIds the Promotion IDs to load, must not be empty
+     * @return list of PromotionSchedule objects
+     */
+    List<PromotionSchedule> selectByPromotionIds(@Param("promotionIds") List<Long> promotionIds);
+
+    /**
      * Selects the schedules of a promotion that are enabled and whose window
      * contains the given time on the given day.
      *
