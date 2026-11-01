@@ -191,8 +191,11 @@ class OrderItemValidationServiceImplTest {
      * are on sale and priced. Everything else each test needs is stubbed on top of this.
      */
     private void givenASellableBasket() {
+        // store_tiers.tier_menu_id holds the MENU tier id itself, which is also the value
+        // written into tier_menus.tier_id. The joined tier_menus row is incidental, so the
+        // fixture mirrors the database: tierMenuId == the tier id the lookup is keyed on.
         StoreTier storeTier = new StoreTier().setStoreId(STORE_ID).setTierPriceId(PRICE_TIER_ID)
-                .setTierMenuId(9).setTierMenu(new TierMenu().setId(9).setTierId(MENU_TIER_ID));
+                .setTierMenuId(MENU_TIER_ID).setTierMenu(new TierMenu().setId(MENU_TIER_ID).setTierId(MENU_TIER_ID));
         when(storeTierService.selectByStoreId(STORE_ID)).thenReturn(storeTier);
         when(tierMenuService.getMenusByTierId(MENU_TIER_ID))
                 .thenReturn(List.of(new TierMenu().setCategoryId(CATEGORY_ID).setActive(true).setDeleted(false)));
@@ -270,6 +273,35 @@ class OrderItemValidationServiceImplTest {
         BusinessBadRequestException e = rejectionOf(request(line(PRODUCT_ID, SKU_ID, 1)));
 
         assertEquals("exception.orderValidation.productNotAvailable", e.getMessage());
+    }
+
+    /**
+     * Regression: the store's menu tier is identified by {@code store_tiers.tier_menu_id},
+     * which is the MENU tier's own id. The {@code tier_menus} row joined by the mapper is
+     * an incidental row that merely shares that id and carries a different {@code tier_id};
+     * reading the joined row's {@code tier_id} resolves a different tier's menu and wrongly
+     * reports every product as unavailable.
+     */
+    @Test
+    void validate_shouldResolveTheStoreMenuByTheStoreTierIdNotTheJoinedRowsTierId() {
+        Integer joinedRowTierId = 99;
+        StoreTier storeTier = new StoreTier().setStoreId(STORE_ID).setTierPriceId(PRICE_TIER_ID)
+                .setTierMenuId(MENU_TIER_ID)
+                .setTierMenu(new TierMenu().setId(MENU_TIER_ID).setTierId(joinedRowTierId));
+        when(storeTierService.selectByStoreId(STORE_ID)).thenReturn(storeTier);
+        when(tierMenuService.getMenusByTierId(MENU_TIER_ID))
+                .thenReturn(List.of(new TierMenu().setCategoryId(CATEGORY_ID).setActive(true).setDeleted(false)));
+        when(productMapper.selectByIds(anyList(), anyInt())).thenReturn(List.of(product()));
+        when(skuMapper.selectByIds(anyList())).thenReturn(List.of(sku()));
+        when(skuTierPriceService.selectBySkusTierId(anyList(), any()))
+                .thenReturn(List.of(new SkuTierPrice().setSkuId(SKU_ID).setTierId(PRICE_TIER_ID)
+                        .setPrice(new BigDecimal("20000"))));
+
+        ValidateOrderItemsResponseDto response = service.validate(request(line(PRODUCT_ID, SKU_ID, 1)));
+
+        assertEquals("Kopi Gula Aren", response.getItems().get(0).getProductName());
+        verify(tierMenuService).getMenusByTierId(MENU_TIER_ID);
+        verify(tierMenuService, never()).getMenusByTierId(joinedRowTierId);
     }
 
     @Test

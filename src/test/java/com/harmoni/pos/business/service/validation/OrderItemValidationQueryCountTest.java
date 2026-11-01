@@ -164,8 +164,8 @@ class OrderItemValidationQueryCountTest {
     }
 
     private void givenCatalogueFor(boolean priced, boolean withChoices) {
-        StoreTier storeTier = new StoreTier().setStoreId(STORE_ID).setTierMenuId(9)
-                .setTierMenu(new TierMenu().setId(9).setTierId(MENU_TIER_ID));
+        StoreTier storeTier = new StoreTier().setStoreId(STORE_ID).setTierMenuId(MENU_TIER_ID)
+                .setTierMenu(new TierMenu().setId(MENU_TIER_ID).setTierId(MENU_TIER_ID));
         if (priced) {
             storeTier.setTierPriceId(PRICE_TIER_ID);
         }

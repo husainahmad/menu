@@ -283,15 +283,18 @@ public class OrderItemValidationServiceImpl implements OrderItemValidationServic
      * @return the category IDs on sale, or {@code null} when there is no menu tier
      */
     private Set<Integer> sellableCategoryIds(StoreTier storeTier) {
-        // getMenusByTierId filters on tier_menus.tier_id, so this must be the tier id
-        // carried by the store's tier_menu row, not the row's own primary key.
-        Integer menuTierId = storeTier == null || storeTier.getTierMenu() == null
-                ? null
-                : storeTier.getTierMenu().getTierId();
+        // store_tiers.tier_menu_id holds the MENU tier's id (tiers.id, type='MENU'), which
+        // is the same value written into tier_menus.tier_id. The tier_menus row joined in
+        // by StoreTierMapper is only the arbitrary row that happens to have that id, so
+        // its own tier_id must not be used: that would resolve a different tier's menu.
+        Integer menuTierId = storeTier == null ? null : storeTier.getTierMenuId();
+        if (menuTierId == null && storeTier != null && storeTier.getTierMenu() != null) {
+            menuTierId = storeTier.getTierMenu().getTierId();
+        }
         if (menuTierId == null) {
             return null;
         }
-        return tierMenuService.getMenusByTierId(storeTier.getTierMenu().getId()).stream()
+        return tierMenuService.getMenusByTierId(menuTierId).stream()
                 .filter(menu -> !Boolean.TRUE.equals(menu.getDeleted()))
                 .map(TierMenu::getCategoryId)
                 .filter(Objects::nonNull)
