@@ -39,6 +39,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
+    /** Default and maximum page sizes for the cursor-paged product list. */
+    private static final int DEFAULT_PAGE_SIZE = 50;
+    private static final int MAX_PAGE_SIZE = 200;
+
     // Injected dependencies for data access and related services
     private final ProductMapper productMapper;
     private final SkuService skuService;
@@ -86,6 +90,39 @@ public class ProductServiceImpl implements ProductService {
         StoreTier storeTier = storeTierService.selectByStoreId(user.getStoreId());
         List<Product> products = productMapper.selectByCategoryIdPrice(categoryId, storeTier.getTierPriceId());
         return attachCustomizations(products, storeTier.getTierPriceId());
+    }
+
+    /**
+     * One keyset page of category products with the operator's tier pricing.
+     * <p>
+     * The cursor is the last product id on the page. Asking for one extra row is how
+     * {@code hasMore} is learned without a second counting query; that row is dropped
+     * before answering, so the client can page until {@code hasMore} is false.
+     */
+    @Override
+    public ProductPage selectByCategoryPricePage(String username, Integer categoryId,
+                                                 Integer beforeId, Integer limit) {
+        User user = userService.selectByUsername(username);
+        StoreTier storeTier = storeTierService.selectByStoreId(user.getStoreId());
+        int size = limit == null || limit <= 0
+                ? DEFAULT_PAGE_SIZE
+                : Math.min(limit, MAX_PAGE_SIZE);
+
+        List<Product> fetched = productMapper.selectByCategoryIdPricePaged(
+                categoryId, storeTier.getTierPriceId(), beforeId, size + 1);
+
+        boolean hasMore = fetched.size() > size;
+        List<Product> page = hasMore ? new ArrayList<>(fetched.subList(0, size)) : fetched;
+
+        Integer nextCursor = null;
+        if (hasMore && !page.isEmpty()) {
+            Product last = page.get(page.size() - 1);
+            nextCursor = last == null ? null : last.getId();
+        }
+        return new ProductPage()
+                .setProducts(attachCustomizations(page, storeTier.getTierPriceId()))
+                .setHasMore(hasMore)
+                .setNextCursor(nextCursor);
     }
 
     /**

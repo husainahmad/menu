@@ -1,6 +1,7 @@
 package com.harmoni.pos.business.service.product;
 
 import com.harmoni.pos.menu.model.Product;
+import com.harmoni.pos.menu.model.ProductPage;
 import com.harmoni.pos.menu.model.dto.add.ProductAddDto;
 import com.harmoni.pos.menu.model.dto.ProductSkuDto;
 import com.harmoni.pos.menu.model.dto.edit.ProductEditDto;
@@ -29,6 +30,18 @@ public interface ProductService {
      * @return list of products with contextual pricing
      */
     List<Product> selectByCategoryPrice(String username, Integer categoryId);
+
+    /**
+     * Retrieves one keyset page of products by category with the operator's tier pricing.
+     *
+     * @param username   the username, used to resolve the store and its price tier
+     * @param categoryId the category id; {@code -1} means every category
+     * @param beforeId   return only products with an id lower than this; null for the first page
+     * @param limit      the maximum number of products to return
+     * @return one page of products plus the next cursor
+     */
+    ProductPage selectByCategoryPricePage(String username, Integer categoryId,
+                                          Integer beforeId, Integer limit);
 
     /**
      * Retrieves products by category ID.

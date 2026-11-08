@@ -158,6 +158,38 @@ public class ProductController {
     }
 
     /**
+     * Retrieves one cursor page of products by Category ID with price information.
+     * <p>
+     * Endpoint: GET /api/v1/product/category/{id}/price/page?limit=50&amp;beforeId=120
+     * <p>
+     * The response is {@code { products, nextCursor, hasMore }}. Pass {@code nextCursor}
+     * back as {@code beforeId} to append the next page; {@code hasMore} is false on the
+     * last one. The cursor is a product id rather than an offset so an insert cannot make
+     * the next page repeat a row.
+     *
+     * @param username the username
+     * @param id       the category id; {@code -1} means every category
+     * @param limit    the most products to return; defaults to 50, capped at 200
+     * @param beforeId return only products with an id lower than this; omit for the first page
+     * @return ResponseEntity containing the product page
+     */
+    @GetMapping("/category/{id}/price/page")
+    public ResponseEntity<RestAPIResponse> getByCategoryPricePage(
+            @RequestHeader("X-Username") String username,
+            @PathVariable Integer id,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "beforeId", required = false) Integer beforeId) {
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(this.productService.selectByCategoryPricePage(username, id, beforeId, limit))
+                .error(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    /**
      * Search products by product name LIKE (for AI).
      * GET /api/v1/product/search?productName=latte
      */

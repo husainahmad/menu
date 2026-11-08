@@ -136,6 +136,34 @@
 
   </select>
 
+  <select id="selectByCategoryIdPricePaged" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.CategoryMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.SkuMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.ProductImageMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.SkuTierPriceMapper.Base_Column_List"/>
+    from (
+      select page.id from products page
+      where (page.is_deleted = 0 or page.is_deleted is null)
+      <if test="categoryId != null and categoryId != -1">
+        and page.category_id = #{categoryId,jdbcType=INTEGER}
+      </if>
+      <if test="beforeId != null">
+        and page.id &lt; #{beforeId,jdbcType=INTEGER}
+      </if>
+      order by page.id desc
+      limit #{limit}
+    ) AS page_window
+    join products product on product.id = page_window.id
+    left join categories category on category.id = product.category_id
+    left join skus sku on sku.product_id = product.id
+    left join sku_tier_prices stp on stp.sku_id = sku.id
+    and stp.tier_id = #{tierId,jdbcType=INTEGER}
+    left join product_images product_image on product_image.product_id = product.id
+    order by product.id desc
+  </select>
+
   <select id="selectByCategoryIdBrandId" resultMap="BaseResultMap">
       select
       <include refid="Base_Column_List" />,
