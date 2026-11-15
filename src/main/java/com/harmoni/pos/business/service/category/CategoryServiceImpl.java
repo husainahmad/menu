@@ -54,6 +54,30 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
+     * Updates an existing category, preserving its timestamps and rejecting a
+     * rename that would collide with another category in the same brand.
+     *
+     * @param id          the category ID
+     * @param categoryDto the new category details
+     * @return number of rows updated
+     */
+    @Override
+    public int update(Integer id, CategoryDto categoryDto) {
+        Category existing = this.get(id);
+        Category duplicate = categoryMapper.selectByNameBrandId(categoryDto.getName(), categoryDto.getBrandId());
+        if (!ObjectUtils.isEmpty(duplicate) && !existing.getId().equals(duplicate.getId())) {
+            throw new BusinessBadRequestException("exception.category.badRequest.duplicate", null);
+        }
+
+        Category category = categoryDto.toCategory();
+        category.setId(existing.getId());
+        category.setCreatedAt(existing.getCreatedAt());
+        category.setUpdatedAt(new Date(System.currentTimeMillis()));
+        category.setDeletedAt(existing.getDeletedAt());
+        return categoryMapper.updateByPrimaryKey(category);
+    }
+
+    /**
      * Deletes a category by its ID.
      *
      * @param id the category ID
@@ -116,6 +140,29 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> selectByBrandId(Integer brandId) {
         return categoryMapper.selectByBrandId(brandId);
+    }
+
+    /**
+     * Retrieves a paginated list of categories associated with a specific brand.
+     *
+     * @param brandId the unique identifier of the brand
+     * @param page    the page number, 1-based
+     * @param size    the number of records per page
+     * @return a map containing paginated category data and metadata
+     */
+    @Override
+    public Map<String, Object> listPaginatedByBrand(Integer brandId, int page, int size) {
+        PaginationUtils.applyPagination(page, size);
+        Map<String, Object> paginationData = new HashMap<>();
+        PageInfo<Category> categoryPageInfo = new PageInfo<>(this.selectByBrandId(brandId));
+
+        paginationData.put("page", categoryPageInfo.getPages());
+        paginationData.put("size", categoryPageInfo.getSize());
+        paginationData.put("total", categoryPageInfo.getTotal());
+        paginationData.put("data", categoryPageInfo.getList());
+        paginationData.put("navigate", categoryPageInfo.getNavigatepageNums());
+
+        return paginationData;
     }
 
     /**

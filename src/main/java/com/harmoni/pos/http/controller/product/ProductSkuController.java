@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/product")
+@PreAuthorize("hasAnyAuthority('menu:view', 'menu:edit', 'catalog:read', 'catalog:write', 'rbac:manage')")
 public class ProductSkuController {
 
     private final ProductService productService;
@@ -49,6 +51,7 @@ public class ProductSkuController {
      * @return ResponseEntity with update status
      */
     @PutMapping("/{id}/sku")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> putSku(@PathVariable Integer id, @Valid @RequestBody ProductSkuDto productSkuDto) {
         productService.updateProductSku(id, productSkuDto);
 

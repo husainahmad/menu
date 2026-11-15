@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/customization")
 @RequiredArgsConstructor
 @Slf4j
+@PreAuthorize("hasAnyAuthority('menu:view', 'menu:edit', 'catalog:read', 'catalog:write', 'rbac:manage')")
 public class CustomizationController {
 
     private final CustomizationService customizationService;
@@ -28,6 +30,7 @@ public class CustomizationController {
      * @return ResponseEntity with creation result
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@RequestHeader("X-Username") String username, @Valid @RequestBody CustomizationDto customizationDto) {
         int id = customizationService.createCustomization(username, customizationDto.toEntity());
         log.debug("Customization created with ID: {}", id);
@@ -80,6 +83,7 @@ public class CustomizationController {
      * @return ResponseEntity with update result
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer id,
                                                   @Valid @RequestBody CustomizationDto customizationDto) {
         customizationDto.setId(id);
@@ -95,6 +99,7 @@ public class CustomizationController {
      * @return ResponseEntity with deletion status
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         int rows = customizationService.deleteCustomization(id);
         log.debug("Customization deleted with ID: {}, rows: {}", id, rows);

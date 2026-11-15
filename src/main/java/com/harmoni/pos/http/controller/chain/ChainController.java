@@ -1,5 +1,7 @@
 package com.harmoni.pos.http.controller.chain;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.harmoni.pos.business.service.chain.ChainService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.ChainDto;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/chain")
 @Slf4j
+@PreAuthorize("hasAnyAuthority('organization:read', 'rbac:manage')")
 public class ChainController {
 
     private final ChainService chainService;
@@ -28,6 +31,7 @@ public class ChainController {
      * @return ResponseEntity with creation status
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ChainDto chainDto) {
         int id = chainService.create(chainDto);
         log.debug("Chain created {} ", id);
@@ -42,6 +46,7 @@ public class ChainController {
      * @return ResponseEntity with update status
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> update(@Valid @RequestBody ChainDto chainDto, @PathVariable Integer id) {
         chainService.update(chainDto, id);
         log.debug("Chain updated {} ", id);
@@ -74,6 +79,7 @@ public class ChainController {
      * @return ResponseEntity with deletion status
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('organization:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())

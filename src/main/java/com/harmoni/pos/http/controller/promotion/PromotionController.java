@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/promotion")
 @Slf4j
+@PreAuthorize("hasAnyAuthority('menu:view', 'menu:edit', 'catalog:read', 'catalog:write', 'rbac:manage')")
 public class PromotionController {
 
     private final PromotionService promotionService;
@@ -44,6 +46,7 @@ public class PromotionController {
      * @return the created promotion
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody PromotionAddDto promotionAddDto) {
         Promotion promotion = promotionService.create(promotionAddDto);
         log.debug("Promotion created {} ", promotion.getId());
@@ -130,6 +133,7 @@ public class PromotionController {
      * @return the updated promotion
      */
     @PutMapping("")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> put(@Valid @RequestBody PromotionEditDto promotionEditDto) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -147,6 +151,7 @@ public class PromotionController {
      * @return the number of updated rows
      */
     @PatchMapping("/{id:\\d+}/status")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> patchStatus(@PathVariable("id") Long id,
                                                        @RequestParam("status") PromotionStatus status) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -168,6 +173,7 @@ public class PromotionController {
      * @return one priced line per requested line, plus the order wide saving
      */
     @PostMapping("/price")
+    @PreAuthorize("hasAnyAuthority('menu:view', 'catalog:read', 'order:view', 'terminal:view', 'availability:view', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> price(@Valid @RequestBody PromotionPriceRequestDto request) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -183,6 +189,7 @@ public class PromotionController {
      * @return the number of deleted rows
      */
     @DeleteMapping("/{id:\\d+}")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable("id") Long id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -201,6 +208,7 @@ public class PromotionController {
      * @return the number of deleted rows
      */
     @DeleteMapping("")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> deleteByFilter(@RequestParam(name = "status", required = false) PromotionStatus status,
                                                           @RequestParam(name = "promotionType", required = false) PromotionType promotionType,
                                                           @RequestParam(name = "search", required = false) String search) {

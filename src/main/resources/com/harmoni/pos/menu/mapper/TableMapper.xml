@@ -5,19 +5,34 @@
   <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.Table">
     <id column="table_id" jdbcType="INTEGER" property="id" />
     <result column="table_store_id" jdbcType="INTEGER" property="storeId" />
+    <result column="table_floor_id" jdbcType="INTEGER" property="floorId" />
     <result column="table_name" jdbcType="VARCHAR" property="name" />
     <result column="table_capacity" jdbcType="INTEGER" property="capacity" />
+    <result column="table_shape" jdbcType="VARCHAR" property="shape" />
+    <result column="table_pos_x" jdbcType="INTEGER" property="posX" />
+    <result column="table_pos_y" jdbcType="INTEGER" property="posY" />
+    <result column="table_width" jdbcType="INTEGER" property="width" />
+    <result column="table_height" jdbcType="INTEGER" property="height" />
+    <result column="table_active" jdbcType="BOOLEAN" property="active" />
     <result column="table_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="table_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <result column="table_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
     <association property="store" resultMap="com.harmoni.pos.menu.mapper.StoreMapper.BaseResultMap"/>
+    <association property="floor" resultMap="com.harmoni.pos.menu.mapper.FloorMapper.BaseResultMap"/>
   </resultMap>
 
   <sql id="Base_Column_List">
     tbl.id as table_id,
     tbl.store_id as table_store_id,
+    tbl.floor_id as table_floor_id,
     tbl.name as table_name,
     tbl.capacity as table_capacity,
+    tbl.shape as table_shape,
+    tbl.pos_x as table_pos_x,
+    tbl.pos_y as table_pos_y,
+    tbl.width as table_width,
+    tbl.height as table_height,
+    tbl.active as table_active,
     tbl.created_at as table_created_at,
     tbl.updated_at as table_updated_at,
     tbl.deleted_at as table_deleted_at
@@ -26,19 +41,22 @@
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />,
-    <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>
+    <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.FloorMapper.Base_Column_List"/>
     from tables tbl
     left join stores store on store.id = tbl.store_id
     left join store_tiers store_tier on store_tier.store_id = store.id
+    left join floors floor on floor.id = tbl.floor_id
     where tbl.id = #{id,jdbcType=INTEGER}
           and tbl.deleted_at is null
   </select>
 
-  <select id="selectByNameStoreId" resultMap="BaseResultMap">
+  <select id="selectByNameFloorIdStoreId" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from tables tbl
     where tbl.name = #{name,jdbcType=VARCHAR}
+          and tbl.floor_id = #{floorId,jdbcType=INTEGER}
           and tbl.store_id = #{storeId,jdbcType=INTEGER}
           and tbl.deleted_at is null
   </select>
@@ -46,21 +64,46 @@
   <select id="selectAll" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />,
-    <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>
+    <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.FloorMapper.Base_Column_List"/>
     from tables tbl
     left join stores store on store.id = tbl.store_id
     left join store_tiers store_tier on store_tier.store_id = store.id
+    left join floors floor on floor.id = tbl.floor_id
     where tbl.deleted_at is null
   </select>
 
   <select id="selectByStoreId" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />,
-    <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>
+    <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.FloorMapper.Base_Column_List"/>
     from tables tbl
     left join stores store on store.id = tbl.store_id
     left join store_tiers store_tier on store_tier.store_id = store.id
+    left join floors floor on floor.id = tbl.floor_id
     where tbl.store_id = #{storeId,jdbcType=INTEGER}
+          and tbl.deleted_at is null
+  </select>
+
+  <select id="selectByFloorId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>,
+    <include refid="com.harmoni.pos.menu.mapper.FloorMapper.Base_Column_List"/>
+    from tables tbl
+    left join stores store on store.id = tbl.store_id
+    left join store_tiers store_tier on store_tier.store_id = store.id
+    left join floors floor on floor.id = tbl.floor_id
+    where tbl.floor_id = #{floorId,jdbcType=INTEGER}
+          and tbl.deleted_at is null
+    order by tbl.name asc
+  </select>
+
+  <select id="countByFloorId" parameterType="java.lang.Integer" resultType="int">
+    select count(*)
+    from tables tbl
+    where tbl.floor_id = #{floorId,jdbcType=INTEGER}
           and tbl.deleted_at is null
   </select>
 
@@ -74,18 +117,27 @@
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into tables (store_id, name, capacity, created_at,
-      updated_at, deleted_at)
-    values (#{storeId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{capacity,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP},
+    insert into tables (store_id, floor_id, name, capacity, shape, pos_x, pos_y,
+      width, height, active, created_at, updated_at, deleted_at)
+    values (#{storeId,jdbcType=INTEGER}, #{floorId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR},
+      #{capacity,jdbcType=INTEGER}, #{shape,jdbcType=VARCHAR}, #{posX,jdbcType=INTEGER},
+      #{posY,jdbcType=INTEGER}, #{width,jdbcType=INTEGER}, #{height,jdbcType=INTEGER},
+      #{active,jdbcType=BOOLEAN}, #{createdAt,jdbcType=TIMESTAMP},
       #{updatedAt,jdbcType=TIMESTAMP}, #{deletedAt,jdbcType=TIMESTAMP})
   </insert>
 
   <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Table">
     update tables
     set store_id = #{storeId,jdbcType=INTEGER},
+      floor_id = #{floorId,jdbcType=INTEGER},
       name = #{name,jdbcType=VARCHAR},
       capacity = #{capacity,jdbcType=INTEGER},
-      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      shape = #{shape,jdbcType=VARCHAR},
+      pos_x = #{posX,jdbcType=INTEGER},
+      pos_y = #{posY,jdbcType=INTEGER},
+      width = #{width,jdbcType=INTEGER},
+      height = #{height,jdbcType=INTEGER},
+      active = #{active,jdbcType=BOOLEAN},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},
       deleted_at = #{deletedAt,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}

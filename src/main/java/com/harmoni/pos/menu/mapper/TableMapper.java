@@ -33,12 +33,13 @@ public interface TableMapper {
     Table selectByPrimaryKey(Integer id);
 
     /**
-     * Selects a Table by its name and store ID.
+     * Selects a Table by its name, floor ID and store ID.
      * @param name the Table name
+     * @param floorId the Floor ID
      * @param storeId the Store ID
      * @return the Table object
      */
-    Table selectByNameStoreId(String name, Integer storeId);
+    Table selectByNameFloorIdStoreId(String name, Integer floorId, Integer storeId);
 
     /**
      * Selects all Tables.
@@ -52,6 +53,20 @@ public interface TableMapper {
      * @return list of Table objects
      */
     List<Table> selectByStoreId(Integer storeId);
+
+    /**
+     * Selects Tables by Floor ID.
+     * @param floorId the Floor ID
+     * @return list of Table objects
+     */
+    List<Table> selectByFloorId(Integer floorId);
+
+    /**
+     * Counts the tables on a floor, used to guard floor deletion.
+     * @param floorId the Floor ID
+     * @return number of active tables on the floor
+     */
+    int countByFloorId(Integer floorId);
 
     /**
      * Updates a Table by its primary key.

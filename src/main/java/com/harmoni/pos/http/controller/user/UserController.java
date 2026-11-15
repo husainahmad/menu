@@ -10,7 +10,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * REST controller for managing User entities.
@@ -32,9 +35,11 @@ public class UserController {
      * @throws Exception if an error occurs during creation
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('employee:edit', 'user:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> createUser(@Valid @RequestBody UserDto userDto,
-                                                      @RequestHeader("X-Username") String username) throws Exception {
-        int id = this.userService.insert(username, userDto);
+                                                      @RequestHeader("X-Username") String username,
+                                                      @RequestHeader(value = "Authorization", required = false) String authorization) throws Exception {
+        int id = this.userService.insert(authorization, userDto);
         log.debug("tier created {} ", id);
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
     }
@@ -49,6 +54,7 @@ public class UserController {
      * @return ResponseEntity containing users for the chain
      */
     @GetMapping("/chain/{chainId}")
+    @PreAuthorize("hasAnyAuthority('employee:view', 'user:read', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> getByCategoryBrand(@PathVariable Integer chainId,
                                                               @RequestParam(name = "page") int page,
                                                               @RequestParam(name = "size") int size,
@@ -56,7 +62,39 @@ public class UserController {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(this.userService.selectByChainId(chainId, page, size, search))
+                .data(this.userService.selectByChainId(chainId, page, size, search, null, null))
+                .error(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    /**
+     * Retrieves a page of employees across the stores in the caller's scope.
+     *
+     * @param storeIds  the store ids in the caller's scope
+     * @param page      1-based page number
+     * @param size      page size
+     * @param search    optional name/code search term
+     * @param roleId    optional role filter
+     * @param scopeType optional scope filter (BRAND, CHAIN, STORE)
+     * @return a page of users with pagination metadata
+     */
+    @GetMapping("/page")
+    @PreAuthorize("hasAnyAuthority('employee:view', 'user:read', 'rbac:manage')")
+    public ResponseEntity<RestAPIResponse> getPage(@RequestParam(name = "storeIds") List<Integer> storeIds,
+                                                   @RequestParam(name = "page", defaultValue = "1") int page,
+                                                   @RequestParam(name = "size", defaultValue = "10") int size,
+                                                   @RequestParam(name = "search", required = false, defaultValue = "") String search,
+                                                   @RequestParam(name = "roleId", required = false) String roleId,
+                                                   @RequestParam(name = "scopeType", required = false) String scopeType) {
+
+        Integer roleFilter = roleId == null || roleId.isBlank() ? null : Integer.valueOf(roleId);
+        String scopeFilter = scopeType == null || scopeType.isBlank() ? null : scopeType;
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(this.userService.selectByStoreIdPage(storeIds, page, size, search, roleFilter, scopeFilter))
                 .error(null)
                 .build();
 
@@ -72,8 +110,11 @@ public class UserController {
      * @throws Exception if an error occurs during deletion
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<RestAPIResponse> deleteUser(@PathVariable Integer id, @RequestHeader("X-Username") String username) throws Exception {
-        int rowCount = this.userService.delete(username, id);
+    @PreAuthorize("hasAnyAuthority('employee:edit', 'user:delete', 'rbac:manage')")
+    public ResponseEntity<RestAPIResponse> deleteUser(@PathVariable Integer id,
+                                                      @RequestHeader("X-Username") String username,
+                                                      @RequestHeader(value = "Authorization", required = false) String authorization) throws Exception {
+        int rowCount = this.userService.delete(authorization, id);
         log.debug("user deleted {} ", rowCount);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
@@ -89,9 +130,12 @@ public class UserController {
      * @throws Exception if an error occurs during update
      */
     @PutMapping("/{id}")
-    public ResponseEntity<RestAPIResponse> updateUser(@PathVariable Integer id, @RequestHeader("X-Username") String username,
+    @PreAuthorize("hasAnyAuthority('employee:edit', 'user:write', 'rbac:manage')")
+    public ResponseEntity<RestAPIResponse> updateUser(@PathVariable Integer id,
+                    @RequestHeader("X-Username") String username,
+                    @RequestHeader(value = "Authorization", required = false) String authorization,
                     @Valid @RequestBody UserEditDto userEditDto) throws Exception {
-        int rowCount = this.userService.update(username, userEditDto);
+        int rowCount = this.userService.update(authorization, userEditDto);
         log.debug("user updated {} ", rowCount);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
@@ -105,6 +149,7 @@ public class UserController {
      * @throws Exception if an error occurs during retrieval
      */
     @GetMapping("/{username}")
+    @PreAuthorize("hasAnyAuthority('menu:view', 'catalog:read', 'organization:read', 'order:view', 'terminal:view', 'availability:view', 'employee:view', 'user:read', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> detailUser(@PathVariable String username) throws Exception {
         User user = this.userService.selectByUsername(username);
         log.debug("user detail {} ", user);

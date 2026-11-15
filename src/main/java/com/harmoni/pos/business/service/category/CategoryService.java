@@ -25,6 +25,16 @@ public interface CategoryService {
     int create(CategoryDto categoryDto);
 
     /**
+     * Updates an existing category.
+     *
+     * @param id          the unique identifier of the category
+     * @param categoryDto the DTO containing the new category details
+     * @return the number of rows updated
+     * @throws com.harmoni.pos.exception.BusinessBadRequestException if the category does not exist
+     */
+    int update(Integer id, CategoryDto categoryDto);
+
+    /**
      * Deletes an existing category by its ID.
      *
      * @param id the unique identifier of the category
@@ -58,6 +68,16 @@ public interface CategoryService {
      * @return a list of categories under the brand
      */
     List<Category> selectByBrandId(Integer brandId);
+
+    /**
+     * Retrieves a paginated list of categories associated with a specific brand.
+     *
+     * @param brandId the unique identifier of the brand
+     * @param page    the page number, 1-based
+     * @param size    the number of records per page
+     * @return a map containing paginated category data and metadata
+     */
+    Map<String, Object> listPaginatedByBrand(Integer brandId, int page, int size);
 
     /**
      * Retrieves a single category by its ID.

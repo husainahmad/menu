@@ -22,12 +22,48 @@ public class BrandDto {
     private String name;
 
     /**
+     * The hosted URL of the brand logo.
+     */
+    private String logoUrl;
+
+    /**
+     * The IANA time zone of the brand.
+     */
+    private String timeZone;
+
+    /**
+     * The ISO currency code of the brand.
+     */
+    private String currency;
+
+    /**
+     * The email address of the brand administrator.
+     */
+    private String adminEmail;
+
+    /**
+     * How the initial menu is created: {@code EMPTY} or {@code COPY}.
+     */
+    private String initialMenuMode;
+
+    /**
+     * The brand whose menu is copied when {@link #initialMenuMode} is {@code COPY}.
+     */
+    private Integer sourceBrandId;
+
+    /**
      * Converts this DTO to a Brand entity.
      *
-     * @return a Brand entity with the name set
+     * @return a Brand entity with the fields set
      */
     public Brand toBrand() {
         return new Brand()
-                .setName(name);
+                .setName(name)
+                .setLogoUrl(logoUrl)
+                .setTimeZone(timeZone == null ? "Asia/Jakarta" : timeZone)
+                .setCurrency(currency == null ? "IDR" : currency)
+                .setAdminEmail(adminEmail)
+                .setInitialMenuMode(initialMenuMode == null ? "EMPTY" : initialMenuMode)
+                .setSourceBrandId(sourceBrandId);
     }
 }

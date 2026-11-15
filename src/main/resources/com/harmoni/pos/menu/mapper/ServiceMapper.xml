@@ -47,6 +47,28 @@
       on sub_service.service_id = service.id
   </select>
 
+  <select id="countAll" resultType="int">
+    select count(*) from services
+  </select>
+
+  <select id="selectPagedIds" resultType="java.lang.Integer">
+    select id from services order by id limit #{offset}, #{size}
+  </select>
+
+  <select id="selectByIdsAndSubService" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.SubServiceMapper.Base_Column_List"/>
+    from services service
+    left join sub_services sub_service
+      on sub_service.service_id = service.id
+    where service.id in
+    <foreach item="id" collection="ids" separator="," open="(" close=")">
+      #{id}
+    </foreach>
+    order by service.id
+  </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from services
     where id = #{id,jdbcType=INTEGER}

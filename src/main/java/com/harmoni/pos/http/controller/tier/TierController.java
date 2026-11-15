@@ -1,5 +1,7 @@
 package com.harmoni.pos.http.controller.tier;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.harmoni.pos.business.service.tier.TierService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.TierType;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/tier")
+@PreAuthorize("hasAnyAuthority('organization:read', 'rbac:manage')")
 public class TierController {
 
     private final TierService tierService;
@@ -29,6 +32,7 @@ public class TierController {
      * @return ResponseEntity with creation status
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody TierDto tierDto) {
         int id = tierService.create(tierDto);
         log.debug("tier created {} ", id);
@@ -60,6 +64,7 @@ public class TierController {
      * @return ResponseEntity with update status
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> update(@Valid @RequestBody TierDto tierDto, @PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -94,6 +99,7 @@ public class TierController {
      * @return ResponseEntity with deletion status
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('organization:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> deleteByBrand(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

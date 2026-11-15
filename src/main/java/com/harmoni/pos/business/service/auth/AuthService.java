@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Service class for handling authentication-related operations such as
@@ -33,17 +34,17 @@ public class AuthService implements Serializable {
      *
      * @param token    JWT token for authentication
      * @param userDto  the user data to register
-     * @return the HTTP status code returned by the external service
+     * @return the created authentication user id, or {@code 0} when registration failed
      */
-    public int create(String token, UserDto userDto) {
-        AtomicInteger statusCode = new AtomicInteger();
+    public Integer create(String token, UserDto userDto) {
+        AtomicReference<Integer> authUserId = new AtomicReference<>(0);
         restClientService.post(token, authUrlProperties.getRegister(), Mono.just(userDto), UserDto.class).map(restAPIResponse -> {
             if (restAPIResponse != null && restAPIResponse.getData() != null) {
-                statusCode.set(restAPIResponse.getHttpStatus());
+                authUserId.set(Integer.valueOf(restAPIResponse.getData().toString()));
             }
-            return statusCode;
+            return authUserId;
         }).block();
-        return statusCode.get();
+        return authUserId.get();
     }
 
     /**

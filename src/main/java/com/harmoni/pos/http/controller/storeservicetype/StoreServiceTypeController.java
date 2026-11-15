@@ -1,5 +1,7 @@
 package com.harmoni.pos.http.controller.storeservicetype;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.harmoni.pos.business.service.storeservicetype.StoreServiceTypeService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.StoreServiceTypeDto;
@@ -31,6 +33,7 @@ public class StoreServiceTypeController {
      * @return ResponseEntity with creation status
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('terminal:edit', 'operation:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody StoreServiceTypeDto storeServiceTypeDto) {
         int id = storeServiceTypeService.create(storeServiceTypeDto);
         log.debug("store service type created {} ", id);

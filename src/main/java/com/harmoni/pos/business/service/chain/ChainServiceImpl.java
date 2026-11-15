@@ -56,16 +56,36 @@ public class ChainServiceImpl implements ChainService {
      */
     @Override
     public boolean update(ChainDto chainDto, Integer id) {
-        if (!ObjectUtils.isEmpty(chainMapper.selectByName(chainDto.getName()))) {
+        Chain duplicate = chainMapper.selectByName(chainDto.getName());
+        if (!ObjectUtils.isEmpty(duplicate) && !java.util.Objects.equals(duplicate.getId(), id)) {
             throw new BusinessBadRequestException("exception.chain.name.badRequest.duplicate", null);
         }
 
-        if (ObjectUtils.isEmpty(chainMapper.selectByPrimaryKey(id))) {
+        Chain existing = chainMapper.selectByPrimaryKey(id);
+        if (ObjectUtils.isEmpty(existing)) {
             throw new BusinessBadRequestException("exception.chain.id.badRequest.notFound", null);
         }
 
-        chainMapper.updateByPrimaryKey(
-                new Chain().setName(chainDto.getName()).setId(id).setBrandId(chainDto.getBrandId()));
+        Chain updated = chainDto.toChain();
+        updated.setId(id);
+        updated.setCreatedAt(existing.getCreatedAt());
+        updated.setUpdatedAt(new java.util.Date(System.currentTimeMillis()));
+        if (updated.getType() == null) {
+            updated.setType(existing.getType());
+        }
+        if (updated.getManagerEmail() == null) {
+            updated.setManagerEmail(existing.getManagerEmail());
+        }
+        if (updated.getTaxServiceMode() == null) {
+            updated.setTaxServiceMode(existing.getTaxServiceMode());
+        }
+        if (updated.getTaxPercent() == null) {
+            updated.setTaxPercent(existing.getTaxPercent());
+        }
+        if (updated.getServiceChargePercent() == null) {
+            updated.setServiceChargePercent(existing.getServiceChargePercent());
+        }
+        chainMapper.updateByPrimaryKey(updated);
 
         return true;
     }

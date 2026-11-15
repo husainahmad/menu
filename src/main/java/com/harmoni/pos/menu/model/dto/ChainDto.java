@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -28,14 +29,45 @@ public class ChainDto {
     private Integer brandId;
 
     /**
+     * The chain type: {@code REGION}, {@code FRANCHISE} or {@code OTHER}.
+     */
+    private String type;
+
+    /**
+     * The email address of the chain manager.
+     */
+    private String managerEmail;
+
+    /**
+     * Whether tax/service settings are inherited from the brand
+     * ({@code INHERIT}) or set on the chain ({@code OWN}).
+     */
+    private String taxServiceMode;
+
+    /**
+     * The tax percentage when {@link #taxServiceMode} is {@code OWN}.
+     */
+    private BigDecimal taxPercent;
+
+    /**
+     * The service-charge percentage when {@link #taxServiceMode} is {@code OWN}.
+     */
+    private BigDecimal serviceChargePercent;
+
+    /**
      * Converts this DTO to a Chain entity.
      *
-     * @return a Chain entity with name, brandId, and createdAt set
+     * @return a Chain entity with the fields set
      */
     public Chain toChain() {
         return new Chain()
                 .setName(name)
                 .setBrandId(brandId)
+                .setType(type == null ? "REGION" : type)
+                .setManagerEmail(managerEmail)
+                .setTaxServiceMode(taxServiceMode == null ? "INHERIT" : taxServiceMode)
+                .setTaxPercent(taxPercent)
+                .setServiceChargePercent(serviceChargePercent)
                 .setCreatedAt(new Date(System.currentTimeMillis()));
     }
 }

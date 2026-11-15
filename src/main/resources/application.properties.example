@@ -54,3 +54,6 @@ auth.url=http://localhost:8080
 auth.url.register=${auth.url}/api/v1/user
 auth.url.delete=${auth.url}/api/v1/user
 auth.url.update=${auth.url}/api/v1/user
+
+# RBAC enforcement. Enable after the dashboard and auth service ship permissions.
+harmoni.menu.rbac.enforce=false

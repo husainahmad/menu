@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.KitchenPrinterMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.KitchenPrinter">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="kitchen_station_id" jdbcType="INTEGER" property="kitchenStationId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="printer_type" jdbcType="VARCHAR" property="printerType" />
+    <result column="connection_config" jdbcType="VARCHAR" property="connectionConfig" />
+    <result column="paper_width" jdbcType="VARCHAR" property="paperWidth" />
+    <result column="is_primary" jdbcType="BOOLEAN" property="isPrimary" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
+    <result column="station_name" jdbcType="VARCHAR" property="stationName" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    p.id, p.kitchen_station_id, p.name, p.printer_type, p.connection_config,
+    p.paper_width, p.is_primary, p.status, p.created_at, p.updated_at, p.deleted_at
+  </sql>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.KitchenPrinter"
+          useGeneratedKeys="true" keyProperty="id">
+    insert into kitchen_printers
+      (kitchen_station_id, name, printer_type, connection_config, paper_width,
+       is_primary, status, created_at, updated_at)
+    values
+      (#{kitchenStationId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR},
+       #{printerType,jdbcType=VARCHAR}, #{connectionConfig,jdbcType=VARCHAR},
+       #{paperWidth,jdbcType=VARCHAR}, #{isPrimary,jdbcType=BOOLEAN},
+       #{status,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP},
+       #{updatedAt,jdbcType=TIMESTAMP})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.KitchenPrinter">
+    update kitchen_printers
+    set name = #{name,jdbcType=VARCHAR},
+        printer_type = #{printerType,jdbcType=VARCHAR},
+        connection_config = #{connectionConfig,jdbcType=VARCHAR},
+        paper_width = #{paperWidth,jdbcType=VARCHAR},
+        is_primary = #{isPrimary,jdbcType=BOOLEAN},
+        status = #{status,jdbcType=VARCHAR},
+        updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+      and deleted_at is null
+  </update>
+
+  <update id="deleteByPrimaryKey">
+    update kitchen_printers
+    set deleted_at = #{deletedAt,jdbcType=TIMESTAMP},
+        updated_at = #{deletedAt,jdbcType=TIMESTAMP},
+        is_primary = 0
+    where id = #{id,jdbcType=INTEGER}
+      and deleted_at is null
+  </update>
+
+  <update id="clearPrimaryByStationId">
+    update kitchen_printers
+    set is_primary = 0
+    where kitchen_station_id = #{stationId,jdbcType=INTEGER}
+      and deleted_at is null
+      and is_primary = 1
+      <if test="exceptId != null">
+        and id &lt;&gt; #{exceptId,jdbcType=INTEGER}
+      </if>
+  </update>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />, s.name as station_name
+    from kitchen_printers p
+    left join kitchen_stations s on s.id = p.kitchen_station_id
+    where p.id = #{id,jdbcType=INTEGER}
+      and p.deleted_at is null
+  </select>
+
+  <select id="selectByStationId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />, s.name as station_name
+    from kitchen_printers p
+    left join kitchen_stations s on s.id = p.kitchen_station_id
+    where p.kitchen_station_id = #{stationId,jdbcType=INTEGER}
+      and p.deleted_at is null
+    order by p.is_primary desc, p.name asc, p.id asc
+  </select>
+
+  <select id="selectPrimaryByStationId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from kitchen_printers p
+    where p.kitchen_station_id = #{stationId,jdbcType=INTEGER}
+      and p.is_primary = 1
+      and p.status = 'ACTIVE'
+      and p.deleted_at is null
+    limit 1
+  </select>
+
+  <select id="selectFirstActiveByStationId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from kitchen_printers p
+    where p.kitchen_station_id = #{stationId,jdbcType=INTEGER}
+      and p.status = 'ACTIVE'
+      and p.deleted_at is null
+    order by p.is_primary desc, p.id asc
+    limit 1
+  </select>
+
+  <select id="selectByStationIdAndName" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from kitchen_printers p
+    where p.kitchen_station_id = #{stationId,jdbcType=INTEGER}
+      and p.name = #{name,jdbcType=VARCHAR}
+      and p.deleted_at is null
+    limit 1
+  </select>
+
+</mapper>

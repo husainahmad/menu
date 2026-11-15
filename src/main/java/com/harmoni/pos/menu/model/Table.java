@@ -30,6 +30,16 @@ public class Table {
     private Store store;
 
     /**
+     * The floor ID the table stands on.
+     */
+    private Integer floorId;
+
+    /**
+     * The floor entity the table stands on.
+     */
+    private Floor floor;
+
+    /**
      * The name of the table.
      */
     private String name;
@@ -38,6 +48,36 @@ public class Table {
      * The seating capacity of the table.
      */
     private Integer capacity;
+
+    /**
+     * Floor-plan shape: SQUARE, ROUND or RECTANGLE.
+     */
+    private String shape;
+
+    /**
+     * Horizontal position on the floor plan, as a percentage of the canvas.
+     */
+    private Integer posX;
+
+    /**
+     * Vertical position on the floor plan, as a percentage of the canvas.
+     */
+    private Integer posY;
+
+    /**
+     * Width on the floor plan, as a percentage of the canvas.
+     */
+    private Integer width;
+
+    /**
+     * Height on the floor plan, as a percentage of the canvas.
+     */
+    private Integer height;
+
+    /**
+     * Whether the table is active at the cashier.
+     */
+    private Boolean active;
 
     /**
      * The creation timestamp of the table.

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -33,6 +34,32 @@ public class Chain {
      * The brand entity associated with the chain.
      */
     private Brand brand;
+
+    /**
+     * The chain type: {@code REGION}, {@code FRANCHISE} or {@code OTHER}.
+     */
+    private String type;
+
+    /**
+     * The email address of the chain manager.
+     */
+    private String managerEmail;
+
+    /**
+     * Whether tax/service settings are inherited from the brand
+     * ({@code INHERIT}) or set on the chain ({@code OWN}).
+     */
+    private String taxServiceMode;
+
+    /**
+     * The tax percentage when {@link #taxServiceMode} is {@code OWN}.
+     */
+    private BigDecimal taxPercent;
+
+    /**
+     * The service-charge percentage when {@link #taxServiceMode} is {@code OWN}.
+     */
+    private BigDecimal serviceChargePercent;
 
     /**
      * The creation timestamp of the chain.

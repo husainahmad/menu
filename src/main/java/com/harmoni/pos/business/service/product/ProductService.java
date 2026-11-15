@@ -44,6 +44,19 @@ public interface ProductService {
                                           Integer beforeId, Integer limit);
 
     /**
+     * Retrieves one keyset page of products by brand with the given tier pricing.
+     *
+     * @param brandId  the brand id
+     * @param tierId   the tier id used to resolve prices
+     * @param beforeId return only products with an id lower than this; null for the first page
+     * @param search   optional product-name search term
+     * @param limit    the maximum number of products to return
+     * @return one page of products plus the next cursor
+     */
+    ProductPage selectByBrandPricePage(Integer brandId, Integer tierId,
+                                       Integer beforeId, String search, Integer limit);
+
+    /**
      * Retrieves products by category ID.
      *
      * @param categoryId the category ID

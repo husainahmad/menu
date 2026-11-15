@@ -1,5 +1,7 @@
 package com.harmoni.pos.http.controller.brand;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.harmoni.pos.business.service.brand.BrandService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.BrandDto;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/brand")
+@PreAuthorize("hasAnyAuthority('organization:read', 'rbac:manage')")
 public class BrandController {
 
     private final Logger log = LoggerFactory.getLogger(BrandController.class);
@@ -29,10 +32,31 @@ public class BrandController {
      * @return ResponseEntity with creation status
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody BrandDto brandDto) {
         int id = brandService.create(brandDto);
         log.debug("Brand created {} ", id);
         return new ResponseEntity<>(RestAPIResponse.builder().build(),HttpStatus.CREATED);
+    }
+
+    /**
+     * Updates an existing Brand.
+     *
+     * @param brandDto the brand data transfer object
+     * @param id       the brand ID
+     * @return ResponseEntity with update status
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
+    public ResponseEntity<RestAPIResponse> update(@Valid @RequestBody BrandDto brandDto,
+                                                  @PathVariable Integer id) {
+        brandService.update(brandDto, id);
+        log.debug("Brand updated {} ", id);
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.ACCEPTED.value())
+                .data(HttpStatus.ACCEPTED)
+                .build();
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.ACCEPTED);
     }
 
     /**
@@ -77,6 +101,7 @@ public class BrandController {
      * @return ResponseEntity with deletion status
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('organization:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         brandService.delete(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()

@@ -6,6 +6,11 @@
     <id column="chain_id" jdbcType="INTEGER" property="id" />
     <result column="chain_name" jdbcType="VARCHAR" property="name" />
     <result column="chain_brand_id" jdbcType="VARCHAR" property="brandId" />
+    <result column="chain_type" jdbcType="VARCHAR" property="type" />
+    <result column="chain_manager_email" jdbcType="VARCHAR" property="managerEmail" />
+    <result column="chain_tax_service_mode" jdbcType="VARCHAR" property="taxServiceMode" />
+    <result column="chain_tax_percent" jdbcType="DECIMAL" property="taxPercent" />
+    <result column="chain_service_charge_percent" jdbcType="DECIMAL" property="serviceChargePercent" />
     <result column="chain_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="chain_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
     <result column="chain_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
@@ -15,6 +20,11 @@
     chain.id as chain_id,
     chain.name as chain_name,
     chain.brand_id as chain_brand_id,
+    chain.type as chain_type,
+    chain.manager_email as chain_manager_email,
+    chain.tax_service_mode as chain_tax_service_mode,
+    chain.tax_percent as chain_tax_percent,
+    chain.service_charge_percent as chain_service_charge_percent,
     chain.created_at as chain_created_at,
     chain.updated_at as chain_updated_at,
     chain.deleted_at as chain_deleted_at
@@ -56,9 +66,11 @@
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into chains (name, brand_id, created_at, updated_at,
-      deleted_at)
-    values (#{name,jdbcType=VARCHAR}, #{brandId,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP},
+    insert into chains (name, brand_id, type, manager_email, tax_service_mode,
+      tax_percent, service_charge_percent, created_at, updated_at, deleted_at)
+    values (#{name,jdbcType=VARCHAR}, #{brandId,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR},
+      #{managerEmail,jdbcType=VARCHAR}, #{taxServiceMode,jdbcType=VARCHAR}, #{taxPercent,jdbcType=DECIMAL},
+      #{serviceChargePercent,jdbcType=DECIMAL}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP},
       #{deletedAt,jdbcType=TIMESTAMP})
   </insert>
 
@@ -66,6 +78,11 @@
     update chains
     set name = #{name,jdbcType=VARCHAR},
       brand_id = #{brandId,jdbcType=INTEGER},
+      type = #{type,jdbcType=VARCHAR},
+      manager_email = #{managerEmail,jdbcType=VARCHAR},
+      tax_service_mode = #{taxServiceMode,jdbcType=VARCHAR},
+      tax_percent = #{taxPercent,jdbcType=DECIMAL},
+      service_charge_percent = #{serviceChargePercent,jdbcType=DECIMAL},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},
       deleted_at = #{deletedAt,jdbcType=TIMESTAMP}

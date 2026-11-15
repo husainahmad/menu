@@ -97,6 +97,22 @@ public interface ProductMapper {
     List<Product> selectByCategoryIdBrandId(Integer categoryId, Integer brandId, String search);
 
     /**
+     * Selects one keyset page of Products by Brand ID and Tier ID, newest id first.
+     *
+     * @param brandId  the Brand ID
+     * @param tierId   the Tier ID used to resolve prices
+     * @param beforeId return only products with an id lower than this; null for the first page
+     * @param search   optional product-name search term
+     * @param limit    the maximum number of rows to return
+     * @return list of Product objects, ordered by id descending
+     */
+    List<Product> selectByBrandIdPricePaged(@Param("brandId") Integer brandId,
+                                            @Param("tierId") Integer tierId,
+                                            @Param("beforeId") Integer beforeId,
+                                            @Param("search") String search,
+                                            @Param("limit") int limit);
+
+    /**
      * Updates a Product by its primary key.
      * @param row the Product object
      * @return number of rows affected

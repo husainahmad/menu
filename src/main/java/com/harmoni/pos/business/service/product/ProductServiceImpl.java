@@ -126,6 +126,40 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
+     * Retrieves one keyset page of products by brand with the given tier pricing.
+     *
+     * @param brandId  the brand id
+     * @param tierId   the tier id used to resolve prices
+     * @param beforeId return only products with an id lower than this; null for the first page
+     * @param search   optional product-name search term
+     * @param limit    the maximum number of products to return
+     * @return one page of products plus the next cursor
+     */
+    @Override
+    public ProductPage selectByBrandPricePage(Integer brandId, Integer tierId,
+                                              Integer beforeId, String search, Integer limit) {
+        int size = limit == null || limit <= 0
+                ? DEFAULT_PAGE_SIZE
+                : Math.min(limit, MAX_PAGE_SIZE);
+
+        List<Product> fetched = productMapper.selectByBrandIdPricePaged(
+                brandId, tierId, beforeId, search, size + 1);
+
+        boolean hasMore = fetched.size() > size;
+        List<Product> page = hasMore ? new ArrayList<>(fetched.subList(0, size)) : fetched;
+
+        Integer nextCursor = null;
+        if (hasMore && !page.isEmpty()) {
+            Product last = page.get(page.size() - 1);
+            nextCursor = last == null ? null : last.getId();
+        }
+        return new ProductPage()
+                .setProducts(page)
+                .setHasMore(hasMore)
+                .setNextCursor(nextCursor);
+    }
+
+    /**
      * Retrieves all products in a specific category, with their customizations.
      * <p>
      * Customizations and their options are attached, including every tier's price rather

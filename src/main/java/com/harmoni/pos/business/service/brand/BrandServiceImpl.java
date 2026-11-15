@@ -52,6 +52,42 @@ public class BrandServiceImpl implements BrandService {
     }
 
     /**
+     * Updates an existing brand.
+     *
+     * @param brandDto the new brand data
+     * @param id       the brand ID to update
+     * @return number of rows affected
+     * @throws BusinessNotFoundRequestException if the brand is not found
+     */
+    @Override
+    public int update(BrandDto brandDto, Integer id) {
+        Brand existing = this.get(id);
+        Brand updated = brandDto.toBrand();
+        updated.setId(existing.getId());
+        updated.setCreatedAt(existing.getCreatedAt());
+        updated.setUpdatedAt(new java.util.Date(System.currentTimeMillis()));
+        if (updated.getLogoUrl() == null) {
+            updated.setLogoUrl(existing.getLogoUrl());
+        }
+        if (updated.getTimeZone() == null) {
+            updated.setTimeZone(existing.getTimeZone());
+        }
+        if (updated.getCurrency() == null) {
+            updated.setCurrency(existing.getCurrency());
+        }
+        if (updated.getAdminEmail() == null) {
+            updated.setAdminEmail(existing.getAdminEmail());
+        }
+        if (updated.getInitialMenuMode() == null) {
+            updated.setInitialMenuMode(existing.getInitialMenuMode());
+        }
+        if (updated.getSourceBrandId() == null) {
+            updated.setSourceBrandId(existing.getSourceBrandId());
+        }
+        return brandMapper.updateByPrimaryKey(updated);
+    }
+
+    /**
      * Deletes a brand by ID.
      *
      * @param id the brand ID to delete

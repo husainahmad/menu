@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/product/{productId}/customization")
 @RequiredArgsConstructor
 @Slf4j
+@PreAuthorize("hasAnyAuthority('menu:view', 'menu:edit', 'catalog:read', 'catalog:write', 'rbac:manage')")
 public class ProductCustomizationController {
 
     private final ProductCustomizationService productCustomizationService;
@@ -55,6 +57,7 @@ public class ProductCustomizationController {
      * @return response with replacement status
      */
     @PutMapping("")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> replace(@PathVariable Integer productId,
                                                    @Valid @RequestBody ProductCustomizationReplaceDto productCustomizationReplace) {
         int rows = productCustomizationService.replaceForProduct(productId,
@@ -78,6 +81,7 @@ public class ProductCustomizationController {
      * @return response with update status
      */
     @PutMapping("/{linkId:\\d+}")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> configure(@PathVariable Integer productId,
                                                      @PathVariable Integer linkId,
                                                      @Valid @RequestBody ProductCustomizationConfigDto config) {
@@ -100,6 +104,7 @@ public class ProductCustomizationController {
      * @return response with deletion status
      */
     @DeleteMapping("/{linkId:\\d+}")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> detach(@PathVariable Integer productId,
                                                   @PathVariable Integer linkId) {
         int rows = productCustomizationService.delete(linkId);

@@ -1,5 +1,7 @@
 package com.harmoni.pos.http.controller.tier.menu;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.harmoni.pos.business.service.tier.tiermenu.TierMenuService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.add.TierMenuEditDto;
@@ -19,6 +21,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/tier")
+@PreAuthorize("hasAnyAuthority('organization:read', 'rbac:manage')")
 public class TierMenuController {
 
     private final TierMenuService tierMenuService;
@@ -31,6 +34,7 @@ public class TierMenuController {
      * @return ResponseEntity with update status
      */
     @PutMapping("/{tierId}/menu")
+    @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer tierId,
                                                   @Valid @RequestBody List<TierMenuEditDto> tierMenuEditDtos) {
         tierMenuService.create(tierId, tierMenuEditDtos);

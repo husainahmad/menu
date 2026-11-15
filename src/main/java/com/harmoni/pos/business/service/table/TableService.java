@@ -2,6 +2,7 @@ package com.harmoni.pos.business.service.table;
 
 import com.harmoni.pos.menu.model.Table;
 import com.harmoni.pos.menu.model.dto.TableDto;
+import com.harmoni.pos.menu.model.dto.TableLayoutDto;
 
 import java.util.List;
 
@@ -65,4 +66,20 @@ public interface TableService {
      * @return a list of table entities under the store
      */
     List<Table> listByStoreId(Integer storeId);
+
+    /**
+     * Retrieves a list of tables associated with a specific floor.
+     *
+     * @param floorId the unique identifier of the floor
+     * @return a list of table entities on the floor
+     */
+    List<Table> listByFloorId(Integer floorId);
+
+    /**
+     * Persists the editable floor-plan state of a set of tables in one batch.
+     *
+     * @param layouts the tables' layout, name, capacity, active and shape
+     * @return the number of rows updated
+     */
+    int updateLayout(List<TableLayoutDto> layouts);
 }

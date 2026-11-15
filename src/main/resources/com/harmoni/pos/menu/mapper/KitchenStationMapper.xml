@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.KitchenStationMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.KitchenStation">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="store_id" jdbcType="INTEGER" property="storeId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, store_id, name, code, description, status, created_at, updated_at, deleted_at
+  </sql>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.KitchenStation"
+          useGeneratedKeys="true" keyProperty="id">
+    insert into kitchen_stations
+      (store_id, name, code, description, status, created_at, updated_at)
+    values
+      (#{storeId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR},
+       #{description,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR},
+       #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.KitchenStation">
+    update kitchen_stations
+    set name = #{name,jdbcType=VARCHAR},
+        code = #{code,jdbcType=VARCHAR},
+        description = #{description,jdbcType=VARCHAR},
+        status = #{status,jdbcType=VARCHAR},
+        updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+      and deleted_at is null
+  </update>
+
+  <update id="deleteByPrimaryKey">
+    update kitchen_stations
+    set deleted_at = #{deletedAt,jdbcType=TIMESTAMP},
+        updated_at = #{deletedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+      and deleted_at is null
+  </update>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from kitchen_stations
+    where id = #{id,jdbcType=INTEGER}
+      and deleted_at is null
+  </select>
+
+  <select id="selectByStoreId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from kitchen_stations
+    where store_id = #{storeId,jdbcType=INTEGER}
+      and deleted_at is null
+    order by name asc, id asc
+  </select>
+
+  <select id="selectByStoreIdAndCode" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from kitchen_stations
+    where store_id = #{storeId,jdbcType=INTEGER}
+      and code = #{code,jdbcType=VARCHAR}
+      and deleted_at is null
+    limit 1
+  </select>
+
+  <select id="selectByIdAndStore" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from kitchen_stations
+    where id = #{id,jdbcType=INTEGER}
+      and store_id = #{storeId,jdbcType=INTEGER}
+      and deleted_at is null
+  </select>
+
+</mapper>

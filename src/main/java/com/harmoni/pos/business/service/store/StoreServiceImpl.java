@@ -139,7 +139,33 @@ public class StoreServiceImpl implements StoreService {
         Store store = this.get(id);
         Store storeUpdated = storeDto.toStore();
         storeUpdated.setId(store.getId());
+        storeUpdated.setCreatedAt(store.getCreatedAt());
         storeUpdated.setUpdatedAt(new Date(System.currentTimeMillis()));
+        storeUpdated.setTimeZone(store.getTimeZone());
+        if (storeUpdated.getOrderTypes() == null) {
+            storeUpdated.setOrderTypes(store.getOrderTypes());
+        }
+        if (storeUpdated.getTaxServiceMode() == null) {
+            storeUpdated.setTaxServiceMode(store.getTaxServiceMode());
+        }
+        if (storeUpdated.getTaxPercent() == null) {
+            storeUpdated.setTaxPercent(store.getTaxPercent());
+        }
+        if (storeUpdated.getServiceChargePercent() == null) {
+            storeUpdated.setServiceChargePercent(store.getServiceChargePercent());
+        }
+        if (storeUpdated.getReceiptLogoMode() == null) {
+            storeUpdated.setReceiptLogoMode(store.getReceiptLogoMode());
+        }
+        if (storeUpdated.getLogoUrl() == null) {
+            storeUpdated.setLogoUrl(store.getLogoUrl());
+        }
+        if (storeUpdated.getMenuPriceMode() == null) {
+            storeUpdated.setMenuPriceMode(store.getMenuPriceMode());
+        }
+        if (storeUpdated.getOrderTypeMode() == null) {
+            storeUpdated.setOrderTypeMode(store.getOrderTypeMode());
+        }
 
         storeMapper.updateByPrimaryKey(storeUpdated);
         StoreTier storeTier = storeDto.toStoreTier();

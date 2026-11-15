@@ -15,7 +15,6 @@ import com.harmoni.pos.menu.model.StoreTier;
 import com.harmoni.pos.menu.model.User;
 import com.harmoni.pos.menu.model.dto.pricing.CustomizationPriceRequestDto;
 import com.harmoni.pos.menu.model.dto.pricing.CustomizationPriceResponseDto;
-import com.harmoni.pos.menu.model.dto.pricing.PricedCustomizationDto;
 import com.harmoni.pos.menu.model.dto.product.ProductCustomizationResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

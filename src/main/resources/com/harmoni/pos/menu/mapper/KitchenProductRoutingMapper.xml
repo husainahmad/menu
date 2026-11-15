@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.KitchenProductRoutingMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.KitchenProductRouting">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="store_id" jdbcType="INTEGER" property="storeId" />
+    <result column="product_id" jdbcType="INTEGER" property="productId" />
+    <result column="kitchen_station_id" jdbcType="INTEGER" property="kitchenStationId" />
+    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
+    <result column="product_name" jdbcType="VARCHAR" property="productName" />
+    <result column="station_name" jdbcType="VARCHAR" property="kitchenStationName" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    r.id, r.store_id, r.product_id, r.kitchen_station_id,
+    r.created_at, r.updated_at, r.deleted_at
+  </sql>
+
+  <insert id="insertOrUpdate" parameterType="com.harmoni.pos.menu.model.KitchenProductRouting"
+          useGeneratedKeys="true" keyProperty="id">
+    insert into kitchen_product_routings
+      (store_id, product_id, kitchen_station_id, created_at, updated_at)
+    values
+      (#{storeId,jdbcType=INTEGER}, #{productId,jdbcType=INTEGER},
+       #{kitchenStationId,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP},
+       #{updatedAt,jdbcType=TIMESTAMP})
+    on duplicate key update
+      kitchen_station_id = values(kitchen_station_id),
+      updated_at = values(updated_at),
+      deleted_at = null
+  </insert>
+
+  <delete id="deleteByStoreIdAndProductId">
+    delete from kitchen_product_routings
+    where store_id = #{storeId,jdbcType=INTEGER}
+      and product_id = #{productId,jdbcType=INTEGER}
+  </delete>
+
+  <select id="selectByStoreIdAndProductId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />, p.name as product_name, s.name as station_name
+    from kitchen_product_routings r
+    left join products p on p.id = r.product_id
+    left join kitchen_stations s on s.id = r.kitchen_station_id
+    where r.store_id = #{storeId,jdbcType=INTEGER}
+      and r.product_id = #{productId,jdbcType=INTEGER}
+      and r.deleted_at is null
+  </select>
+
+  <select id="selectByStoreId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />, p.name as product_name, s.name as station_name
+    from kitchen_product_routings r
+    left join products p on p.id = r.product_id
+    left join kitchen_stations s on s.id = r.kitchen_station_id
+    where r.store_id = #{storeId,jdbcType=INTEGER}
+      and r.deleted_at is null
+    order by p.name asc, r.id asc
+  </select>
+
+  <select id="selectRoutingByStoreId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />, s.name as station_name
+    from kitchen_product_routings r
+    left join kitchen_stations s on s.id = r.kitchen_station_id
+    where r.store_id = #{storeId,jdbcType=INTEGER}
+      and r.deleted_at is null
+      and s.deleted_at is null
+  </select>
+
+</mapper>

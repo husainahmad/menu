@@ -22,14 +22,14 @@
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    from promotion_scopes ps
+    from promotion_scope ps
     where ps.id = #{id,jdbcType=BIGINT}
   </select>
 
   <select id="selectByPromotionId" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    from promotion_scopes ps
+    from promotion_scope ps
     where ps.promotion_id = #{promotionId,jdbcType=BIGINT}
     order by ps.scope_type asc, ps.id asc
   </select>
@@ -37,7 +37,7 @@
   <select id="selectByPromotionIds" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    from promotion_scopes ps
+    from promotion_scope ps
     where ps.promotion_id in
     <foreach item="promotionId" index="index" collection="promotionIds" separator="," open="(" close=")">
       #{promotionId,jdbcType=BIGINT}
@@ -48,7 +48,7 @@
   <select id="selectByPromotionIdAndType" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    from promotion_scopes ps
+    from promotion_scope ps
     where ps.promotion_id = #{promotionId,jdbcType=BIGINT}
       and ps.scope_type = #{scopeType,jdbcType=VARCHAR}
     order by ps.id asc
@@ -57,7 +57,7 @@
   <select id="selectByEntityRefs" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
-    from promotion_scopes ps
+    from promotion_scope ps
     where 1 = 1
     <if test="promotionIds != null">
       and ps.promotion_id in
@@ -77,12 +77,12 @@
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    delete from promotion_scopes
+    delete from promotion_scope
     where id = #{id,jdbcType=BIGINT}
   </delete>
 
   <delete id="deleteByPromotionId" parameterType="java.lang.Long">
-    delete from promotion_scopes
+    delete from promotion_scope
     where promotion_id = #{promotionId,jdbcType=BIGINT}
   </delete>
 
@@ -90,13 +90,13 @@
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into promotion_scopes (promotion_id, scope_type, scope_id, created_at)
+    insert into promotion_scope (promotion_id, scope_type, scope_id, created_at)
     values (#{promotionId,jdbcType=BIGINT}, #{scopeType,jdbcType=VARCHAR},
       #{scopeId,jdbcType=BIGINT}, #{createdAt,jdbcType=TIMESTAMP})
   </insert>
 
   <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
-    insert into promotion_scopes (promotion_id, scope_type, scope_id, created_at)
+    insert into promotion_scope (promotion_id, scope_type, scope_id, created_at)
     values
     <foreach item="scope" index="index" collection="scopes" separator=",">
       (#{scope.promotionId,jdbcType=BIGINT}, #{scope.scopeType,jdbcType=VARCHAR},
@@ -105,7 +105,7 @@
   </insert>
 
   <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.PromotionScope">
-    update promotion_scopes
+    update promotion_scope
     set promotion_id = #{promotionId,jdbcType=BIGINT},
       scope_type = #{scopeType,jdbcType=VARCHAR},
       scope_id = #{scopeId,jdbcType=BIGINT},

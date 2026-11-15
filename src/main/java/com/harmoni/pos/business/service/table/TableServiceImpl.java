@@ -1,12 +1,15 @@
 package com.harmoni.pos.business.service.table;
 
+import com.harmoni.pos.business.service.floor.FloorService;
 import com.harmoni.pos.business.service.store.StoreService;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
 import com.harmoni.pos.exception.BusinessNotFoundRequestException;
 import com.harmoni.pos.menu.mapper.TableMapper;
+import com.harmoni.pos.menu.model.Floor;
 import com.harmoni.pos.menu.model.Table;
 import com.harmoni.pos.menu.model.dto.TableDto;
+import com.harmoni.pos.menu.model.dto.TableLayoutDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,7 @@ public class TableServiceImpl implements TableService {
 
     private final TableMapper tableMapper;
     private final StoreService storeService;
+    private final FloorService floorService;
 
     /**
      * Creates a new table.
@@ -41,8 +45,10 @@ public class TableServiceImpl implements TableService {
     @Override
     public int create(TableDto tableDto) {
         storeService.get(tableDto.getStoreId());
+        requireFloorInStore(tableDto);
 
-        if (!ObjectUtils.isEmpty(tableMapper.selectByNameStoreId(tableDto.getName(), tableDto.getStoreId()))) {
+        if (!ObjectUtils.isEmpty(tableMapper.selectByNameFloorIdStoreId(
+                tableDto.getName(), tableDto.getFloorId(), tableDto.getStoreId()))) {
             throw new BusinessBadRequestException("exception.table.name.badRequest.duplicate", null);
         }
 
@@ -71,8 +77,10 @@ public class TableServiceImpl implements TableService {
     public int update(Integer id, TableDto tableDto) {
         Table existing = this.get(id);
         storeService.get(tableDto.getStoreId());
+        requireFloorInStore(tableDto);
 
-        Table duplicate = tableMapper.selectByNameStoreId(tableDto.getName(), tableDto.getStoreId());
+        Table duplicate = tableMapper.selectByNameFloorIdStoreId(
+                tableDto.getName(), tableDto.getFloorId(), tableDto.getStoreId());
         if (!ObjectUtils.isEmpty(duplicate) && !duplicate.getId().equals(existing.getId())) {
             throw new BusinessBadRequestException("exception.table.name.badRequest.duplicate", null);
         }
@@ -140,5 +148,65 @@ public class TableServiceImpl implements TableService {
     @Override
     public List<Table> listByStoreId(Integer storeId) {
         return tableMapper.selectByStoreId(storeId);
+    }
+
+    @Override
+    public List<Table> listByFloorId(Integer floorId) {
+        return tableMapper.selectByFloorId(floorId);
+    }
+
+    @Override
+    public int updateLayout(List<TableLayoutDto> layouts) {
+        int updated = 0;
+        Date now = new Date(System.currentTimeMillis());
+        for (TableLayoutDto layout : layouts) {
+            Table table = this.get(layout.getId());
+            if (layout.getName() != null && !layout.getName().trim().isEmpty()) {
+                String name = layout.getName().trim();
+                Table duplicate = tableMapper.selectByNameFloorIdStoreId(
+                        name, table.getFloorId(), table.getStoreId());
+                if (!ObjectUtils.isEmpty(duplicate) && !duplicate.getId().equals(table.getId())) {
+                    throw new BusinessBadRequestException("exception.table.name.badRequest.duplicate", null);
+                }
+                table.setName(name);
+            }
+            if (layout.getCapacity() != null) {
+                table.setCapacity(layout.getCapacity());
+            }
+            if (layout.getActive() != null) {
+                table.setActive(layout.getActive());
+            }
+            if (layout.getShape() != null) {
+                table.setShape(layout.getShape());
+            }
+            if (layout.getPosX() != null) {
+                table.setPosX(layout.getPosX());
+            }
+            if (layout.getPosY() != null) {
+                table.setPosY(layout.getPosY());
+            }
+            if (layout.getWidth() != null) {
+                table.setWidth(layout.getWidth());
+            }
+            if (layout.getHeight() != null) {
+                table.setHeight(layout.getHeight());
+            }
+            table.setUpdatedAt(now);
+            updated += tableMapper.updateByPrimaryKey(table);
+        }
+        return updated;
+    }
+
+    /**
+     * Ensures the target floor exists and belongs to the table's store, so a
+     * table can never be attached to another store's floor.
+     *
+     * @param tableDto the table payload carrying storeId and floorId
+     */
+    private void requireFloorInStore(TableDto tableDto) {
+        Floor floor = floorService.get(tableDto.getFloorId());
+        if (!ObjectUtils.nullSafeEquals(floor.getStoreId(), tableDto.getStoreId())) {
+            throw new BusinessBadRequestException("exception.table.floor.badRequest.notInStore", null);
+        }
     }
 }

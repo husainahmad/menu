@@ -21,6 +21,12 @@ public class TableDto {
     private Integer storeId;
 
     /**
+     * The floor the table stands on.
+     */
+    @NotNull(message = "{validation.table.floorId.NotNull}")
+    private Integer floorId;
+
+    /**
      * The name of the table.
      */
     @NotBlank(message = "{validation.table.name.NotBlank}")
@@ -35,6 +41,36 @@ public class TableDto {
     private Integer capacity;
 
     /**
+     * Floor-plan shape: SQUARE, ROUND or RECTANGLE. Defaults to SQUARE.
+     */
+    private String shape;
+
+    /**
+     * Horizontal position on the floor plan, in percent (0-100).
+     */
+    private Integer posX;
+
+    /**
+     * Vertical position on the floor plan, in percent (0-100).
+     */
+    private Integer posY;
+
+    /**
+     * Width on the floor plan, in percent (0-100).
+     */
+    private Integer width;
+
+    /**
+     * Height on the floor plan, in percent (0-100).
+     */
+    private Integer height;
+
+    /**
+     * Whether the table is active at the cashier.
+     */
+    private Boolean active;
+
+    /**
      * Converts this DTO to a Table entity.
      *
      * @return a Table entity with storeId, name and capacity set
@@ -42,7 +78,14 @@ public class TableDto {
     public Table toTable() {
         return new Table()
                 .setStoreId(storeId)
+                .setFloorId(floorId)
                 .setName(name)
-                .setCapacity(capacity);
+                .setCapacity(capacity)
+                .setShape(shape == null ? "SQUARE" : shape)
+                .setPosX(posX == null ? 10 : posX)
+                .setPosY(posY == null ? 10 : posY)
+                .setWidth(width == null ? 12 : width)
+                .setHeight(height == null ? 12 : height)
+                .setActive(active == null || active);
     }
 }

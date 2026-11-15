@@ -1,5 +1,7 @@
 package com.harmoni.pos.http.controller.sku;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.harmoni.pos.business.service.sku.SkuService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.add.SkuAddDto;
@@ -19,6 +21,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/sku")
+@PreAuthorize("hasAnyAuthority('menu:view', 'catalog:read', 'rbac:manage')")
 public class SkuController {
 
     private final SkuService skuService;
@@ -30,6 +33,7 @@ public class SkuController {
      * @return ResponseEntity with creation status
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody SkuAddDto skuDto) {
         int id = skuService.create(skuDto);
         log.debug("Sku created {} ", id);
@@ -44,6 +48,7 @@ public class SkuController {
      * @return ResponseEntity with deletion status
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         skuService.deleteSku(id);
 

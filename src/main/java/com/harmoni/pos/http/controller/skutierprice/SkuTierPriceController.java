@@ -1,5 +1,7 @@
 package com.harmoni.pos.http.controller.skutierprice;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.SkuTierPriceDto;
@@ -19,6 +21,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/skutier")
+@PreAuthorize("hasAnyAuthority('menu:view', 'catalog:read', 'organization:read', 'rbac:manage')")
 public class SkuTierPriceController {
 
     private final SkuTierPriceService skuTierPriceService;
@@ -30,6 +33,7 @@ public class SkuTierPriceController {
      * @return ResponseEntity with creation status
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody SkuTierPriceDto skuTierPriceDto) {
         int id = skuTierPriceService.create(skuTierPriceDto);
         log.debug("Sku Tier Price created {} ", id);

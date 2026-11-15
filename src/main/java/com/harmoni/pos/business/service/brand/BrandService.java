@@ -24,6 +24,15 @@ public interface BrandService {
     int create(BrandDto brandDto);
 
     /**
+     * Updates an existing brand.
+     *
+     * @param brandDto the new brand data
+     * @param id       the brand ID to update
+     * @return the number of rows affected
+     */
+    int update(BrandDto brandDto, Integer id);
+
+    /**
      * Deletes a brand by its ID.
      *
      * @param id the unique identifier of the brand to be deleted

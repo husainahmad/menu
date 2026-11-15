@@ -5,7 +5,6 @@ import com.harmoni.pos.business.service.sku.SkuService;
 import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.menu.model.Product;
 import com.harmoni.pos.menu.model.Sku;
-import com.harmoni.pos.menu.model.SkuTierPrice;
 import com.harmoni.pos.menu.model.dto.add.ProductAddDto;
 import com.harmoni.pos.menu.model.dto.add.SkuAddDto;
 import com.harmoni.pos.menu.model.dto.edit.ProductEditDto;

@@ -1,5 +1,7 @@
 package com.harmoni.pos.http.controller.store;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.harmoni.pos.business.service.store.StoreService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.StoreDto;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/store")
 @Slf4j
+@PreAuthorize("hasAnyAuthority('organization:read', 'rbac:manage')")
 public class StoreController {
 
     private final StoreService storeService;
@@ -28,6 +31,7 @@ public class StoreController {
      * @return ResponseEntity with creation status
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody StoreDto storeDto) {
         int id = storeService.create(storeDto);
         log.debug("store created {} ", id);
@@ -44,6 +48,7 @@ public class StoreController {
      * @return ResponseEntity containing paginated stores
      */
     @GetMapping("")
+    @PreAuthorize("hasAnyAuthority('menu:view', 'catalog:read', 'organization:read', 'order:view', 'terminal:view', 'availability:view', 'employee:view', 'user:read', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> list(@RequestParam(name = "chainId") Integer chainId,
                                                 @RequestParam(name = "page") int page,
                                                 @RequestParam(name = "size") int size,
@@ -62,6 +67,7 @@ public class StoreController {
      * @return ResponseEntity with deletion status
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('organization:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(storeService.delete(id))
@@ -78,6 +84,7 @@ public class StoreController {
      * @return ResponseEntity with update status
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer id, @Valid @RequestBody StoreDto storeDto) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(storeService.update(id, storeDto))

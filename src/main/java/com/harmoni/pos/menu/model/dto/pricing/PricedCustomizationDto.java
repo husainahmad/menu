@@ -3,7 +3,6 @@ package com.harmoni.pos.menu.model.dto.pricing;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * One customization choice, priced and named.

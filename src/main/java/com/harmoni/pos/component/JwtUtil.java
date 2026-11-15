@@ -8,8 +8,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.util.Date;
+
 
 /**
  * Utility class for handling JWT operations such as token generation, extraction, and validation.
@@ -20,22 +19,6 @@ import java.util.Date;
 public class JwtUtil {
 
     private final JwtProperties jwtProperties;
-
-    /**
-     * Generates a JWT token for the specified username.
-     *
-     * @param username the username for which the token is generated
-     * @return the generated JWT token as a String
-     */
-    public String generateToken(String username) {
-        Instant now = Instant.now();
-        return Jwts.builder()
-                .subject(username)
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusMillis(jwtProperties.getExpiredTime())))
-                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret())))
-                .compact();
-    }
 
     /**
      * Extracts the username from the given JWT token.
@@ -50,43 +33,6 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
-    }
-
-    /**
-     * Validates the JWT token against the provided username.
-     *
-     * @param token the JWT token to validate
-     * @param username the username to compare with the token's subject
-     * @return true if the token is valid and matches the username, false otherwise
-     */
-    public boolean validateToken(String token, String username) {
-        return extractUsername(token).equals(username) && !isTokenExpired(token);
-    }
-
-    /**
-     * Checks if the JWT token is expired.
-     *
-     * @param token the JWT token to check
-     * @return true if the token is expired, false otherwise
-     */
-    private boolean isTokenExpired(String token) {
-        return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret())))
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getExpiration()
-                .before(new Date());
-    }
-
-    /**
-     * Extracts the JWT token from a Bearer authorization header.
-     *
-     * @param authorization the Bearer authorization header
-     * @return the JWT token string
-     */
-    public String getTokenFromBearer(String authorization) {
-        return authorization.substring(7);
     }
 
 }

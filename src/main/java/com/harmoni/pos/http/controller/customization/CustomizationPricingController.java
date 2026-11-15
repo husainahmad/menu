@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/customization")
 @RequiredArgsConstructor
 @Slf4j
+@PreAuthorize("hasAnyAuthority('menu:view', 'menu:edit', 'catalog:read', 'catalog:write', 'rbac:manage')")
 public class CustomizationPricingController {
 
     private final CustomizationPricingService customizationPricingService;
@@ -39,6 +41,7 @@ public class CustomizationPricingController {
      * @return each chosen option priced and named, plus the total surcharge for the line
      */
     @PostMapping("/price")
+    @PreAuthorize("hasAnyAuthority('menu:view', 'catalog:read', 'order:view', 'terminal:view', 'availability:view', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> price(
             @RequestHeader("X-Username") String username,
             @RequestBody CustomizationPriceRequestDto request) {

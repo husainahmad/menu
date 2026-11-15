@@ -2,7 +2,6 @@ package com.harmoni.pos.http.controller.product;
 
 import com.harmoni.pos.business.service.product.ProductService;
 import com.harmoni.pos.business.service.product.ProductSkuService;
-import com.harmoni.pos.component.JwtUtil;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.Product;
 import com.harmoni.pos.menu.model.dto.add.ProductAddDto;
@@ -13,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,11 +24,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/product")
 @Slf4j
+@PreAuthorize("hasAnyAuthority('menu:view', 'menu:edit', 'catalog:read', 'catalog:write', 'rbac:manage')")
 public class ProductController {
 
     private final ProductService productService;
     private final ProductSkuService productSkuService;
-    private final JwtUtil jwtUtil;
 
     /**
      * Creates a new Product.
@@ -37,6 +37,7 @@ public class ProductController {
      * @return ResponseEntity with creation status
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ProductAddDto productDto) {
         Product product = productSkuService.create(productDto);
         log.debug("Product created {} ", ObjectUtils.getDisplayString(product));
@@ -88,6 +89,7 @@ public class ProductController {
      * @return ResponseEntity with update status
      */
     @PutMapping("")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> put(@Valid @RequestBody ProductEditDto productEditDto) {
         this.productSkuService.update(productEditDto);
 
@@ -107,6 +109,7 @@ public class ProductController {
      * @return ResponseEntity with deletion status
      */
     @DeleteMapping("/{id:\\d+}")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
 
         this.productService.delete(id);
@@ -183,6 +186,39 @@ public class ProductController {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(this.productService.selectByCategoryPricePage(username, id, beforeId, limit))
+                .error(null)
+                .build();
+
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    /**
+     * Retrieves one cursor page of products by Brand and Tier.
+     * <p>
+     * Endpoint: GET /api/v1/product/brand/{brandId}/tier/{tierId}/cursor?limit=10&amp;beforeId=120&amp;search=latte
+     * <p>
+     * The response is {@code { products, nextCursor, hasMore }}. Pass {@code nextCursor}
+     * back as {@code beforeId} to append the next page; {@code hasMore} is false on the
+     * last one.
+     *
+     * @param brandId  the brand id
+     * @param tierId   the tier id used to resolve prices
+     * @param limit    the most products to return; defaults to 50, capped at 200
+     * @param beforeId return only products with an id lower than this; omit for the first page
+     * @param search   optional product-name search term
+     * @return ResponseEntity containing the product page
+     */
+    @GetMapping("/brand/{brandId}/tier/{tierId}/cursor")
+    public ResponseEntity<RestAPIResponse> getByBrandTierCursor(
+            @PathVariable Integer brandId,
+            @PathVariable Integer tierId,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "beforeId", required = false) Integer beforeId,
+            @RequestParam(value = "search", required = false) String search) {
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(this.productService.selectByBrandPricePage(brandId, tierId, beforeId, search, limit))
                 .error(null)
                 .build();
 

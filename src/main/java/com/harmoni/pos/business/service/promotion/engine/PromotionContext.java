@@ -43,14 +43,4 @@ public record PromotionContext(Long storeId,
         zone = zone == null ? ZoneId.systemDefault() : zone;
     }
 
-    /**
-     * A context for a single store in the system default zone, the common case for a
-     * till that only needs to know which store it is.
-     *
-     * @param storeId the store the sale is happening in
-     * @return a context bound to the system default zone
-     */
-    public static PromotionContext ofStore(Long storeId) {
-        return new PromotionContext(storeId, null, null, null, ZoneId.systemDefault());
-    }
 }

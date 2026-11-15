@@ -16,20 +16,20 @@ public interface UserService {
     /**
      * Inserts a new user.
      *
-     * @param username the username of the requester
+     * @param authorization the caller's bearer authorization, forwarded to the auth service
      * @param userDto the data transfer object containing user details
      * @return the ID of the inserted user
      */
-    int insert(String username, UserDto userDto);
+    int insert(String authorization, UserDto userDto);
 
     /**
      * Updates an existing user.
      *
-     * @param username the username of the requester
+     * @param authorization the caller's bearer authorization, forwarded to the auth service
      * @param userEditDto the data transfer object containing updated user details
      * @return the number of records updated
      */
-    int update(String username, UserEditDto userEditDto);
+    int update(String authorization, UserEditDto userEditDto);
 
     /**
      * Retrieves a user by their ID.
@@ -42,11 +42,11 @@ public interface UserService {
     /**
      * Deletes a user by their ID.
      *
-     * @param username the username of the requester
+     * @param authorization the caller's bearer authorization, forwarded to the auth service
      * @param id the ID of the user to delete
      * @return the number of records deleted
      */
-    int delete(String username, Integer id);
+    int delete(String authorization, Integer id);
 
     /**
      * Retrieves a user by their username.
@@ -79,18 +79,37 @@ public interface UserService {
      *
      * @param stores the list of stores to filter users
      * @param search the search term to filter users
+     * @param roleId optional role id to filter assignments by
+     * @param scopeType optional scope type to filter assignments by
      * @return a list of User objects matching the criteria
      */
-    List<User> selectByStoreIds(List<Store> stores, String search);
+    List<User> selectByStoreIds(List<Store> stores, String search, Integer roleId, String scopeType);
 
     /**
-     * Retrieves users by chain ID with pagination and an optional search term.
+     * Retrieves users by chain ID with pagination and optional filters.
      *
      * @param chainId the chain ID to filter users
      * @param page the page number for pagination
      * @param size the number of records per page
      * @param search the search term to filter users
+     * @param roleId optional role id to filter assignments by
+     * @param scopeType optional scope type to filter assignments by
      * @return a map containing user data and pagination information
      */
-    Map<String, Object> selectByChainId(Integer chainId, int page, int size, String search);
+    Map<String, Object> selectByChainId(Integer chainId, int page, int size, String search,
+                                        Integer roleId, String scopeType);
+
+    /**
+     * Retrieves users across the given stores with pagination and optional filters.
+     *
+     * @param storeIds the store IDs in the caller's scope
+     * @param page the page number for pagination
+     * @param size the number of records per page
+     * @param search the search term to filter users
+     * @param roleId optional role id to filter assignments by
+     * @param scopeType optional scope type to filter assignments by
+     * @return a map containing user data and pagination information
+     */
+    Map<String, Object> selectByStoreIdPage(List<Integer> storeIds, int page, int size, String search,
+                                            Integer roleId, String scopeType);
 }

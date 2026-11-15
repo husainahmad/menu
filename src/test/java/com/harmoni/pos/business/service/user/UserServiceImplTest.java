@@ -91,7 +91,6 @@ class UserServiceImplTest {
 
     @Test
     void insert_shouldThrow_whenUserExists() {
-        when(authService.create(anyString(), eq(userDto))).thenReturn(200);
         when(userMapper.selectByUsernameAuthIdAndStoreId("john", 1, 10)).thenReturn(user);
 
         assertThrows(BusinessNotFoundRequestException.class, () -> userService.insert("Bearer token", userDto));
@@ -190,8 +189,8 @@ class UserServiceImplTest {
     @Test
     void selectByStoreIds_shouldReturnList() {
         Store store = new Store().setId(10);
-        when(userMapper.selectByListChain(List.of(store), "")).thenReturn(List.of(user));
-        assertFalse(userService.selectByStoreIds(List.of(store), "").isEmpty());
+        when(userMapper.selectByListChain(List.of(store), "", null, null)).thenReturn(List.of(user));
+        assertFalse(userService.selectByStoreIds(List.of(store), "", null, null).isEmpty());
     }
 
     private final Brand brand = new Brand().setId(1).setName("Brand1");

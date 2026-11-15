@@ -50,6 +50,7 @@ class UserControllerTest {
 
         mockMvc.perform(post("/api/v1/user")
                         .header("X-Username", "ahmad.husain")
+                        .header("Authorization", "Bearer token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated());
@@ -57,7 +58,7 @@ class UserControllerTest {
 
     @Test
     void getByCategoryBrand_shouldReturn200() throws Exception {
-        when(userService.selectByChainId(1, 1, 10, "search"))
+        when(userService.selectByChainId(1, 1, 10, "search", null, null))
                 .thenReturn(Map.of("data", "result"));
 
         mockMvc.perform(get("/api/v1/user/chain/1")
@@ -69,10 +70,11 @@ class UserControllerTest {
 
     @Test
     void deleteUser_shouldReturn200() throws Exception {
-        when(userService.delete("ahmad.husain", 1)).thenReturn(1);
+        when(userService.delete(anyString(), eq(1))).thenReturn(1);
 
         mockMvc.perform(delete("/api/v1/user/1")
-                        .header("X-Username", "ahmad.husain"))
+                        .header("X-Username", "ahmad.husain")
+                        .header("Authorization", "Bearer token"))
                 .andExpect(status().isOk());
     }
 
@@ -84,10 +86,11 @@ class UserControllerTest {
         editDto.setStoreId(2);
         editDto.setAuthId(1);
         editDto.setPassword("pass123");
-        when(userService.update("ahmad.husain", editDto)).thenReturn(1);
+        when(userService.update(anyString(), eq(editDto))).thenReturn(1);
 
         mockMvc.perform(put("/api/v1/user/1")
                         .header("X-Username", "ahmad.husain")
+                        .header("Authorization", "Bearer token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(editDto)))
                 .andExpect(status().isOk());

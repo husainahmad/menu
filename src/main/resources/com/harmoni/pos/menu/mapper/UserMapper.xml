@@ -5,7 +5,10 @@
   <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.User">
     <id column="user_id" jdbcType="INTEGER" property="id" />
     <result column="user_name" jdbcType="VARCHAR" property="username" />
+    <result column="user_employee_code" jdbcType="VARCHAR" property="employeeCode" />
+    <result column="user_status" jdbcType="VARCHAR" property="status" />
     <result column="user_auth_id" jdbcType="VARCHAR" property="authId" />
+    <result column="user_auth_user_id" jdbcType="BIGINT" property="authUserId" />
     <result column="user_store_id" jdbcType="INTEGER" property="storeId" />
     <result column="user_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="user_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
@@ -15,7 +18,10 @@
   <sql id="Base_Column_List">
     user.id as user_id,
     user.auth_id as user_auth_id,
+    user.auth_user_id as user_auth_user_id,
     user.name as user_name,
+    user.employee_code as user_employee_code,
+    user.status as user_status,
     user.store_id as user_store_id,
     user.created_at as user_created_at,
     user.updated_at as user_updated_at,
@@ -41,15 +47,30 @@
     <include refid="Base_Column_List" />
     from users user
     where user.store_id is not null
-    <if test="stores!=null">
+    <if test="stores != null and stores.size() > 0">
       and user.store_id in
       <foreach item="store" index="index" collection="stores"
                open="(" separator="," close=")" nullable="true">
         #{store.id}
       </foreach>
     </if>
+    <if test="stores != null and stores.size() == 0">
+      and 1 = 0
+    </if>
     <if test="search!=null">
       and user.name like concat('%', #{search, jdbcType=VARCHAR}, '%')
+    </if>
+    <if test="roleId != null or (scopeType != null and scopeType != '')">
+      and user.auth_user_id in (
+        select ur.user_id from `db-harmoni-auth`.user_roles ur
+        where 1 = 1
+        <if test="roleId != null">
+          and ur.role_id = #{roleId,jdbcType=INTEGER}
+        </if>
+        <if test="scopeType != null and scopeType != ''">
+          and ur.scope_type = #{scopeType,jdbcType=VARCHAR}
+        </if>
+      )
     </if>
   </select>
 
@@ -71,18 +92,27 @@
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into users (auth_id, name, store_id,
+    insert into users (auth_id, auth_user_id, name, employee_code, status, store_id,
         created_at, updated_at, deleted_at
       )
-    values (#{authId,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{storeId,jdbcType=INTEGER},
+    values (#{authId,jdbcType=INTEGER}, #{authUserId,jdbcType=BIGINT}, #{username,jdbcType=VARCHAR},
+      #{employeeCode,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{storeId,jdbcType=INTEGER},
       #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}, #{deletedAt,jdbcType=TIMESTAMP}
       )
   </insert>
 
+  <select id="countByEmployeeCodePrefix" resultType="int">
+    select count(*) from users
+    where employee_code like concat(#{prefix,jdbcType=VARCHAR}, '%')
+  </select>
+
   <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.User">
     update users
     set name = #{username,jdbcType=VARCHAR},
+      employee_code = #{employeeCode,jdbcType=VARCHAR},
+      status = #{status,jdbcType=VARCHAR},
       auth_id = #{authId,jdbcType=INTEGER},
+      auth_user_id = #{authUserId,jdbcType=BIGINT},
       store_id = #{storeId,jdbcType=INTEGER},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP},

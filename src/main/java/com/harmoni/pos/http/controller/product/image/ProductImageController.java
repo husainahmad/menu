@@ -1,5 +1,7 @@
 package com.harmoni.pos.http.controller.product.image;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.harmoni.pos.business.service.product.image.ProductImageService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.ProductImage;
@@ -23,6 +25,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/v1/product/image")
 @Slf4j
+@PreAuthorize("hasAnyAuthority('menu:view', 'catalog:read', 'rbac:manage')")
 public class ProductImageController {
 
     private final ProductImageService productImageService;
@@ -35,6 +38,7 @@ public class ProductImageController {
      * @throws IOException if an I/O error occurs
      */
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@RequestParam("file") MultipartFile file) throws IOException {
 
         ProductImageDto productImageDto = new ProductImageDto();
@@ -61,6 +65,7 @@ public class ProductImageController {
      * @throws IOException if an I/O error occurs
      */
     @PutMapping(value = "/{productId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer productId,
                                                   @RequestParam("file") MultipartFile file) throws IOException {
 

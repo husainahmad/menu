@@ -5,6 +5,12 @@
   <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.Brand">
     <id column="brand_id" jdbcType="INTEGER" property="id" />
     <result column="brand_name" jdbcType="VARCHAR" property="name" />
+    <result column="brand_logo_url" jdbcType="VARCHAR" property="logoUrl" />
+    <result column="brand_time_zone" jdbcType="VARCHAR" property="timeZone" />
+    <result column="brand_currency" jdbcType="VARCHAR" property="currency" />
+    <result column="brand_admin_email" jdbcType="VARCHAR" property="adminEmail" />
+    <result column="brand_initial_menu_mode" jdbcType="VARCHAR" property="initialMenuMode" />
+    <result column="brand_source_brand_id" jdbcType="INTEGER" property="sourceBrandId" />
     <result column="brand_created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="brand_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
   </resultMap>
@@ -12,6 +18,12 @@
   <sql id="Base_Column_List">
       brand.id as brand_id,
       brand.name as brand_name,
+      brand.logo_url as brand_logo_url,
+      brand.time_zone as brand_time_zone,
+      brand.currency as brand_currency,
+      brand.admin_email as brand_admin_email,
+      brand.initial_menu_mode as brand_initial_menu_mode,
+      brand.source_brand_id as brand_source_brand_id,
       brand.created_at as brand_created_at,
       brand.updated_at as brand_updated_at
   </sql>
@@ -45,15 +57,22 @@
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into brands (name, created_at,
-      updated_at)
-    values (#{name,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP},
-      #{updatedAt,jdbcType=TIMESTAMP})
+    insert into brands (name, logo_url, time_zone, currency, admin_email,
+      initial_menu_mode, source_brand_id, created_at, updated_at)
+    values (#{name,jdbcType=VARCHAR}, #{logoUrl,jdbcType=VARCHAR}, #{timeZone,jdbcType=VARCHAR},
+      #{currency,jdbcType=VARCHAR}, #{adminEmail,jdbcType=VARCHAR}, #{initialMenuMode,jdbcType=VARCHAR},
+      #{sourceBrandId,jdbcType=INTEGER}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP})
   </insert>
 
   <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Brand">
     update brands
     set name = #{name,jdbcType=VARCHAR},
+      logo_url = #{logoUrl,jdbcType=VARCHAR},
+      time_zone = #{timeZone,jdbcType=VARCHAR},
+      currency = #{currency,jdbcType=VARCHAR},
+      admin_email = #{adminEmail,jdbcType=VARCHAR},
+      initial_menu_mode = #{initialMenuMode,jdbcType=VARCHAR},
+      source_brand_id = #{sourceBrandId,jdbcType=INTEGER},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
       updated_at = #{updatedAt,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}

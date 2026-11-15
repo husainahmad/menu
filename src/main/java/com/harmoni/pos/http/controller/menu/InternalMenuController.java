@@ -1,5 +1,7 @@
 package com.harmoni.pos.http.controller.menu;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.harmoni.pos.business.service.validation.OrderItemValidationService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.validation.ValidateOrderItemsRequest;
@@ -49,6 +51,7 @@ public class InternalMenuController {
      * @return each line confirmed, named and priced
      */
     @PostMapping("/validate-order-items")
+    @PreAuthorize("hasAnyAuthority('menu:view', 'catalog:read', 'organization:read', 'order:view', 'terminal:view', 'availability:view', 'employee:view', 'user:read', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> validateOrderItems(@Valid @RequestBody ValidateOrderItemsRequest request) {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())

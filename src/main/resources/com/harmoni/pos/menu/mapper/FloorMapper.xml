@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harmoni.pos.menu.mapper.FloorMapper">
+
+  <resultMap id="BaseResultMap" type="com.harmoni.pos.menu.model.Floor">
+    <id column="floor_id" jdbcType="INTEGER" property="id" />
+    <result column="floor_store_id" jdbcType="INTEGER" property="storeId" />
+    <result column="floor_name" jdbcType="VARCHAR" property="name" />
+    <result column="floor_sort_order" jdbcType="INTEGER" property="sortOrder" />
+    <result column="floor_active" jdbcType="BOOLEAN" property="active" />
+    <result column="floor_created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="floor_updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="floor_deleted_at" jdbcType="TIMESTAMP" property="deletedAt" />
+    <association property="store" resultMap="com.harmoni.pos.menu.mapper.StoreMapper.BaseResultMap"/>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    floor.id as floor_id,
+    floor.store_id as floor_store_id,
+    floor.name as floor_name,
+    floor.sort_order as floor_sort_order,
+    floor.active as floor_active,
+    floor.created_at as floor_created_at,
+    floor.updated_at as floor_updated_at,
+    floor.deleted_at as floor_deleted_at
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>
+    from floors floor
+    left join stores store on store.id = floor.store_id
+    left join store_tiers store_tier on store_tier.store_id = store.id
+    where floor.id = #{id,jdbcType=INTEGER}
+          and floor.deleted_at is null
+  </select>
+
+  <select id="selectByNameStoreId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from floors floor
+    where floor.name = #{name,jdbcType=VARCHAR}
+          and floor.store_id = #{storeId,jdbcType=INTEGER}
+          and floor.deleted_at is null
+  </select>
+
+  <select id="selectByStoreId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />,
+    <include refid="com.harmoni.pos.menu.mapper.StoreMapper.Base_Column_List"/>
+    from floors floor
+    left join stores store on store.id = floor.store_id
+    left join store_tiers store_tier on store_tier.store_id = store.id
+    where floor.store_id = #{storeId,jdbcType=INTEGER}
+          and floor.deleted_at is null
+    order by floor.sort_order asc, floor.name asc
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Floor">
+    update floors
+    set deleted_at = #{deletedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.harmoni.pos.menu.model.Floor">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into floors (store_id, name, sort_order, active, created_at,
+      updated_at, deleted_at)
+    values (#{storeId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{sortOrder,jdbcType=INTEGER},
+      #{active,jdbcType=BOOLEAN}, #{createdAt,jdbcType=TIMESTAMP},
+      #{updatedAt,jdbcType=TIMESTAMP}, #{deletedAt,jdbcType=TIMESTAMP})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.harmoni.pos.menu.model.Floor">
+    update floors
+    set store_id = #{storeId,jdbcType=INTEGER},
+      name = #{name,jdbcType=VARCHAR},
+      sort_order = #{sortOrder,jdbcType=INTEGER},
+      active = #{active,jdbcType=BOOLEAN},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+</mapper>

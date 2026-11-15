@@ -1,5 +1,7 @@
 package com.harmoni.pos.http.controller.tier.tierservice;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.harmoni.pos.business.service.tier.tierservice.TierServiceService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.TierServiceDto;
@@ -19,6 +21,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/tier")
+@PreAuthorize("hasAnyAuthority('organization:read', 'rbac:manage')")
 public class TierServiceController {
 
     private final TierServiceService tierServiceService;
@@ -30,6 +33,7 @@ public class TierServiceController {
      * @return ResponseEntity with creation status
      */
     @PostMapping("/service")
+    @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody TierServiceDto tierServiceDto) {
         int id = tierServiceService.create(tierServiceDto);
         log.debug("tier created {} ", id);
@@ -61,6 +65,7 @@ public class TierServiceController {
      * @return ResponseEntity with update status
      */
     @PutMapping("/{tierId}/service")
+    @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> update(@RequestBody List<TierServiceDto> tierServiceDtos,
                                                @Valid @PathVariable Integer tierId) {
 

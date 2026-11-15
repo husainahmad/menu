@@ -3,6 +3,7 @@ package com.harmoni.pos.menu.mapper;
 import com.harmoni.pos.menu.model.Store;
 import com.harmoni.pos.menu.model.User;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -50,12 +51,18 @@ public interface UserMapper {
     User selectByUsernameAuthIdAndStoreId(String username, Integer authId, Integer storeId);
 
     /**
-     * Selects Users by a list of stores and search term.
-     * @param stores the list of Store objects
-     * @param search the search term
+     * Selects Users by a list of stores, search term and optional role/scope filter.
+     *
+     * @param stores    the list of Store objects
+     * @param search    the search term
+     * @param roleId    optional role id to filter assignments by
+     * @param scopeType optional scope type (BRAND, CHAIN, STORE) to filter assignments by
      * @return list of User objects
      */
-    List<User> selectByListChain(List<Store> stores, String search);
+    List<User> selectByListChain(@Param("stores") List<Store> stores,
+                                 @Param("search") String search,
+                                 @Param("roleId") Integer roleId,
+                                 @Param("scopeType") String scopeType);
 
     /**
      * Updates a User by its primary key.
@@ -63,5 +70,13 @@ public interface UserMapper {
      * @return number of rows affected
      */
     int updateByPrimaryKey(User row);
+
+    /**
+     * Counts users whose employee code starts with the given prefix.
+     *
+     * @param prefix the code prefix, e.g. {@code KSR-}
+     * @return the number of matching users
+     */
+    int countByEmployeeCodePrefix(@Param("prefix") String prefix);
 
 }

@@ -1,5 +1,7 @@
 package com.harmoni.pos.http.controller.subservice;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.harmoni.pos.business.service.subservice.SubServiceService;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.SubServiceDto;
@@ -31,6 +33,7 @@ public class SubServiceController {
      * @return ResponseEntity with creation status
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('terminal:edit', 'operation:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody SubServiceDto subServiceDto) {
         int id = subServiceService.create(subServiceDto);
         log.debug("subservice created {} ", id);

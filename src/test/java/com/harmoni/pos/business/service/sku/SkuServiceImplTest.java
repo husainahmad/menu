@@ -2,7 +2,6 @@ package com.harmoni.pos.business.service.sku;
 
 import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.business.service.user.UserService;
-import com.harmoni.pos.component.JwtUtil;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
 import com.harmoni.pos.menu.mapper.SkuMapper;
@@ -43,9 +42,6 @@ class SkuServiceImplTest {
 
     @Mock
     private UserService userService;
-
-    @Mock
-    private JwtUtil jwtUtil;
 
     @InjectMocks
     private SkuServiceImpl skuService;

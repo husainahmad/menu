@@ -13,6 +13,7 @@ import com.harmoni.pos.menu.model.Brand;
 import com.harmoni.pos.menu.model.Chain;
 import com.harmoni.pos.menu.model.Store;
 import com.harmoni.pos.menu.model.User;
+import com.harmoni.pos.menu.model.dto.AssignmentDto;
 import com.harmoni.pos.menu.model.dto.UserDto;
 import com.harmoni.pos.menu.model.dto.edit.UserEditDto;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +21,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Implementation of {@link UserService} for managing User entities.
@@ -53,16 +57,30 @@ public class UserServiceImpl implements UserService {
      * @throws BusinessNotFoundRequestException if authentication fails or user already exists
      */
     @Override
-    public int insert(String username, UserDto userDto) {
-        if (authService.create(username, userDto)==0) {
-            throw new BusinessNotFoundRequestException(AUTH_FAILED_EXCEPTION, null);
-        }
-        if ((ObjectUtils.isNotEmpty(this.selectByUsernameAuthIdAndStoreId(userDto.getUsername(), userDto.getAuthId(),
-                userDto.getStoreId())))) {
+    public int insert(String authorization, UserDto userDto) {
+        if (ObjectUtils.isNotEmpty(this.selectByUsernameAuthIdAndStoreId(userDto.getUsername(),
+                userDto.getAuthId(), userDto.getStoreId()))) {
             throw new BusinessNotFoundRequestException(USER_NOT_FOUND_EXCEPTION, null);
         }
 
-        return userMapper.insert(userDto.toUser());
+        String status = userDto.getStatus() == null ? "ACTIVE" : userDto.getStatus();
+        userDto.setStatus(status);
+        userDto.setEnabled("ACTIVE".equalsIgnoreCase(status));
+        if (userDto.getEmployeeCode() == null || userDto.getEmployeeCode().isBlank()) {
+            userDto.setEmployeeCode(generateEmployeeCode(firstRoleCode(userDto.getAssignments())));
+        }
+
+        Integer authUserId = authService.create(rawToken(authorization), userDto);
+        if (authUserId == null || authUserId == 0) {
+            throw new BusinessNotFoundRequestException(AUTH_FAILED_EXCEPTION, null);
+        }
+
+        User user = userDto.toUser();
+        user.setAuthUserId(authUserId.longValue());
+        if (user.getAuthId() == null) {
+            user.setAuthId(firstRoleId(userDto.getRoleIds()));
+        }
+        return userMapper.insert(user);
     }
 
     /**
@@ -74,15 +92,60 @@ public class UserServiceImpl implements UserService {
      * @throws BusinessNotFoundRequestException if authentication fails
      */
     @Override
-    public int update(String username, UserEditDto userEditDto) {
+    public int update(String authorization, UserEditDto userEditDto) {
         User user = selectById(userEditDto.getId());
         user.setUsername(userEditDto.getUsername());
         user.setStoreId(userEditDto.getStoreId());
         user.setAuthId(userEditDto.getAuthId());
-        if (authService.update(username, userEditDto)==0) {
+        if (user.getAuthId() == null) {
+            user.setAuthId(firstRoleId(userEditDto.getRoleIds()));
+        }
+        if (userEditDto.getEmployeeCode() != null && !userEditDto.getEmployeeCode().isBlank()) {
+            user.setEmployeeCode(userEditDto.getEmployeeCode());
+        }
+        if (userEditDto.getStatus() != null) {
+            user.setStatus(userEditDto.getStatus());
+        }
+        userEditDto.setEnabled(!"INACTIVE".equalsIgnoreCase(user.getStatus()));
+        if (authService.update(rawToken(authorization), userEditDto)==0) {
             throw new BusinessNotFoundRequestException(AUTH_FAILED_EXCEPTION, null);
         }
         return userMapper.updateByPrimaryKey(user);
+    }
+
+    private String rawToken(String authorization) {
+        if (authorization == null || authorization.isBlank()) {
+            throw new IllegalStateException("Missing bearer token");
+        }
+        return authorization.startsWith("Bearer ") ? authorization.substring(7) : authorization;
+    }
+
+    private String generateEmployeeCode(String roleCode) {
+        String prefix = roleCode == null || roleCode.isBlank() ? "EMP" : roleCode;
+        int next = userMapper.countByEmployeeCodePrefix(prefix + "-") + 1;
+        return prefix + "-" + String.format("%03d", next);
+    }
+
+    private String firstRoleCode(List<AssignmentDto> assignments) {
+        if (assignments == null || assignments.isEmpty()) {
+            return null;
+        }
+        return assignments.stream()
+                .map(AssignmentDto::getRoleCode)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Integer firstRoleId(Set<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            return null;
+        }
+        return roleIds.stream()
+                .filter(Objects::nonNull)
+                .findFirst()
+                .map(Long::intValue)
+                .orElse(null);
     }
 
     /**
@@ -110,12 +173,12 @@ public class UserServiceImpl implements UserService {
      * @throws BusinessNotFoundRequestException if the user is not found or authentication fails
      */
     @Override
-    public int delete(String username, Integer id) {
+    public int delete(String authorization, Integer id) {
         User user = userMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(user)) {
             throw new BusinessNotFoundRequestException(USER_NOT_FOUND_EXCEPTION, null);
         }
-        if (authService.delete(username, user.getUsername())==0) {
+        if (authService.delete(rawToken(authorization), user.getUsername())==0) {
             throw new BusinessNotFoundRequestException(AUTH_FAILED_EXCEPTION, null);
         }
         return userMapper.deleteByPrimaryKey(user.getId());
@@ -175,8 +238,8 @@ public class UserServiceImpl implements UserService {
      * @return a list of User objects matching the criteria
      */
     @Override
-    public List<User> selectByStoreIds(List<Store> stores, String search) {
-        return userMapper.selectByListChain(stores, search);
+    public List<User> selectByStoreIds(List<Store> stores, String search, Integer roleId, String scopeType) {
+        return userMapper.selectByListChain(stores, search, roleId, scopeType);
     }
 
     /**
@@ -189,12 +252,16 @@ public class UserServiceImpl implements UserService {
      * @return a map containing user data and pagination information
      */
     @Override
-    public Map<String, Object> selectByChainId(Integer chainId, int page, int size, String search) {
+    public Map<String, Object> selectByChainId(Integer chainId, int page, int size, String search,
+                                               Integer roleId, String scopeType) {
         List<Store> stores = this.storeService.getAllStoresByChainId(chainId, "");
+        if (stores == null || stores.isEmpty()) {
+            return emptyPage(size);
+        }
         PaginationUtils.applyPagination(page, size);
 
         Map<String, Object> paginationData = new HashMap<>();
-        PageInfo<User> productPageInfo = new PageInfo<>(selectByStoreIds(stores, search));
+        PageInfo<User> productPageInfo = new PageInfo<>(selectByStoreIds(stores, search, roleId, scopeType));
 
         paginationData.put("page", productPageInfo.getPages());
         paginationData.put("size", productPageInfo.getSize());
@@ -203,6 +270,42 @@ public class UserServiceImpl implements UserService {
         paginationData.put("navigate", productPageInfo.getNavigatepageNums());
 
         return paginationData;
+    }
+
+    @Override
+    public Map<String, Object> selectByStoreIdPage(List<Integer> storeIds, int page, int size, String search,
+                                                   Integer roleId, String scopeType) {
+        if (storeIds == null || storeIds.isEmpty()) {
+            return emptyPage(size);
+        }
+        List<Store> stores = new ArrayList<>();
+        for (Integer storeId : storeIds) {
+            if (storeId != null) {
+                Store store = new Store();
+                store.setId(storeId);
+                stores.add(store);
+            }
+        }
+        PaginationUtils.applyPagination(page, size);
+
+        PageInfo<User> pageInfo = new PageInfo<>(selectByStoreIds(stores, search, roleId, scopeType));
+        Map<String, Object> paginationData = new HashMap<>();
+        paginationData.put("page", pageInfo.getPages());
+        paginationData.put("size", pageInfo.getSize());
+        paginationData.put("total", pageInfo.getTotal());
+        paginationData.put("data", pageInfo.getList());
+        paginationData.put("navigate", pageInfo.getNavigatepageNums());
+        return paginationData;
+    }
+
+    private Map<String, Object> emptyPage(int size) {
+        Map<String, Object> empty = new HashMap<>();
+        empty.put("page", 0);
+        empty.put("size", size);
+        empty.put("total", 0L);
+        empty.put("data", List.of());
+        empty.put("navigate", List.of());
+        return empty;
     }
 
 }

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/category")
 @Slf4j
+@PreAuthorize("hasAnyAuthority('menu:view', 'menu:edit', 'catalog:read', 'catalog:write', 'rbac:manage')")
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -28,10 +30,29 @@ public class CategoryController {
      * @return ResponseEntity with creation status
      */
     @PostMapping("")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody CategoryDto categoryDto) {
         int id = categoryService.create(categoryDto);
         log.debug("Category created {} ", id);
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
+    }
+
+    /**
+     * Updates an existing Category.
+     *
+     * @param id          the category ID
+     * @param categoryDto the category data transfer object
+     * @return ResponseEntity with the update status
+     */
+    @PutMapping("/{id:\\d+}")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
+    public ResponseEntity<RestAPIResponse> update(@PathVariable Integer id,
+                                                  @Valid @RequestBody CategoryDto categoryDto) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(categoryService.update(id, categoryDto))
+                .build();
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 
     /**
@@ -78,6 +99,7 @@ public class CategoryController {
      * @return ResponseEntity with deletion status
      */
     @DeleteMapping("/{id:\\d+}")
+    @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -101,6 +123,27 @@ public class CategoryController {
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(this.categoryService.selectByBrandId(brandId))
+                .error(null)
+                .build();
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    /**
+     * Retrieves a paginated list of Categories for a Brand.
+     *
+     * @param brandId the brand ID
+     * @param page    the page number, 1-based
+     * @param size    the number of categories per page
+     * @return ResponseEntity containing the paginated categories
+     */
+    @GetMapping("/brand/{brandId}/page")
+    public ResponseEntity<RestAPIResponse> getByBrandIdPaginated(@PathVariable Integer brandId,
+                                                                 @RequestParam(name = "page") int page,
+                                                                 @RequestParam(name = "size") int size) {
+
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(this.categoryService.listPaginatedByBrand(brandId, page, size))
                 .error(null)
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
