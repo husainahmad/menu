@@ -60,17 +60,18 @@
     <if test="search!=null">
       and user.name like concat('%', #{search, jdbcType=VARCHAR}, '%')
     </if>
-    <if test="roleId != null or (scopeType != null and scopeType != '')">
-      and user.auth_user_id in (
-        select ur.user_id from `db-harmoni-auth`.user_roles ur
-        where 1 = 1
-        <if test="roleId != null">
-          and ur.role_id = #{roleId,jdbcType=INTEGER}
-        </if>
-        <if test="scopeType != null and scopeType != ''">
-          and ur.scope_type = #{scopeType,jdbcType=VARCHAR}
-        </if>
-      )
+    <if test="filteredUserIds != null">
+      <choose>
+        <when test="filteredUserIds.size() > 0">
+          and user.auth_user_id in
+          <foreach item="userId" collection="filteredUserIds" open="(" separator="," close=")">
+            #{userId,jdbcType=BIGINT}
+          </foreach>
+        </when>
+        <otherwise>
+          and 1 = 0
+        </otherwise>
+      </choose>
     </if>
   </select>
 

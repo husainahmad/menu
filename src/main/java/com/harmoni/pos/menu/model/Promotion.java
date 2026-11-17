@@ -32,6 +32,11 @@ public class Promotion {
     private Long id;
 
     /**
+     * The brand that owns the promotion. Used by the dashboard brand filter.
+     */
+    private Integer brandId;
+
+    /**
      * The unique, human readable code used to redeem the promotion at checkout.
      */
     private String code;

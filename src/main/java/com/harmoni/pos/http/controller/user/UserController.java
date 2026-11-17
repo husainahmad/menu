@@ -1,6 +1,10 @@
 package com.harmoni.pos.http.controller.user;
 
+import com.harmoni.pos.business.service.auth.AuthService;
 import com.harmoni.pos.business.service.user.UserService;
+import com.harmoni.pos.component.CallerScope;
+import com.harmoni.pos.component.CallerScopeContext;
+import com.harmoni.pos.exception.ScopeAccessDeniedException;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.User;
 import com.harmoni.pos.menu.model.dto.UserDto;
@@ -13,7 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * REST controller for managing User entities.
@@ -25,6 +31,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final AuthService authService;
 
     /**
      * Creates a new User.
@@ -39,6 +46,7 @@ public class UserController {
     public ResponseEntity<RestAPIResponse> createUser(@Valid @RequestBody UserDto userDto,
                                                       @RequestHeader("X-Username") String username,
                                                       @RequestHeader(value = "Authorization", required = false) String authorization) throws Exception {
+        CallerScopeContext.current().requireStore(userDto.getStoreId());
         int id = this.userService.insert(authorization, userDto);
         log.debug("tier created {} ", id);
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
@@ -59,10 +67,13 @@ public class UserController {
                                                               @RequestParam(name = "page") int page,
                                                               @RequestParam(name = "size") int size,
                                                               @RequestParam(name = "search") String search) {
+        if (!CallerScopeContext.current().canAccessChain(chainId)) {
+            throw new ScopeAccessDeniedException("Chain " + chainId + " is outside the caller's scope");
+        }
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(this.userService.selectByChainId(chainId, page, size, search, null, null))
+                .data(this.userService.selectByChainId(chainId, page, size, search))
                 .error(null)
                 .build();
 
@@ -87,18 +98,41 @@ public class UserController {
                                                    @RequestParam(name = "size", defaultValue = "10") int size,
                                                    @RequestParam(name = "search", required = false, defaultValue = "") String search,
                                                    @RequestParam(name = "roleId", required = false) String roleId,
-                                                   @RequestParam(name = "scopeType", required = false) String scopeType) {
+                                                   @RequestParam(name = "scopeType", required = false) String scopeType,
+                                                   @RequestHeader(value = "Authorization", required = false) String authorization) {
+
+        CallerScope callerScope = CallerScopeContext.current();
+        List<Integer> allowedStoreIds = callerScope.filterStoreIds(storeIds);
+        if (allowedStoreIds.isEmpty()) {
+            RestAPIResponse empty = RestAPIResponse.builder()
+                    .httpStatus(HttpStatus.OK.value())
+                    .data(emptyPage(page, size))
+                    .error(null)
+                    .build();
+            return new ResponseEntity<>(empty, HttpStatus.OK);
+        }
 
         Integer roleFilter = roleId == null || roleId.isBlank() ? null : Integer.valueOf(roleId);
         String scopeFilter = scopeType == null || scopeType.isBlank() ? null : scopeType;
+        List<Long> filteredUserIds = null;
+        if (roleFilter != null || scopeFilter != null) {
+            filteredUserIds = authService.findUserIds(rawToken(authorization), roleFilter, scopeFilter);
+        }
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(this.userService.selectByStoreIdPage(storeIds, page, size, search, roleFilter, scopeFilter))
+                .data(this.userService.selectByStoreIdPage(allowedStoreIds, page, size, search, filteredUserIds))
                 .error(null)
                 .build();
 
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    private String rawToken(String authorization) {
+        if (authorization == null || authorization.isBlank()) {
+            throw new IllegalStateException("Missing bearer token");
+        }
+        return authorization.startsWith("Bearer ") ? authorization.substring(7) : authorization;
     }
 
     /**
@@ -114,6 +148,7 @@ public class UserController {
     public ResponseEntity<RestAPIResponse> deleteUser(@PathVariable Integer id,
                                                       @RequestHeader("X-Username") String username,
                                                       @RequestHeader(value = "Authorization", required = false) String authorization) throws Exception {
+        requireUserStore(id);
         int rowCount = this.userService.delete(authorization, id);
         log.debug("user deleted {} ", rowCount);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
@@ -135,6 +170,7 @@ public class UserController {
                     @RequestHeader("X-Username") String username,
                     @RequestHeader(value = "Authorization", required = false) String authorization,
                     @Valid @RequestBody UserEditDto userEditDto) throws Exception {
+        requireUserStore(id);
         int rowCount = this.userService.update(authorization, userEditDto);
         log.debug("user updated {} ", rowCount);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder().build();
@@ -152,10 +188,26 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('menu:view', 'catalog:read', 'organization:read', 'order:view', 'terminal:view', 'availability:view', 'employee:view', 'user:read', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> detailUser(@PathVariable String username) throws Exception {
         User user = this.userService.selectByUsername(username);
+        CallerScopeContext.current().requireStore(user == null ? null : user.getStoreId());
         log.debug("user detail {} ", user);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(user)
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    private void requireUserStore(Integer userId) {
+        User user = userService.selectById(userId);
+        CallerScopeContext.current().requireStore(user == null ? null : user.getStoreId());
+    }
+
+    private Map<String, Object> emptyPage(int page, int size) {
+        Map<String, Object> empty = new HashMap<>();
+        empty.put("page", 0);
+        empty.put("size", size);
+        empty.put("total", 0);
+        empty.put("data", List.of());
+        empty.put("navigate", List.of());
+        return empty;
     }
 }

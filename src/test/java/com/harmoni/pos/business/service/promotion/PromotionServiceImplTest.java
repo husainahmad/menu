@@ -332,11 +332,11 @@ class PromotionServiceImplTest {
 
     @Test
     void deleteByFilter_shouldCascadeChildrenForEveryMatch() {
-        when(promotionMapper.selectByFilter(PromotionStatus.EXPIRED, null, "old"))
+        when(promotionMapper.selectByFilter(PromotionStatus.EXPIRED, null, "old", null))
                 .thenReturn(List.of(promotion, new Promotion().setId(2L)));
-        when(promotionMapper.deleteByFilter(PromotionStatus.EXPIRED, null, "old")).thenReturn(2);
+        when(promotionMapper.deleteByFilter(PromotionStatus.EXPIRED, null, "old", null)).thenReturn(2);
 
-        assertEquals(2, promotionService.deleteByFilter(PromotionStatus.EXPIRED, null, "old"));
+        assertEquals(2, promotionService.deleteByFilter(PromotionStatus.EXPIRED, null, "old", null));
 
         verify(promotionScheduleMapper).deleteByPromotionId(1L);
         verify(promotionScheduleMapper).deleteByPromotionId(2L);
@@ -383,11 +383,11 @@ class PromotionServiceImplTest {
 
     @Test
     void listPaginated_shouldReturnPageEnvelope() {
-        when(promotionMapper.selectByFilter(PromotionStatus.ACTIVE, PromotionType.PERCENTAGE, "happy"))
+        when(promotionMapper.selectByFilter(PromotionStatus.ACTIVE, PromotionType.PERCENTAGE, "happy", null))
                 .thenReturn(List.of(promotion));
 
         Map<String, Object> page = promotionService
-                .listPaginated(PromotionStatus.ACTIVE, PromotionType.PERCENTAGE, "happy", 1, 10);
+                .listPaginated(PromotionStatus.ACTIVE, PromotionType.PERCENTAGE, "happy", null, 1, 10);
 
         assertTrue(page.containsKey("page"));
         assertTrue(page.containsKey("size"));
@@ -398,11 +398,11 @@ class PromotionServiceImplTest {
 
     @Test
     void listPaginated_shouldNormaliseBlankSearchToNull() {
-        when(promotionMapper.selectByFilter(null, null, null)).thenReturn(List.of());
+        when(promotionMapper.selectByFilter(null, null, null, null)).thenReturn(List.of());
 
-        promotionService.listPaginated(null, null, "   ", 1, 10);
+        promotionService.listPaginated(null, null, "   ", null, 1, 10);
 
-        verify(promotionMapper).selectByFilter(null, null, null);
+        verify(promotionMapper).selectByFilter(null, null, null, null);
     }
 
     @Test

@@ -25,13 +25,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   HeaderAuthoritiesFilter headerAuthoritiesFilter)
+                                                   HeaderAuthoritiesFilter headerAuthoritiesFilter,
+                                                   CallerScopeService callerScopeService)
             throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/internal/**", "/swagger-ui/**", "/v3/api-docs/**",
                                 "/actuator/**", "/error").permitAll()
                         .anyRequest().authenticated())
+                .addFilterBefore(new CallerScopeFilter(callerScopeService), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(headerAuthoritiesFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();

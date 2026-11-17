@@ -1,6 +1,9 @@
 package com.harmoni.pos.http.controller.customization;
 
 import com.harmoni.pos.business.service.customization.CustomizationService;
+import com.harmoni.pos.component.CallerScopeContext;
+import com.harmoni.pos.exception.ScopeAccessDeniedException;
+import com.harmoni.pos.menu.model.Customization;
 import com.harmoni.pos.menu.model.dto.CustomizationDto;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import jakarta.validation.Valid;
@@ -66,6 +69,7 @@ public class CustomizationController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
+        requireCustomization(id);
         return new ResponseEntity<>(
                 RestAPIResponse.builder()
                         .httpStatus(HttpStatus.OK.value())
@@ -86,6 +90,7 @@ public class CustomizationController {
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer id,
                                                   @Valid @RequestBody CustomizationDto customizationDto) {
+        requireCustomization(id);
         customizationDto.setId(id);
         int rows = customizationService.updateCustomization(customizationDto.toEntity());
         log.debug("Customization updated with ID: {}, rows: {}", id, rows);
@@ -101,6 +106,7 @@ public class CustomizationController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
+        requireCustomization(id);
         int rows = customizationService.deleteCustomization(id);
         log.debug("Customization deleted with ID: {}, rows: {}", id, rows);
         return new ResponseEntity<>(
@@ -119,6 +125,7 @@ public class CustomizationController {
      */
     @GetMapping("/product/{productId}")
     public ResponseEntity<RestAPIResponse> getByProductId(@PathVariable Integer productId) {
+        requireCustomization(productId);
         return new ResponseEntity<>(
                 RestAPIResponse.builder()
                         .httpStatus(HttpStatus.OK.value())
@@ -126,5 +133,15 @@ public class CustomizationController {
                         .build(),
                 HttpStatus.OK
         );
+    }
+
+    private void requireCustomization(Integer id) {
+        Customization customization = customizationService.getCustomizationById(id).orElse(null);
+        if (customization == null) {
+            return;
+        }
+        if (!CallerScopeContext.current().canAccessBrand(customization.getBrandId())) {
+            throw new ScopeAccessDeniedException("Customization " + id + " is outside the caller's scope");
+        }
     }
 }

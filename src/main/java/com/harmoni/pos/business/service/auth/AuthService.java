@@ -1,6 +1,7 @@
 package com.harmoni.pos.business.service.auth;
 
 import com.harmoni.pos.business.service.rest.RestClientService;
+import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.config.AuthUrlProperties;
 import com.harmoni.pos.menu.model.dto.UserDto;
 import com.harmoni.pos.menu.model.dto.edit.UserEditDto;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -28,6 +31,31 @@ public class AuthService implements Serializable {
 
     private final RestClientService restClientService;
     private final AuthUrlProperties authUrlProperties;
+
+    /**
+     * Resolves the auth user ids whose assignments match the role/scope filter.
+     *
+     * @param token     JWT token for authentication
+     * @param roleId    optional role id
+     * @param scopeType optional scope type
+     * @return the matching auth user ids, never {@code null}
+     */
+    public List<Long> findUserIds(String token, Integer roleId, String scopeType) {
+        String url = authUrlProperties.getUserIds()
+                + "?roleId=" + (roleId == null ? "" : roleId)
+                + "&scopeType=" + (scopeType == null ? "" : scopeType);
+        RestAPIResponse response = restClientService.get(token, url).block();
+        if (response == null || !(response.getData() instanceof List<?> rows)) {
+            return List.of();
+        }
+        List<Long> ids = new ArrayList<>();
+        for (Object row : rows) {
+            if (row instanceof Number number) {
+                ids.add(number.longValue());
+            }
+        }
+        return ids;
+    }
 
     /**
      * Sends a POST request to the external authentication service to register a new user.

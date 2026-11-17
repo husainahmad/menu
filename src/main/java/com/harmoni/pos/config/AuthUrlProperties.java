@@ -11,4 +11,5 @@ public class AuthUrlProperties {
     private String register;
     private String delete;
     private String update;
+    private String userIds;
 }

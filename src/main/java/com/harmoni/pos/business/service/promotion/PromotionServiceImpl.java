@@ -175,8 +175,9 @@ public class PromotionServiceImpl implements PromotionService {
      */
     @Override
     @Transactional(transactionManager = "menuSQLTransactionManager")
-    public int deleteByFilter(PromotionStatus status, PromotionType promotionType, String search) {
-        List<Promotion> promotions = promotionMapper.selectByFilter(status, promotionType, search);
+    public int deleteByFilter(PromotionStatus status, PromotionType promotionType, String search,
+                              Integer brandId) {
+        List<Promotion> promotions = promotionMapper.selectByFilter(status, promotionType, search, brandId);
         promotions.forEach(promotion -> {
             Long promotionId = promotion.getId();
             promotionScheduleMapper.deleteByPromotionId(promotionId);
@@ -185,7 +186,7 @@ public class PromotionServiceImpl implements PromotionService {
             promotionSpecialPriceMapper.deleteByPromotionId(promotionId);
             promotionScopeMapper.deleteByPromotionId(promotionId);
         });
-        return promotionMapper.deleteByFilter(status, promotionType, search);
+        return promotionMapper.deleteByFilter(status, promotionType, search, brandId);
     }
 
     /**
@@ -213,11 +214,11 @@ public class PromotionServiceImpl implements PromotionService {
      */
     @Override
     public Map<String, Object> listPaginated(PromotionStatus status, PromotionType promotionType,
-                                             String search, int page, int size) {
+                                             String search, Integer brandId, int page, int size) {
         PaginationUtils.applyPagination(page, size);
         Map<String, Object> paginationData = new HashMap<>();
         PageInfo<Promotion> promotionPageInfo =
-                new PageInfo<>(promotionMapper.selectByFilter(status, promotionType, normalize(search)));
+                new PageInfo<>(promotionMapper.selectByFilter(status, promotionType, normalize(search), brandId));
 
         paginationData.put("page", promotionPageInfo.getPages());
         paginationData.put("size", promotionPageInfo.getSize());

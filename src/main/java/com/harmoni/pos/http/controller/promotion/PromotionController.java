@@ -2,6 +2,9 @@ package com.harmoni.pos.http.controller.promotion;
 
 import com.harmoni.pos.business.service.promotion.PromotionService;
 import com.harmoni.pos.business.service.promotion.pricing.PromotionPricingService;
+import com.harmoni.pos.component.CallerScope;
+import com.harmoni.pos.component.CallerScopeContext;
+import com.harmoni.pos.exception.ScopeAccessDeniedException;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.Promotion;
 import com.harmoni.pos.menu.model.PromotionStatus;
@@ -26,6 +29,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * REST controller for managing Promotion entities.
  */
@@ -48,6 +53,7 @@ public class PromotionController {
     @PostMapping("")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody PromotionAddDto promotionAddDto) {
+        CallerScopeContext.current().requireBrand(promotionAddDto.getBrandId());
         Promotion promotion = promotionService.create(promotionAddDto);
         log.debug("Promotion created {} ", promotion.getId());
         return new ResponseEntity<>(RestAPIResponse.builder()
@@ -70,11 +76,22 @@ public class PromotionController {
     public ResponseEntity<RestAPIResponse> list(@RequestParam(name = "status", required = false) PromotionStatus status,
                                                 @RequestParam(name = "promotionType", required = false) PromotionType promotionType,
                                                 @RequestParam(name = "search", required = false) String search,
+                                                @RequestParam(name = "brandId", required = false) Integer brandId,
                                                 @RequestParam(name = "page") int page,
                                                 @RequestParam(name = "size") int size) {
+        CallerScope scope = CallerScopeContext.current();
+        if (brandId != null) {
+            CallerScopeContext.current().requireBrand(brandId);
+        } else if (!scope.isGlobal()) {
+            if (scope.getBrandIds().size() == 1) {
+                brandId = scope.getBrandIds().iterator().next();
+            } else {
+                throw new ScopeAccessDeniedException("A brand id is required for a multi-brand scope");
+            }
+        }
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(promotionService.listPaginated(status, promotionType, search, page, size))
+                .data(promotionService.listPaginated(status, promotionType, search, brandId, page, size))
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
@@ -87,6 +104,7 @@ public class PromotionController {
      */
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable("id") Long id) {
+        requirePromotion(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(promotionService.get(id))
@@ -103,6 +121,8 @@ public class PromotionController {
      */
     @GetMapping("/code/{code}")
     public ResponseEntity<RestAPIResponse> getByCode(@PathVariable("code") String code) {
+        Promotion existing = promotionService.getByCode(code);
+        CallerScopeContext.current().requireBrand(existing == null ? null : existing.getBrandId());
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(promotionService.getByCode(code))
@@ -118,9 +138,13 @@ public class PromotionController {
      */
     @GetMapping("/redeemable")
     public ResponseEntity<RestAPIResponse> listRedeemable() {
+        CallerScope scope = CallerScopeContext.current();
+        List<Promotion> promotions = promotionService.listRedeemable().stream()
+                .filter(promotion -> scope.canAccessBrand(promotion.getBrandId()))
+                .toList();
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(promotionService.listRedeemable())
+                .data(promotions)
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
@@ -135,6 +159,8 @@ public class PromotionController {
     @PutMapping("")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> put(@Valid @RequestBody PromotionEditDto promotionEditDto) {
+        requirePromotion(promotionEditDto.getId());
+        CallerScopeContext.current().requireBrand(promotionEditDto.getBrandId());
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(promotionService.update(promotionEditDto))
@@ -154,6 +180,7 @@ public class PromotionController {
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> patchStatus(@PathVariable("id") Long id,
                                                        @RequestParam("status") PromotionStatus status) {
+        requirePromotion(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(promotionService.updateStatus(id, status))
@@ -191,6 +218,7 @@ public class PromotionController {
     @DeleteMapping("/{id:\\d+}")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable("id") Long id) {
+        requirePromotion(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(promotionService.delete(id))
@@ -211,12 +239,28 @@ public class PromotionController {
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> deleteByFilter(@RequestParam(name = "status", required = false) PromotionStatus status,
                                                           @RequestParam(name = "promotionType", required = false) PromotionType promotionType,
-                                                          @RequestParam(name = "search", required = false) String search) {
+                                                          @RequestParam(name = "search", required = false) String search,
+                                                          @RequestParam(name = "brandId", required = false) Integer brandId) {
+        CallerScope scope = CallerScopeContext.current();
+        if (brandId != null) {
+            CallerScopeContext.current().requireBrand(brandId);
+        } else if (!scope.isGlobal()) {
+            throw new ScopeAccessDeniedException("A brand id is required to delete promotions within a scope");
+        }
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(promotionService.deleteByFilter(status, promotionType, search))
+                .data(promotionService.deleteByFilter(status, promotionType, search, brandId))
                 .error(null)
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
+
+    private void requirePromotion(Long id) {
+        if (id == null) {
+            return;
+        }
+        Promotion promotion = promotionService.get(id);
+        CallerScopeContext.current().requireBrand(promotion == null ? null : promotion.getBrandId());
+    }
+
 }

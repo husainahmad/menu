@@ -17,6 +17,9 @@ import java.time.LocalDate;
 @Data
 public class PromotionDto {
 
+    /** The brand that owns the promotion. */
+    private Integer brandId;
+
     @NotBlank(message = "{validation.promotion.code.NotBlank}")
     @Size(max = 50, message = "{validation.promotion.code.Size}")
     private String code;
@@ -48,6 +51,7 @@ public class PromotionDto {
      */
     public Promotion toPromotion() {
         return new Promotion()
+                .setBrandId(brandId)
                 .setCode(code)
                 .setName(name)
                 .setDescription(description)

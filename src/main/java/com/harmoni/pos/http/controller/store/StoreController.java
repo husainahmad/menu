@@ -3,7 +3,11 @@ package com.harmoni.pos.http.controller.store;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.harmoni.pos.business.service.store.StoreService;
+import com.harmoni.pos.component.CallerScope;
+import com.harmoni.pos.component.CallerScopeContext;
+import com.harmoni.pos.exception.ScopeAccessDeniedException;
 import com.harmoni.pos.http.response.RestAPIResponse;
+import com.harmoni.pos.menu.model.Store;
 import com.harmoni.pos.menu.model.dto.StoreDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * REST controller for managing Store entities.
@@ -53,8 +61,12 @@ public class StoreController {
                                                 @RequestParam(name = "page") int page,
                                                 @RequestParam(name = "size") int size,
                                                 @RequestParam(name = "search") String search) {
+        CallerScope scope = CallerScopeContext.current();
+        if (!scope.canAccessChain(chainId)) {
+            throw new ScopeAccessDeniedException("Chain " + chainId + " is outside the caller's scope");
+        }
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .data(storeService.getAllStoresByChainIdPaginated(chainId, page, size, search))
+                .data(filterStores(scope, storeService.getAllStoresByChainIdPaginated(chainId, page, size, search)))
                 .httpStatus(HttpStatus.OK.value())
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
@@ -69,6 +81,7 @@ public class StoreController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('organization:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
+        CallerScopeContext.current().requireStore(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(storeService.delete(id))
                 .httpStatus(HttpStatus.OK.value())
@@ -86,6 +99,7 @@ public class StoreController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer id, @Valid @RequestBody StoreDto storeDto) {
+        CallerScopeContext.current().requireStore(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(storeService.update(id, storeDto))
                 .httpStatus(HttpStatus.OK.value())
@@ -101,11 +115,32 @@ public class StoreController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
+        CallerScopeContext.current().requireStore(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(storeService.get(id))
                 .httpStatus(HttpStatus.OK.value())
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> filterStores(CallerScope scope, Map<String, Object> page) {
+        if (scope.isGlobal() || page == null) {
+            return page;
+        }
+        Object data = page.get("data");
+        if (!(data instanceof List<?> rows)) {
+            return page;
+        }
+        List<Store> allowed = scope.filterStores((List<Store>) rows);
+        if (allowed.size() == rows.size()) {
+            return page;
+        }
+        Map<String, Object> filtered = new HashMap<>(page);
+        filtered.put("data", allowed);
+        filtered.put("total", allowed.size());
+        filtered.put("page", 1);
+        return filtered;
     }
 
 }

@@ -3,6 +3,7 @@ package com.harmoni.pos.http.controller.brand;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.harmoni.pos.business.service.brand.BrandService;
+import com.harmoni.pos.component.CallerScopeContext;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.dto.BrandDto;
 import jakarta.validation.Valid;
@@ -50,6 +51,7 @@ public class BrandController {
     @PreAuthorize("hasAnyAuthority('organization:write', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> update(@Valid @RequestBody BrandDto brandDto,
                                                   @PathVariable Integer id) {
+        CallerScopeContext.current().requireBrand(id);
         brandService.update(brandDto, id);
         log.debug("Brand updated {} ", id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -68,7 +70,7 @@ public class BrandController {
     public ResponseEntity<RestAPIResponse> all() {
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .data(brandService.list())
+                .data(CallerScopeContext.current().filterBrands(brandService.list()))
                 .httpStatus(HttpStatus.OK.value())
                 .build();
 
@@ -84,6 +86,7 @@ public class BrandController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable Integer id) {
+        CallerScopeContext.current().requireBrand(id);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .data(brandService.get(id))
@@ -103,6 +106,7 @@ public class BrandController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('organization:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
+        CallerScopeContext.current().requireBrand(id);
         brandService.delete(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())

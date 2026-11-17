@@ -79,11 +79,10 @@ public interface UserService {
      *
      * @param stores the list of stores to filter users
      * @param search the search term to filter users
-     * @param roleId optional role id to filter assignments by
-     * @param scopeType optional scope type to filter assignments by
+     * @param filteredUserIds auth user ids resolved from the auth service, or null for no filter
      * @return a list of User objects matching the criteria
      */
-    List<User> selectByStoreIds(List<Store> stores, String search, Integer roleId, String scopeType);
+    List<User> selectByStoreIds(List<Store> stores, String search, List<Long> filteredUserIds);
 
     /**
      * Retrieves users by chain ID with pagination and optional filters.
@@ -92,12 +91,9 @@ public interface UserService {
      * @param page the page number for pagination
      * @param size the number of records per page
      * @param search the search term to filter users
-     * @param roleId optional role id to filter assignments by
-     * @param scopeType optional scope type to filter assignments by
      * @return a map containing user data and pagination information
      */
-    Map<String, Object> selectByChainId(Integer chainId, int page, int size, String search,
-                                        Integer roleId, String scopeType);
+    Map<String, Object> selectByChainId(Integer chainId, int page, int size, String search);
 
     /**
      * Retrieves users across the given stores with pagination and optional filters.
@@ -106,10 +102,9 @@ public interface UserService {
      * @param page the page number for pagination
      * @param size the number of records per page
      * @param search the search term to filter users
-     * @param roleId optional role id to filter assignments by
-     * @param scopeType optional scope type to filter assignments by
+     * @param filteredUserIds auth user ids resolved from the auth service, or null for no filter
      * @return a map containing user data and pagination information
      */
     Map<String, Object> selectByStoreIdPage(List<Integer> storeIds, int page, int size, String search,
-                                            Integer roleId, String scopeType);
+                                            List<Long> filteredUserIds);
 }

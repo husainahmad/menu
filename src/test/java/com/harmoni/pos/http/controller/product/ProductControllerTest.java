@@ -1,5 +1,6 @@
 package com.harmoni.pos.http.controller.product;
 
+import com.harmoni.pos.business.service.category.CategoryService;
 import com.harmoni.pos.business.service.product.ProductService;
 import com.harmoni.pos.business.service.product.ProductSkuService;
 import com.harmoni.pos.menu.model.Product;
@@ -31,6 +32,9 @@ class ProductControllerTest {
 
     @Mock
     private ProductSkuService productSkuService;
+
+    @Mock
+    private CategoryService categoryService;
 
     @InjectMocks
     private ProductController productController;

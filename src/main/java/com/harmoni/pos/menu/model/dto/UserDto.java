@@ -3,6 +3,8 @@ package com.harmoni.pos.menu.model.dto;
 import com.harmoni.pos.menu.model.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
@@ -15,15 +17,17 @@ import java.util.Set;
 @Data
 public class UserDto {
     /**
-     * The authentication ID for the user.
+     * Legacy role id. Optional under the scoped-role model; when omitted the
+     * menu service derives it from the first role id.
      */
-    @NotNull(message = "{validation.user.authId.NotNull}")
     private Integer authId;
 
     /**
      * The username of the user.
      */
     @NotBlank(message = "{validation.user.name.NotNull}")
+    @Size(min = 6, max = 125, message = "{validation.user.username.Size}")
+    @Pattern(regexp = "^[A-Za-z0-9]+$", message = "{validation.user.username.pattern.NotValid}")
     private String username;
 
     /**

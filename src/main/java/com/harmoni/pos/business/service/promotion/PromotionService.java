@@ -51,7 +51,7 @@ public interface PromotionService {
      * @param search        optional keyword matched against code and name
      * @return the number of deleted rows
      */
-    int deleteByFilter(PromotionStatus status, PromotionType promotionType, String search);
+    int deleteByFilter(PromotionStatus status, PromotionType promotionType, String search, Integer brandId);
 
     /**
      * Retrieves a promotion by its ID, with all child collections populated.
@@ -81,7 +81,7 @@ public interface PromotionService {
      * @return a map holding page, size, total, data and navigate
      */
     Map<String, Object> listPaginated(PromotionStatus status, PromotionType promotionType,
-                                      String search, int page, int size);
+                                      String search, Integer brandId, int page, int size);
 
     /**
      * Retrieves the promotions that may be redeemed right now, that is whose status

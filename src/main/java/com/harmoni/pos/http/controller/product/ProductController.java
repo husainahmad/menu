@@ -1,7 +1,10 @@
 package com.harmoni.pos.http.controller.product;
 
+import com.harmoni.pos.business.service.category.CategoryService;
 import com.harmoni.pos.business.service.product.ProductService;
 import com.harmoni.pos.business.service.product.ProductSkuService;
+import com.harmoni.pos.component.CallerScope;
+import com.harmoni.pos.component.CallerScopeContext;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import com.harmoni.pos.menu.model.Product;
 import com.harmoni.pos.menu.model.dto.add.ProductAddDto;
@@ -29,6 +32,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final ProductSkuService productSkuService;
+    private final CategoryService categoryService;
 
     /**
      * Creates a new Product.
@@ -39,6 +43,7 @@ public class ProductController {
     @PostMapping("")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ProductAddDto productDto) {
+        requireCategory(productDto.getCategoryId());
         Product product = productSkuService.create(productDto);
         log.debug("Product created {} ", ObjectUtils.getDisplayString(product));
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
@@ -52,6 +57,7 @@ public class ProductController {
      */
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable("id") Integer id) {
+        requireProduct(id);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -91,6 +97,7 @@ public class ProductController {
     @PutMapping("")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> put(@Valid @RequestBody ProductEditDto productEditDto) {
+        requireCategory(productEditDto.getCategoryId());
         this.productSkuService.update(productEditDto);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -111,6 +118,7 @@ public class ProductController {
     @DeleteMapping("/{id:\\d+}")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
+        requireProduct(id);
 
         this.productService.delete(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -130,6 +138,7 @@ public class ProductController {
      */
     @GetMapping("/category/{id}")
     public ResponseEntity<RestAPIResponse> getByCategory(@PathVariable Integer id) {
+        requireCategory(id);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -150,6 +159,7 @@ public class ProductController {
     @GetMapping("/category/{id}/price")
     public ResponseEntity<RestAPIResponse> getByCategoryPrice(@RequestHeader("X-Username") String username,
                                                               @PathVariable Integer id) {
+        requireCategory(id);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -182,6 +192,9 @@ public class ProductController {
             @PathVariable Integer id,
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "beforeId", required = false) Integer beforeId) {
+        if (id != null && id > 0) {
+            requireCategory(id);
+        }
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -215,6 +228,7 @@ public class ProductController {
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "beforeId", required = false) Integer beforeId,
             @RequestParam(value = "search", required = false) String search) {
+        CallerScopeContext.current().requireBrand(brandId);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -231,9 +245,13 @@ public class ProductController {
      */
     @GetMapping("/search")
     public ResponseEntity<RestAPIResponse> searchByProductName(@RequestParam String productName) {
+        CallerScope scope = CallerScopeContext.current();
+        List<Product> products = productService.searchByProductName(productName).stream()
+                .filter(product -> scope.canAccessBrand(brandOfCategory(product.getCategoryId())))
+                .toList();
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(productService.searchByProductName(productName))
+                .data(products)
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
@@ -254,6 +272,8 @@ public class ProductController {
                                                               @RequestParam(name = "page") int page,
                                                               @RequestParam(name = "size") int size,
                                                               @RequestParam(name = "search") String search) {
+        CallerScopeContext.current().requireBrand(brandId);
+        requireCategory(categoryId);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -262,6 +282,29 @@ public class ProductController {
                 .build();
 
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    private void requireCategory(Integer categoryId) {
+        if (categoryId == null || categoryId <= 0) {
+            return;
+        }
+        CallerScopeContext.current().requireBrand(brandOfCategory(categoryId));
+    }
+
+    private void requireProduct(Integer productId) {
+        Product product = productService.get(productId);
+        if (product == null) {
+            return;
+        }
+        requireCategory(product.getCategoryId());
+    }
+
+    private Integer brandOfCategory(Integer categoryId) {
+        if (categoryId == null) {
+            return null;
+        }
+        var category = categoryService.get(categoryId);
+        return category == null ? null : category.getBrandId();
     }
 
 }

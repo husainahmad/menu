@@ -101,7 +101,7 @@ class PromotionControllerTest {
 
     @Test
     void list_shouldReturn200() throws Exception {
-        when(promotionService.listPaginated(PromotionStatus.ACTIVE, PromotionType.PERCENTAGE, "happy", 1, 10))
+        when(promotionService.listPaginated(PromotionStatus.ACTIVE, PromotionType.PERCENTAGE, "happy", null, 1, 10))
                 .thenReturn(Map.of("data", List.of(), "total", 0));
 
         mockMvc.perform(get("/api/v1/promotion")
@@ -117,7 +117,7 @@ class PromotionControllerTest {
 
     @Test
     void list_shouldReturn200_whenFiltersOmitted() throws Exception {
-        when(promotionService.listPaginated(null, null, null, 1, 10))
+        when(promotionService.listPaginated(null, null, null, null, 1, 10))
                 .thenReturn(Map.of("data", List.of()));
 
         mockMvc.perform(get("/api/v1/promotion").param("page", "1").param("size", "10"))
@@ -210,7 +210,7 @@ class PromotionControllerTest {
 
     @Test
     void deleteByFilter_shouldReturn200() throws Exception {
-        when(promotionService.deleteByFilter(PromotionStatus.EXPIRED, null, "old")).thenReturn(3);
+        when(promotionService.deleteByFilter(PromotionStatus.EXPIRED, null, "old", null)).thenReturn(3);
 
         mockMvc.perform(delete("/api/v1/promotion")
                         .param("status", "EXPIRED")

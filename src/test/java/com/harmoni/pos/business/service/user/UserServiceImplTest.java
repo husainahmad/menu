@@ -189,8 +189,8 @@ class UserServiceImplTest {
     @Test
     void selectByStoreIds_shouldReturnList() {
         Store store = new Store().setId(10);
-        when(userMapper.selectByListChain(List.of(store), "", null, null)).thenReturn(List.of(user));
-        assertFalse(userService.selectByStoreIds(List.of(store), "", null, null).isEmpty());
+        when(userMapper.selectByListChain(List.of(store), "", null)).thenReturn(List.of(user));
+        assertFalse(userService.selectByStoreIds(List.of(store), "", null).isEmpty());
     }
 
     private final Brand brand = new Brand().setId(1).setName("Brand1");

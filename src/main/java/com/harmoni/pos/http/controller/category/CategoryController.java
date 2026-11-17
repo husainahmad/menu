@@ -1,6 +1,10 @@
 package com.harmoni.pos.http.controller.category;
 
 import com.harmoni.pos.business.service.category.CategoryService;
+import com.harmoni.pos.component.CallerScope;
+import com.harmoni.pos.component.CallerScopeContext;
+import com.harmoni.pos.exception.ScopeAccessDeniedException;
+import com.harmoni.pos.menu.model.Category;
 import com.harmoni.pos.menu.model.dto.CategoryDto;
 import com.harmoni.pos.http.response.RestAPIResponse;
 import jakarta.validation.Valid;
@@ -10,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * REST controller for managing Category entities.
@@ -48,6 +54,7 @@ public class CategoryController {
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer id,
                                                   @Valid @RequestBody CategoryDto categoryDto) {
+        requireCategory(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(categoryService.update(id, categoryDto))
@@ -82,6 +89,7 @@ public class CategoryController {
      */
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable("id") Integer id) {
+        requireCategory(id);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -101,6 +109,7 @@ public class CategoryController {
     @DeleteMapping("/{id:\\d+}")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
+        requireCategory(id);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -119,6 +128,7 @@ public class CategoryController {
      */
     @GetMapping("/brand/{brandId}")
     public ResponseEntity<RestAPIResponse> getByBrandId(@PathVariable Integer brandId) {
+        CallerScopeContext.current().requireBrand(brandId);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -140,6 +150,7 @@ public class CategoryController {
     public ResponseEntity<RestAPIResponse> getByBrandIdPaginated(@PathVariable Integer brandId,
                                                                  @RequestParam(name = "page") int page,
                                                                  @RequestParam(name = "size") int size) {
+        CallerScopeContext.current().requireBrand(brandId);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -155,9 +166,13 @@ public class CategoryController {
      */
     @GetMapping("/search")
     public ResponseEntity<RestAPIResponse> search(@RequestParam String categoryName) {
+        CallerScope scope = CallerScopeContext.current();
+        List<Category> categories = categoryService.searchByCategoryName(categoryName).stream()
+                .filter(category -> scope.canAccessBrand(category.getBrandId()))
+                .toList();
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(categoryService.searchByCategoryName(categoryName))
+                .data(categories)
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
@@ -170,11 +185,25 @@ public class CategoryController {
      */
     @GetMapping("/tier")
     public ResponseEntity<RestAPIResponse> getAll(@RequestHeader("X-Username") String username) {
+        CallerScope scope = CallerScopeContext.current();
+        List<Category> categories = categoryService.getListByUserAuth(username).stream()
+                .filter(category -> scope.canAccessBrand(category.getBrandId()))
+                .toList();
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(categoryService.getListByUserAuth(username))
+                .data(categories)
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    private void requireCategory(Integer id) {
+        Category category = categoryService.get(id);
+        if (category == null) {
+            return;
+        }
+        if (!CallerScopeContext.current().canAccessBrand(category.getBrandId())) {
+            throw new ScopeAccessDeniedException("Category " + id + " is outside the caller's scope");
+        }
     }
 
 }

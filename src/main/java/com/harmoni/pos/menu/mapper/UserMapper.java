@@ -51,18 +51,16 @@ public interface UserMapper {
     User selectByUsernameAuthIdAndStoreId(String username, Integer authId, Integer storeId);
 
     /**
-     * Selects Users by a list of stores, search term and optional role/scope filter.
+     * Selects Users by a list of stores, search term and optional auth-user filter.
      *
-     * @param stores    the list of Store objects
-     * @param search    the search term
-     * @param roleId    optional role id to filter assignments by
-     * @param scopeType optional scope type (BRAND, CHAIN, STORE) to filter assignments by
+     * @param stores          the list of Store objects
+     * @param search          the search term
+     * @param filteredUserIds auth user ids resolved from the auth service, or null for no filter
      * @return list of User objects
      */
     List<User> selectByListChain(@Param("stores") List<Store> stores,
                                  @Param("search") String search,
-                                 @Param("roleId") Integer roleId,
-                                 @Param("scopeType") String scopeType);
+                                 @Param("filteredUserIds") List<Long> filteredUserIds);
 
     /**
      * Updates a User by its primary key.

@@ -42,7 +42,7 @@ class UserControllerTest {
     @Test
     void createUser_shouldReturn201() throws Exception {
         UserDto dto = new UserDto();
-        dto.setUsername("john");
+        dto.setUsername("johndoe");
         dto.setStoreId(2);
         dto.setAuthId(1);
         dto.setPassword("pass123");
@@ -58,7 +58,7 @@ class UserControllerTest {
 
     @Test
     void getByCategoryBrand_shouldReturn200() throws Exception {
-        when(userService.selectByChainId(1, 1, 10, "search", null, null))
+        when(userService.selectByChainId(1, 1, 10, "search"))
                 .thenReturn(Map.of("data", "result"));
 
         mockMvc.perform(get("/api/v1/user/chain/1")
@@ -82,7 +82,7 @@ class UserControllerTest {
     void updateUser_shouldReturn200() throws Exception {
         UserEditDto editDto = new UserEditDto();
         editDto.setId(1);
-        editDto.setUsername("john");
+        editDto.setUsername("johndoe");
         editDto.setStoreId(2);
         editDto.setAuthId(1);
         editDto.setPassword("pass123");
@@ -98,10 +98,10 @@ class UserControllerTest {
 
     @Test
     void detailUser_shouldReturn200() throws Exception {
-        when(userService.selectByUsername("john")).thenReturn(new User().setUsername("john"));
+        when(userService.selectByUsername("johndoe")).thenReturn(new User().setUsername("johndoe"));
 
-        mockMvc.perform(get("/api/v1/user/john"))
+        mockMvc.perform(get("/api/v1/user/johndoe"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.username").value("john"));
+                .andExpect(jsonPath("$.data.username").value("johndoe"));
     }
 }

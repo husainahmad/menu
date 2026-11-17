@@ -238,8 +238,8 @@ public class UserServiceImpl implements UserService {
      * @return a list of User objects matching the criteria
      */
     @Override
-    public List<User> selectByStoreIds(List<Store> stores, String search, Integer roleId, String scopeType) {
-        return userMapper.selectByListChain(stores, search, roleId, scopeType);
+    public List<User> selectByStoreIds(List<Store> stores, String search, List<Long> filteredUserIds) {
+        return userMapper.selectByListChain(stores, search, filteredUserIds);
     }
 
     /**
@@ -252,8 +252,7 @@ public class UserServiceImpl implements UserService {
      * @return a map containing user data and pagination information
      */
     @Override
-    public Map<String, Object> selectByChainId(Integer chainId, int page, int size, String search,
-                                               Integer roleId, String scopeType) {
+    public Map<String, Object> selectByChainId(Integer chainId, int page, int size, String search) {
         List<Store> stores = this.storeService.getAllStoresByChainId(chainId, "");
         if (stores == null || stores.isEmpty()) {
             return emptyPage(size);
@@ -261,7 +260,7 @@ public class UserServiceImpl implements UserService {
         PaginationUtils.applyPagination(page, size);
 
         Map<String, Object> paginationData = new HashMap<>();
-        PageInfo<User> productPageInfo = new PageInfo<>(selectByStoreIds(stores, search, roleId, scopeType));
+        PageInfo<User> productPageInfo = new PageInfo<>(selectByStoreIds(stores, search, null));
 
         paginationData.put("page", productPageInfo.getPages());
         paginationData.put("size", productPageInfo.getSize());
@@ -274,7 +273,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Map<String, Object> selectByStoreIdPage(List<Integer> storeIds, int page, int size, String search,
-                                                   Integer roleId, String scopeType) {
+                                                   List<Long> filteredUserIds) {
         if (storeIds == null || storeIds.isEmpty()) {
             return emptyPage(size);
         }
@@ -288,7 +287,7 @@ public class UserServiceImpl implements UserService {
         }
         PaginationUtils.applyPagination(page, size);
 
-        PageInfo<User> pageInfo = new PageInfo<>(selectByStoreIds(stores, search, roleId, scopeType));
+        PageInfo<User> pageInfo = new PageInfo<>(selectByStoreIds(stores, search, filteredUserIds));
         Map<String, Object> paginationData = new HashMap<>();
         paginationData.put("page", pageInfo.getPages());
         paginationData.put("size", pageInfo.getSize());

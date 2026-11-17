@@ -33,7 +33,8 @@ public interface PromotionMapper {
      */
     int deleteByFilter(@Param("status") PromotionStatus status,
                        @Param("promotionType") PromotionType promotionType,
-                       @Param("search") String search);
+                       @Param("search") String search,
+                       @Param("brandId") Integer brandId);
 
     /**
      * Inserts a new Promotion.
@@ -69,7 +70,8 @@ public interface PromotionMapper {
      */
     List<Promotion> selectByFilter(@Param("status") PromotionStatus status,
                                    @Param("promotionType") PromotionType promotionType,
-                                   @Param("search") String search);
+                                   @Param("search") String search,
+                                   @Param("brandId") Integer brandId);
 
     /**
      * Selects the Promotions that are redeemable on the given date: a lifecycle
