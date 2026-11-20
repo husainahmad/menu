@@ -104,10 +104,10 @@ public class PromotionController {
      */
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable("id") Long id) {
-        requirePromotion(id);
+        Promotion promotion = promotionService.getScoped(id, CallerScopeContext.current());
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(promotionService.get(id))
+                .data(promotion)
                 .error(null)
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
@@ -121,11 +121,10 @@ public class PromotionController {
      */
     @GetMapping("/code/{code}")
     public ResponseEntity<RestAPIResponse> getByCode(@PathVariable("code") String code) {
-        Promotion existing = promotionService.getByCode(code);
-        CallerScopeContext.current().requireBrand(existing == null ? null : existing.getBrandId());
+        Promotion promotion = promotionService.getByCodeScoped(code, CallerScopeContext.current());
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(promotionService.getByCode(code))
+                .data(promotion)
                 .error(null)
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
@@ -159,7 +158,7 @@ public class PromotionController {
     @PutMapping("")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> put(@Valid @RequestBody PromotionEditDto promotionEditDto) {
-        requirePromotion(promotionEditDto.getId());
+        promotionService.getScoped(promotionEditDto.getId(), CallerScopeContext.current());
         CallerScopeContext.current().requireBrand(promotionEditDto.getBrandId());
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -180,7 +179,7 @@ public class PromotionController {
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> patchStatus(@PathVariable("id") Long id,
                                                        @RequestParam("status") PromotionStatus status) {
-        requirePromotion(id);
+        promotionService.getScoped(id, CallerScopeContext.current());
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(promotionService.updateStatus(id, status))
@@ -218,7 +217,7 @@ public class PromotionController {
     @DeleteMapping("/{id:\\d+}")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable("id") Long id) {
-        requirePromotion(id);
+        promotionService.getScoped(id, CallerScopeContext.current());
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(promotionService.delete(id))
@@ -253,14 +252,6 @@ public class PromotionController {
                 .error(null)
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
-    }
-
-    private void requirePromotion(Long id) {
-        if (id == null) {
-            return;
-        }
-        Promotion promotion = promotionService.get(id);
-        CallerScopeContext.current().requireBrand(promotion == null ? null : promotion.getBrandId());
     }
 
 }

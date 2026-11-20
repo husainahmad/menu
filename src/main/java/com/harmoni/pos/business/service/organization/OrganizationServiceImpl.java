@@ -36,7 +36,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
             for (Chain chain : chainMapper.selectByBrandId(brand.getId())) {
                 List<OrganizationTreeDto.StoreNode> storeNodes = new ArrayList<>();
-                for (Store store : storeMapper.selectAllByChainId(chain.getId(), null)) {
+                for (Store store : storeMapper.selectAllByChainId(chain.getId(), null, null)) {
                     storeNodes.add(toStoreNode(store));
                 }
                 brandStoreCount += storeNodes.size();

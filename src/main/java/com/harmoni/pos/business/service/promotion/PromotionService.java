@@ -1,5 +1,6 @@
 package com.harmoni.pos.business.service.promotion;
 
+import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.menu.model.Promotion;
 import com.harmoni.pos.menu.model.PromotionStatus;
 import com.harmoni.pos.menu.model.PromotionType;
@@ -62,12 +63,34 @@ public interface PromotionService {
     Promotion get(Long id);
 
     /**
+     * Retrieves a promotion by its ID and asserts that the caller may access the
+     * brand it belongs to.
+     *
+     * @param id    the promotion ID
+     * @param scope the caller scope, may be {@code null} for unrestricted access
+     * @return the promotion
+     * @throws com.harmoni.pos.exception.ScopeAccessDeniedException if the promotion is outside the caller's scope
+     */
+    Promotion getScoped(Long id, CallerScope scope);
+
+    /**
      * Retrieves a promotion by its unique code, without child collections.
      *
      * @param code the promotion code
      * @return the promotion
      */
     Promotion getByCode(String code);
+
+    /**
+     * Retrieves a promotion by its unique code and asserts that the caller may
+     * access the brand it belongs to.
+     *
+     * @param code  the promotion code
+     * @param scope the caller scope, may be {@code null} for unrestricted access
+     * @return the promotion
+     * @throws com.harmoni.pos.exception.ScopeAccessDeniedException if the promotion is outside the caller's scope
+     */
+    Promotion getByCodeScoped(String code, CallerScope scope);
 
     /**
      * Retrieves a paginated, optionally filtered list of promotions. The child

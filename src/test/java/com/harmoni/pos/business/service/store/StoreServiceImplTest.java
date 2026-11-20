@@ -100,7 +100,7 @@ class StoreServiceImplTest {
 
     @Test
     void getAllStoresByChainId_shouldReturnList() {
-        when(storeMapper.selectAllByChainId(1, "")).thenReturn(List.of(store));
+        when(storeMapper.selectAllByChainId(1, "", null)).thenReturn(List.of(store));
         assertFalse(storeService.getAllStoresByChainId(1, "").isEmpty());
     }
 

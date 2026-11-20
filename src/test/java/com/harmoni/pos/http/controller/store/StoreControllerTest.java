@@ -57,7 +57,7 @@ class StoreControllerTest {
 
     @Test
     void list_shouldReturn200() throws Exception {
-        when(storeService.getAllStoresByChainIdPaginated(1, 1, 10, "search"))
+        when(storeService.getAllStoresByChainIdPaginated(any(), eq(1), eq(1), eq(10), eq("search")))
                 .thenReturn(Map.of("data", "result"));
 
         mockMvc.perform(get("/api/v1/store")

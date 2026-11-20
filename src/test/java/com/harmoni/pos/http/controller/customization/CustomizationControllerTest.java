@@ -69,7 +69,7 @@ class CustomizationControllerTest {
 
     @Test
     void get_shouldReturn200() throws Exception {
-        when(customizationService.getCustomizationById(1)).thenReturn(Optional.of(new Customization().setId(1)));
+        when(customizationService.getCustomizationByIdScoped(eq(1), any())).thenReturn(Optional.of(new Customization().setId(1)));
 
         mockMvc.perform(get("/api/v1/customization/1"))
                 .andExpect(status().isOk());
@@ -99,7 +99,7 @@ class CustomizationControllerTest {
 
     @Test
     void getByProductId_shouldReturn200() throws Exception {
-        when(customizationService.getCustomizationById(1)).thenReturn(Optional.of(new Customization().setId(1)));
+        when(customizationService.getCustomizationByIdScoped(eq(1), any())).thenReturn(Optional.of(new Customization().setId(1)));
 
         mockMvc.perform(get("/api/v1/customization/product/1"))
                 .andExpect(status().isOk());

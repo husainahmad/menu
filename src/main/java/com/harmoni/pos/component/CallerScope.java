@@ -137,6 +137,20 @@ public final class CallerScope {
     }
 
     /**
+     * Asserts that the caller may access the brand of an entity.
+     *
+     * @param brandId the brand id the entity belongs to
+     * @param entity the entity label used in the error message
+     * @param id the entity id used in the error message
+     * @throws ScopeAccessDeniedException when the brand is outside the scope
+     */
+    public void requireBrandOf(Integer brandId, String entity, Object id) {
+        if (!canAccessBrand(brandId)) {
+            throw new ScopeAccessDeniedException(entity + " " + id + " is outside the caller's scope");
+        }
+    }
+
+    /**
      * Keeps only the brands the caller may see.
      *
      * @param brands the candidate brands

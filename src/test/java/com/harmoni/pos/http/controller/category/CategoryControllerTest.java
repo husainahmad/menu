@@ -66,7 +66,7 @@ class CategoryControllerTest {
 
     @Test
     void get_shouldReturn200() throws Exception {
-        when(categoryService.get(1)).thenReturn(new Category().setId(1).setName("Drinks"));
+        when(categoryService.getScoped(eq(1), any())).thenReturn(new Category().setId(1).setName("Drinks"));
 
         mockMvc.perform(get("/api/v1/category/1"))
                 .andExpect(status().isOk())

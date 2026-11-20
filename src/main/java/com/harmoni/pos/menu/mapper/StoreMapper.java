@@ -2,6 +2,7 @@ package com.harmoni.pos.menu.mapper;
 
 import com.harmoni.pos.menu.model.Store;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -30,7 +31,9 @@ public interface StoreMapper {
      * @param id the Chain ID
      * @return the Chain object
      */
-    List<Store> selectAllByChainId(Integer chainId, String search);
+    List<Store> selectAllByChainId(@Param("chainId") Integer chainId,
+                                   @Param("search") String search,
+                                   @Param("storeIds") List<Integer> storeIds);
 
     /**
      * Selects a Chain by its name.

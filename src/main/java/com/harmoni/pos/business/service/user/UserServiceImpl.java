@@ -274,15 +274,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public Map<String, Object> selectByStoreIdPage(List<Integer> storeIds, int page, int size, String search,
                                                    List<Long> filteredUserIds) {
-        if (storeIds == null || storeIds.isEmpty()) {
+        if (storeIds != null && storeIds.isEmpty()) {
             return emptyPage(size);
         }
-        List<Store> stores = new ArrayList<>();
-        for (Integer storeId : storeIds) {
-            if (storeId != null) {
-                Store store = new Store();
-                store.setId(storeId);
-                stores.add(store);
+        // A null list means "no store filter": used for global operators, who
+        // may see every user. An empty list means "no accessible store" and is
+        // handled above so it cannot widen access.
+        List<Store> stores = null;
+        if (storeIds != null) {
+            stores = new ArrayList<>();
+            for (Integer storeId : storeIds) {
+                if (storeId != null) {
+                    Store store = new Store();
+                    store.setId(storeId);
+                    stores.add(store);
+                }
             }
         }
         PaginationUtils.applyPagination(page, size);

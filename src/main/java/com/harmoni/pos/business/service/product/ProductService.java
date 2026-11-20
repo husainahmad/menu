@@ -1,5 +1,6 @@
 package com.harmoni.pos.business.service.product;
 
+import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.menu.model.Product;
 import com.harmoni.pos.menu.model.ProductPage;
 import com.harmoni.pos.menu.model.dto.add.ProductAddDto;
@@ -83,6 +84,17 @@ public interface ProductService {
      * @return the product
      */
     Product get(Integer id);
+
+    /**
+     * Retrieves a product by its ID and asserts that the caller may access the
+     * brand of the category it belongs to.
+     *
+     * @param id    the product ID
+     * @param scope the caller scope, may be {@code null} for unrestricted access
+     * @return the product
+     * @throws com.harmoni.pos.exception.ScopeAccessDeniedException if the product is outside the caller's scope
+     */
+    Product getScoped(Integer id, CallerScope scope);
 
     /**
      * Retrieves a list of products by their IDs and enriches based on the provided JWT token.

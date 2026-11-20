@@ -1,5 +1,6 @@
 package com.harmoni.pos.business.service.promotion;
 
+import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
 import com.harmoni.pos.http.utils.PaginationUtils;
@@ -201,10 +202,34 @@ public class PromotionServiceImpl implements PromotionService {
      * {@inheritDoc}
      */
     @Override
+    public Promotion getScoped(Long id, CallerScope scope) {
+        Promotion promotion = get(id);
+        if (scope != null) {
+            scope.requireBrandOf(promotion.getBrandId(), "Promotion", id);
+        }
+        return promotion;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Promotion getByCode(String code) {
         Promotion promotion = promotionMapper.selectByCode(code);
         if (ObjectUtils.isEmpty(promotion)) {
             throw new BusinessBadRequestException("exception.promotion.code.badRequest.notFound", new Object[]{code});
+        }
+        return promotion;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Promotion getByCodeScoped(String code, CallerScope scope) {
+        Promotion promotion = getByCode(code);
+        if (scope != null) {
+            scope.requireBrandOf(promotion.getBrandId(), "Promotion", code);
         }
         return promotion;
     }

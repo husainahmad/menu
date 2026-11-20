@@ -1,18 +1,23 @@
 package com.harmoni.pos.business.service.rest;
 
 import com.harmoni.pos.http.response.RestAPIResponse;
+import io.netty.channel.ChannelOption;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 
 import java.io.Serializable;
+import java.time.Duration;
 /**
  * Service class for making reactive HTTP REST API calls using {@link WebClient}.
  * <p>
@@ -38,9 +43,25 @@ public class RestClientService implements Serializable {
     private static final String LOG_BAD_REQUEST = "BAD_REQUEST Server Response {}";
     private static final String LOG_NO_CONTENT = "LOG_NO_CONTENT Server Response {}";
     private static final String LOG_UN_AUTHORIZED = "LOG_UN_AUTHORIZED Server Response {}";
+    private static final String LOG_FORBIDDEN = "FORBIDDEN Server Response {}";
     private static final String LOG_INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR Server Response {}";
     private static final String BEARER = "Bearer ";
-    private static final WebClient webClient = WebClient.builder().build();
+
+    /**
+     * Shared client with a bounded connect/response window. A downstream call
+     * that cannot reach the auth service must fail instead of blocking the
+     * request thread indefinitely.
+     */
+    private static final WebClient webClient = buildWebClient();
+
+    private static WebClient buildWebClient() {
+        HttpClient httpClient = HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5_000)
+                .responseTimeout(Duration.ofSeconds(10));
+        return WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .build();
+    }
 
     /**
      * Sends a POST request with the given request body and authentication token.
@@ -60,6 +81,7 @@ public class RestClientService implements Serializable {
                 .retrieve()
                 .onStatus(HttpStatus.NO_CONTENT::equals, this::handleNoContent)
                 .onStatus(HttpStatus.BAD_REQUEST::equals, this::handleBadRequest)
+                .onStatus(HttpStatus.FORBIDDEN::equals, this::handleForbidden)
                 .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, this::handleInternalServerError)
                 .onStatus(HttpStatus.UNAUTHORIZED::equals, this::handleUnAuthorized)
                 .bodyToMono(RestAPIResponse.class);
@@ -81,6 +103,7 @@ public class RestClientService implements Serializable {
 
         retrieve.onStatus(HttpStatus.NO_CONTENT::equals, this::handleNoContent);
         retrieve.onStatus(HttpStatus.BAD_REQUEST::equals, this::handleBadRequest);
+        retrieve.onStatus(HttpStatus.FORBIDDEN::equals, this::handleForbidden);
         retrieve.onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, this::handleInternalServerError);
         retrieve.onStatus(HttpStatus.UNAUTHORIZED::equals, this::handleUnAuthorized);
 
@@ -105,6 +128,7 @@ public class RestClientService implements Serializable {
                 .retrieve()
                 .onStatus(HttpStatus.NO_CONTENT::equals, this::handleNoContent)
                 .onStatus(HttpStatus.BAD_REQUEST::equals, this::handleBadRequest)
+                .onStatus(HttpStatus.FORBIDDEN::equals, this::handleForbidden)
                 .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, this::handleInternalServerError)
                 .onStatus(HttpStatus.UNAUTHORIZED::equals, this::handleUnAuthorized)
                 .bodyToMono(RestAPIResponse.class);
@@ -125,6 +149,7 @@ public class RestClientService implements Serializable {
                 .retrieve()
                 .onStatus(HttpStatus.NO_CONTENT::equals, this::handleNoContent)
                 .onStatus(HttpStatus.BAD_REQUEST::equals, this::handleBadRequest)
+                .onStatus(HttpStatus.FORBIDDEN::equals, this::handleForbidden)
                 .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, this::handleInternalServerError)
                 .onStatus(HttpStatus.UNAUTHORIZED::equals, this::handleUnAuthorized)
                 .bodyToMono(RestAPIResponse.class);
@@ -146,6 +171,18 @@ public class RestClientService implements Serializable {
     private Mono<? extends Throwable> handleBadRequest(ClientResponse clientResponse) {
         return clientResponse.bodyToMono(RestAPIResponse.class)
                 .handle((res, sink) -> logError(LOG_BAD_REQUEST, res));
+    }
+
+    /**
+     * Handles HTTP 403 Forbidden from the downstream service. The auth service
+     * rejects a role assignment the caller may not grant; surfacing it as an
+     * {@link AccessDeniedException} lets the API answer 403 instead of 500.
+     */
+    private Mono<? extends Throwable> handleForbidden(ClientResponse clientResponse) {
+        return clientResponse.bodyToMono(RestAPIResponse.class)
+                .doOnNext(res -> logError(LOG_FORBIDDEN, res))
+                .then(Mono.error(new AccessDeniedException(
+                        "The authentication service rejected the request")));
     }
 
     /**

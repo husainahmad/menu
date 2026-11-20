@@ -1,5 +1,6 @@
 package com.harmoni.pos.business.service.customization;
 
+import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.menu.model.Customization;
 
 import java.util.List;
@@ -20,6 +21,17 @@ public interface CustomizationService {
      * @return an optional containing the customization, or empty if not found
      */
     Optional<Customization> getCustomizationById(Integer id);
+
+    /**
+     * Retrieves a customization by its ID and asserts that the caller may access
+     * the brand it belongs to.
+     *
+     * @param id the customization ID
+     * @param scope the caller scope, may be {@code null} for unrestricted access
+     * @return an optional containing the customization, or empty if not found
+     * @throws com.harmoni.pos.exception.ScopeAccessDeniedException if the customization is outside the caller's scope
+     */
+    Optional<Customization> getCustomizationByIdScoped(Integer id, CallerScope scope);
 
     /**
      * Retrieves all customizations for a specific brand ID.

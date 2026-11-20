@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +84,13 @@ public class UserController {
     /**
      * Retrieves a page of employees across the stores in the caller's scope.
      *
-     * @param storeIds  the store ids in the caller's scope
+     * <p>When {@code storeIds} is omitted the caller's own scope is used: a
+     * chain-scoped operator sees every store of the chain, a brand-scoped
+     * operator every store of the brand, and a global operator every user.
+     * This keeps the list correct even when the dashboard cannot load the
+     * organisation tree (for example a role without {@code organization:read}).</p>
+     *
+     * @param storeIds  optional comma-separated store ids to narrow the page
      * @param page      1-based page number
      * @param size      page size
      * @param search    optional name/code search term
@@ -93,7 +100,7 @@ public class UserController {
      */
     @GetMapping("/page")
     @PreAuthorize("hasAnyAuthority('employee:view', 'user:read', 'rbac:manage')")
-    public ResponseEntity<RestAPIResponse> getPage(@RequestParam(name = "storeIds") List<Integer> storeIds,
+    public ResponseEntity<RestAPIResponse> getPage(@RequestParam(name = "storeIds", required = false) String storeIds,
                                                    @RequestParam(name = "page", defaultValue = "1") int page,
                                                    @RequestParam(name = "size", defaultValue = "10") int size,
                                                    @RequestParam(name = "search", required = false, defaultValue = "") String search,
@@ -102,8 +109,18 @@ public class UserController {
                                                    @RequestHeader(value = "Authorization", required = false) String authorization) {
 
         CallerScope callerScope = CallerScopeContext.current();
-        List<Integer> allowedStoreIds = callerScope.filterStoreIds(storeIds);
-        if (allowedStoreIds.isEmpty()) {
+        List<Integer> requestedStoreIds = parseStoreIds(storeIds);
+        List<Integer> allowedStoreIds;
+        if (requestedStoreIds.isEmpty()) {
+            // No explicit selection: fall back to the caller's expanded scope.
+            // A null list means "no store filter" and is only used for global
+            // operators, who may see every user.
+            allowedStoreIds = callerScope.isGlobal()
+                    ? null : new ArrayList<>(callerScope.getStoreIds());
+        } else {
+            allowedStoreIds = callerScope.filterStoreIds(requestedStoreIds);
+        }
+        if (allowedStoreIds != null && allowedStoreIds.isEmpty()) {
             RestAPIResponse empty = RestAPIResponse.builder()
                     .httpStatus(HttpStatus.OK.value())
                     .data(emptyPage(page, size))
@@ -126,6 +143,25 @@ public class UserController {
                 .build();
 
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    private List<Integer> parseStoreIds(String storeIds) {
+        if (storeIds == null || storeIds.isBlank()) {
+            return List.of();
+        }
+        List<Integer> parsed = new ArrayList<>();
+        for (String value : storeIds.split(",")) {
+            String trimmed = value.trim();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+            try {
+                parsed.add(Integer.valueOf(trimmed));
+            } catch (NumberFormatException ignored) {
+                // Ignore malformed ids rather than failing the whole page.
+            }
+        }
+        return parsed;
     }
 
     private String rawToken(String authorization) {

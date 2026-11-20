@@ -7,7 +7,6 @@ import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.component.CallerScopeContext;
 import com.harmoni.pos.exception.ScopeAccessDeniedException;
 import com.harmoni.pos.http.response.RestAPIResponse;
-import com.harmoni.pos.menu.model.Store;
 import com.harmoni.pos.menu.model.dto.StoreDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * REST controller for managing Store entities.
@@ -66,7 +61,7 @@ public class StoreController {
             throw new ScopeAccessDeniedException("Chain " + chainId + " is outside the caller's scope");
         }
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
-                .data(filterStores(scope, storeService.getAllStoresByChainIdPaginated(chainId, page, size, search)))
+                .data(storeService.getAllStoresByChainIdPaginated(scope, chainId, page, size, search))
                 .httpStatus(HttpStatus.OK.value())
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
@@ -121,26 +116,6 @@ public class StoreController {
                 .httpStatus(HttpStatus.OK.value())
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> filterStores(CallerScope scope, Map<String, Object> page) {
-        if (scope.isGlobal() || page == null) {
-            return page;
-        }
-        Object data = page.get("data");
-        if (!(data instanceof List<?> rows)) {
-            return page;
-        }
-        List<Store> allowed = scope.filterStores((List<Store>) rows);
-        if (allowed.size() == rows.size()) {
-            return page;
-        }
-        Map<String, Object> filtered = new HashMap<>(page);
-        filtered.put("data", allowed);
-        filtered.put("total", allowed.size());
-        filtered.put("page", 1);
-        return filtered;
     }
 
 }

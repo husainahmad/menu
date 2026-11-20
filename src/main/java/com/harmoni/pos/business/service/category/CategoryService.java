@@ -1,5 +1,6 @@
 package com.harmoni.pos.business.service.category;
 
+import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.menu.model.Category;
 import com.harmoni.pos.menu.model.dto.CategoryDto;
 
@@ -87,6 +88,18 @@ public interface CategoryService {
      * @throws com.harmoni.pos.exception.BusinessNotFoundRequestException if the category does not exist
      */
     Category get(Integer id);
+
+    /**
+     * Retrieves a single category by its ID and asserts that the caller may access
+     * the brand it belongs to.
+     *
+     * @param id the unique identifier of the category
+     * @param scope the caller scope, may be {@code null} for unrestricted access
+     * @return the category entity
+     * @throws com.harmoni.pos.exception.BusinessBadRequestException if the category does not exist
+     * @throws com.harmoni.pos.exception.ScopeAccessDeniedException if the category is outside the caller's scope
+     */
+    Category getScoped(Integer id, CallerScope scope);
 
     /**
      * Search categories by name LIKE (for AI).

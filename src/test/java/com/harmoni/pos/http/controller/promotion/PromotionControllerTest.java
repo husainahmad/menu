@@ -135,7 +135,8 @@ class PromotionControllerTest {
 
     @Test
     void get_shouldReturn200() throws Exception {
-        when(promotionService.get(1L)).thenReturn(new Promotion().setId(1L).setName("Happy Hour"));
+        when(promotionService.getScoped(eq(1L), any()))
+                .thenReturn(new Promotion().setId(1L).setName("Happy Hour"));
 
         mockMvc.perform(get("/api/v1/promotion/1"))
                 .andExpect(status().isOk())
@@ -144,7 +145,7 @@ class PromotionControllerTest {
 
     @Test
     void getByCode_shouldReturn200() throws Exception {
-        when(promotionService.getByCode("HAPPY10"))
+        when(promotionService.getByCodeScoped(eq("HAPPY10"), any()))
                 .thenReturn(new Promotion().setId(1L).setCode("HAPPY10"));
 
         mockMvc.perform(get("/api/v1/promotion/code/HAPPY10"))

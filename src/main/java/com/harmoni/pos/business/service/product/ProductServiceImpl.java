@@ -8,6 +8,7 @@ import com.harmoni.pos.business.service.skutierprice.SkuTierPriceService;
 import com.harmoni.pos.business.service.store.tier.StoreTierService;
 import com.harmoni.pos.business.service.tier.TierService;
 import com.harmoni.pos.business.service.user.UserService;
+import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.http.utils.PaginationUtils;
 import com.harmoni.pos.menu.mapper.*;
@@ -440,6 +441,19 @@ public class ProductServiceImpl implements ProductService {
         }
         product.setProductImage(this.productImageService.selectByProductId(id));
         return attachCustomizations(List.of(product), null).get(0);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Product getScoped(Integer id, CallerScope scope) {
+        Product product = get(id);
+        if (scope != null) {
+            Category category = categoryService.get(product.getCategoryId());
+            scope.requireBrandOf(category.getBrandId(), "Product", id);
+        }
+        return product;
     }
 
     /**

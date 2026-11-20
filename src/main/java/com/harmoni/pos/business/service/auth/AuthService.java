@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,7 +45,7 @@ public class AuthService implements Serializable {
         String url = authUrlProperties.getUserIds()
                 + "?roleId=" + (roleId == null ? "" : roleId)
                 + "&scopeType=" + (scopeType == null ? "" : scopeType);
-        RestAPIResponse response = restClientService.get(token, url).block();
+        RestAPIResponse response = restClientService.get(token, url).block(Duration.ofSeconds(10));
         if (response == null || !(response.getData() instanceof List<?> rows)) {
             return List.of();
         }
@@ -71,7 +72,7 @@ public class AuthService implements Serializable {
                 authUserId.set(Integer.valueOf(restAPIResponse.getData().toString()));
             }
             return authUserId;
-        }).block();
+        }).block(Duration.ofSeconds(10));
         return authUserId.get();
     }
 
@@ -89,7 +90,7 @@ public class AuthService implements Serializable {
                 statusCode.set(restAPIResponse.getHttpStatus());
             }
             return statusCode;
-        }).block();
+        }).block(Duration.ofSeconds(10));
         return statusCode.get();
     }
 
@@ -108,7 +109,7 @@ public class AuthService implements Serializable {
                         statusCode.set(restAPIResponse.getHttpStatus());
                     }
                     return statusCode;
-                }).block();
+                }).block(Duration.ofSeconds(10));
         return statusCode.get();
     }
 }

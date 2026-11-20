@@ -2,6 +2,7 @@ package com.harmoni.pos.business.service.store;
 
 import com.github.pagehelper.PageInfo;
 import com.harmoni.pos.business.service.store.tier.StoreTierService;
+import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.exception.BusinessNoContentRequestException;
 import com.harmoni.pos.exception.BusinessNotFoundRequestException;
@@ -90,8 +91,12 @@ public class StoreServiceImpl implements StoreService {
     }
 
     /**
-     * Retrieves stores filtered by chain ID and optional search keyword with pagination.
+     * Retrieves stores filtered by chain ID, caller scope and optional search keyword with pagination.
      *
+     * <p>The scope is applied in the query so the pagination metadata reflects only the
+     * stores the caller may see.</p>
+     *
+     * @param scope the caller scope used to restrict the stores, may be {@code null} for unrestricted access
      * @param chainId the chain ID to filter stores
      * @param page the page number (1-based)
      * @param size the page size
@@ -99,17 +104,18 @@ public class StoreServiceImpl implements StoreService {
      * @return a map containing pagination metadata and list of stores under keys: "page", "size", "total", "data", "navigate"
      */
     @Override
-    public Map<String, Object> getAllStoresByChainIdPaginated(Integer chainId, int page, int size, String search) {
+    public Map<String, Object> getAllStoresByChainIdPaginated(CallerScope scope, Integer chainId, int page, int size, String search) {
         PaginationUtils.applyPagination(page, size);
 
-        Map<String, Object> paginationData = new HashMap<>();
-        PageInfo<Store> productPageInfo = new PageInfo<>(getAllStoresByChainId(chainId, search));
+        List<Integer> storeIds = scope == null || scope.isGlobal() ? null : new ArrayList<>(scope.getStoreIds());
+        PageInfo<Store> storePageInfo = new PageInfo<>(getAllStoresByChainId(chainId, search, storeIds));
 
-        paginationData.put("page", productPageInfo.getPages());
-        paginationData.put("size", productPageInfo.getSize());
-        paginationData.put("total", productPageInfo.getTotal());
-        paginationData.put("data", productPageInfo.getList());
-        paginationData.put("navigate", productPageInfo.getNavigatepageNums());
+        Map<String, Object> paginationData = new HashMap<>();
+        paginationData.put("page", storePageInfo.getPages());
+        paginationData.put("size", storePageInfo.getSize());
+        paginationData.put("total", storePageInfo.getTotal());
+        paginationData.put("data", storePageInfo.getList());
+        paginationData.put("navigate", storePageInfo.getNavigatepageNums());
 
         return paginationData;
     }
@@ -123,7 +129,11 @@ public class StoreServiceImpl implements StoreService {
      */
     @Override
     public List<Store> getAllStoresByChainId(Integer chainId, String search) {
-        return storeMapper.selectAllByChainId(chainId, search);
+        return getAllStoresByChainId(chainId, search, null);
+    }
+
+    private List<Store> getAllStoresByChainId(Integer chainId, String search, List<Integer> storeIds) {
+        return storeMapper.selectAllByChainId(chainId, search, storeIds);
     }
 
     /**

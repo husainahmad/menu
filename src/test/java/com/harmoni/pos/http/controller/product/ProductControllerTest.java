@@ -63,7 +63,7 @@ class ProductControllerTest {
 
     @Test
     void get_shouldReturn200() throws Exception {
-        when(productService.get(1)).thenReturn(new Product().setId(1).setName("Burger"));
+        when(productService.getScoped(eq(1), any())).thenReturn(new Product().setId(1).setName("Burger"));
 
         mockMvc.perform(get("/api/v1/product/1"))
                 .andExpect(status().isOk())

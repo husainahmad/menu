@@ -43,7 +43,7 @@ public class ProductController {
     @PostMapping("")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> create(@Valid @RequestBody ProductAddDto productDto) {
-        requireCategory(productDto.getCategoryId());
+        categoryService.getScoped(productDto.getCategoryId(), CallerScopeContext.current());
         Product product = productSkuService.create(productDto);
         log.debug("Product created {} ", ObjectUtils.getDisplayString(product));
         return new ResponseEntity<>(RestAPIResponse.builder().build(), HttpStatus.CREATED);
@@ -57,11 +57,11 @@ public class ProductController {
      */
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable("id") Integer id) {
-        requireProduct(id);
+        Product product = productService.getScoped(id, CallerScopeContext.current());
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(this.productService.get(id))
+                .data(product)
                 .error(null)
                 .build();
 
@@ -97,7 +97,7 @@ public class ProductController {
     @PutMapping("")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> put(@Valid @RequestBody ProductEditDto productEditDto) {
-        requireCategory(productEditDto.getCategoryId());
+        categoryService.getScoped(productEditDto.getCategoryId(), CallerScopeContext.current());
         this.productSkuService.update(productEditDto);
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -118,7 +118,7 @@ public class ProductController {
     @DeleteMapping("/{id:\\d+}")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
-        requireProduct(id);
+        productService.getScoped(id, CallerScopeContext.current());
 
         this.productService.delete(id);
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -138,7 +138,7 @@ public class ProductController {
      */
     @GetMapping("/category/{id}")
     public ResponseEntity<RestAPIResponse> getByCategory(@PathVariable Integer id) {
-        requireCategory(id);
+        categoryService.getScoped(id, CallerScopeContext.current());
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -159,7 +159,7 @@ public class ProductController {
     @GetMapping("/category/{id}/price")
     public ResponseEntity<RestAPIResponse> getByCategoryPrice(@RequestHeader("X-Username") String username,
                                                               @PathVariable Integer id) {
-        requireCategory(id);
+        categoryService.getScoped(id, CallerScopeContext.current());
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -193,7 +193,7 @@ public class ProductController {
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "beforeId", required = false) Integer beforeId) {
         if (id != null && id > 0) {
-            requireCategory(id);
+            categoryService.getScoped(id, CallerScopeContext.current());
         }
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
@@ -273,7 +273,11 @@ public class ProductController {
                                                               @RequestParam(name = "size") int size,
                                                               @RequestParam(name = "search") String search) {
         CallerScopeContext.current().requireBrand(brandId);
-        requireCategory(categoryId);
+        // -1 is the "All categories" sentinel used by the dashboard; there is
+        // no category row to scope, so skip the lookup instead of failing.
+        if (categoryId != null && categoryId != -1) {
+            categoryService.getScoped(categoryId, CallerScopeContext.current());
+        }
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -282,21 +286,6 @@ public class ProductController {
                 .build();
 
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
-    }
-
-    private void requireCategory(Integer categoryId) {
-        if (categoryId == null || categoryId <= 0) {
-            return;
-        }
-        CallerScopeContext.current().requireBrand(brandOfCategory(categoryId));
-    }
-
-    private void requireProduct(Integer productId) {
-        Product product = productService.get(productId);
-        if (product == null) {
-            return;
-        }
-        requireCategory(product.getCategoryId());
     }
 
     private Integer brandOfCategory(Integer categoryId) {

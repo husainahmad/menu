@@ -2,6 +2,7 @@ package com.harmoni.pos.business.service.category;
 
 import com.github.pagehelper.PageInfo;
 import com.harmoni.pos.business.service.store.tier.StoreTierService;
+import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.business.service.tier.tiermenu.TierMenuService;
 import com.harmoni.pos.business.service.user.UserService;
 import com.harmoni.pos.exception.BusinessBadRequestException;
@@ -177,6 +178,15 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryMapper.selectByPrimaryKey(id);
         if (ObjectUtils.isEmpty(category)) {
             throw new BusinessBadRequestException("exception.category.id.badRequest.notFound", null);
+        }
+        return category;
+    }
+
+    @Override
+    public Category getScoped(Integer id, CallerScope scope) {
+        Category category = get(id);
+        if (scope != null) {
+            scope.requireBrandOf(category.getBrandId(), "Category", id);
         }
         return category;
     }

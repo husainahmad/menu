@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.harmoni.pos.business.service.customizationoption.CustomizationOptionService;
 import com.harmoni.pos.business.service.customizationoptiontierprice.CustomizationOptionTierPriceService;
 import com.harmoni.pos.business.service.user.UserService;
+import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.http.utils.PaginationUtils;
 import com.harmoni.pos.menu.mapper.CustomizationMapper;
 import com.harmoni.pos.menu.model.Customization;
@@ -117,6 +118,17 @@ public class CustomizationServiceImpl implements CustomizationService {
         }
         List<Customization> populated = populateCustomizationOptions(List.of(customization));
         return Optional.of(populated == null || populated.isEmpty() ? customization : populated.get(0));
+    }
+
+    @Override
+    public Optional<Customization> getCustomizationByIdScoped(Integer id, CallerScope scope) {
+        Optional<Customization> customization = getCustomizationById(id);
+        customization.ifPresent(value -> {
+            if (scope != null) {
+                scope.requireBrandOf(value.getBrandId(), "Customization", id);
+            }
+        });
+        return customization;
     }
 
     /**

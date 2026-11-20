@@ -3,7 +3,6 @@ package com.harmoni.pos.http.controller.category;
 import com.harmoni.pos.business.service.category.CategoryService;
 import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.component.CallerScopeContext;
-import com.harmoni.pos.exception.ScopeAccessDeniedException;
 import com.harmoni.pos.menu.model.Category;
 import com.harmoni.pos.menu.model.dto.CategoryDto;
 import com.harmoni.pos.http.response.RestAPIResponse;
@@ -54,7 +53,7 @@ public class CategoryController {
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:write', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> update(@PathVariable Integer id,
                                                   @Valid @RequestBody CategoryDto categoryDto) {
-        requireCategory(id);
+        categoryService.getScoped(id, CallerScopeContext.current());
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
                 .data(categoryService.update(id, categoryDto))
@@ -89,11 +88,11 @@ public class CategoryController {
      */
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<RestAPIResponse> get(@PathVariable("id") Integer id) {
-        requireCategory(id);
+        Category category = categoryService.getScoped(id, CallerScopeContext.current());
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
-                .data(this.categoryService.get(id))
+                .data(category)
                 .error(null)
                 .build();
 
@@ -109,7 +108,7 @@ public class CategoryController {
     @DeleteMapping("/{id:\\d+}")
     @PreAuthorize("hasAnyAuthority('menu:edit', 'catalog:delete', 'rbac:manage')")
     public ResponseEntity<RestAPIResponse> delete(@PathVariable Integer id) {
-        requireCategory(id);
+        categoryService.getScoped(id, CallerScopeContext.current());
 
         RestAPIResponse restAPIResponse = RestAPIResponse.builder()
                 .httpStatus(HttpStatus.OK.value())
@@ -194,16 +193,6 @@ public class CategoryController {
                 .data(categories)
                 .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
-    }
-
-    private void requireCategory(Integer id) {
-        Category category = categoryService.get(id);
-        if (category == null) {
-            return;
-        }
-        if (!CallerScopeContext.current().canAccessBrand(category.getBrandId())) {
-            throw new ScopeAccessDeniedException("Category " + id + " is outside the caller's scope");
-        }
     }
 
 }

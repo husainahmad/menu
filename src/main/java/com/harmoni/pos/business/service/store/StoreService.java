@@ -1,5 +1,6 @@
 package com.harmoni.pos.business.service.store;
 
+import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.menu.model.Store;
 import com.harmoni.pos.menu.model.dto.StoreDto;
 
@@ -36,15 +37,16 @@ public interface StoreService {
     Store get(Integer id);
 
     /**
-     * Retrieves a paginated list of stores filtered by chain ID and an optional search keyword.
+     * Retrieves a paginated list of stores filtered by chain ID, caller scope and an optional search keyword.
      *
+     * @param scope the caller scope used to restrict the stores, may be {@code null} for unrestricted access
      * @param chainId the chain ID to filter stores
      * @param page the page number (starting from 1)
      * @param size the number of records per page
      * @param search an optional search keyword to filter stores by name or other attributes
      * @return a {@link Map} containing pagination metadata and list of stores, keys may include "page", "size", "total", "data", etc.
      */
-    Map<String, Object> getAllStoresByChainIdPaginated(Integer chainId, int page, int size, String search);
+    Map<String, Object> getAllStoresByChainIdPaginated(CallerScope scope, Integer chainId, int page, int size, String search);
 
     /**
      * Retrieves all stores by chain ID filtered by an optional search keyword without pagination.

@@ -85,6 +85,19 @@
     <if test="search != null">
       and store.name like concat('%', #{search, jdbcType=VARCHAR}, '%')
     </if>
+    <if test="storeIds != null">
+      <choose>
+        <when test="storeIds.size() > 0">
+          and store.id in
+          <foreach collection="storeIds" item="storeId" open="(" separator="," close=")">
+            #{storeId,jdbcType=INTEGER}
+          </foreach>
+        </when>
+        <otherwise>
+          and 1 = 0
+        </otherwise>
+      </choose>
+    </if>
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">

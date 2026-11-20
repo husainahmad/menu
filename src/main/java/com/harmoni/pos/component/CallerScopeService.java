@@ -123,7 +123,7 @@ public class CallerScopeService {
             return;
         }
         chainIds.add(chain.getId());
-        for (Store store : storeMapper.selectAllByChainId(chain.getId(), null)) {
+        for (Store store : storeMapper.selectAllByChainId(chain.getId(), null, null)) {
             if (store != null && store.getId() != null) {
                 storeIds.add(store.getId());
             }
