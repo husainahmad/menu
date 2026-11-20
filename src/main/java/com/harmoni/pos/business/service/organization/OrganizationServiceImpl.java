@@ -1,6 +1,7 @@
 package com.harmoni.pos.business.service.organization;
 
 import com.harmoni.pos.menu.mapper.BrandMapper;
+import com.harmoni.pos.menu.mapper.DeviceMapper;
 import com.harmoni.pos.menu.mapper.ChainMapper;
 import com.harmoni.pos.menu.mapper.StoreMapper;
 import com.harmoni.pos.menu.mapper.TableMapper;
@@ -26,6 +27,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final ChainMapper chainMapper;
     private final StoreMapper storeMapper;
     private final TableMapper tableMapper;
+    private final DeviceMapper deviceMapper;
 
     @Override
     public OrganizationTreeDto tree() {
@@ -102,7 +104,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 .tierPriceId(store.getTierPriceId())
                 .tierServiceId(store.getTierServiceId())
                 .tableCount(tableCount)
-                .terminalCount(0)
+                .terminalCount(deviceMapper.countByStoreId(store.getId()))
                 .build();
     }
 }

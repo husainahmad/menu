@@ -50,6 +50,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
         MODULE_BY_PREFIX.put("/api/v1/storeservicetype", "operation");
         MODULE_BY_PREFIX.put("/api/v1/stores", "operation");
         MODULE_BY_PREFIX.put("/api/v1/kitchen-stations", "operation");
+        MODULE_BY_PREFIX.put("/api/v1/devices", "operation");
         MODULE_BY_PREFIX.put("/api/v1/kitchen-printers", "operation");
     }
 
