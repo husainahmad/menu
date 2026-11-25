@@ -75,8 +75,9 @@ The catalogue lives in `db-harmoni-master`.
 | Kitchen | `kitchen_stations`, `kitchen_printers`, `kitchen_category_routings`, `kitchen_product_routings` |
 | Users | `users`, `roles` |
 
-The `sql/` directory holds hand-applied migrations (`001`–`002`). There is no
-migration tool; run them in order against `db-harmoni-master`.
+The `sql/` directory holds hand-applied migrations (`001`–`004`). There is no
+migration tool; run them in order against `db-harmoni-master`. `004` drops the
+retired `sku_stock` table.
 
 ## Domain model
 

@@ -4,6 +4,7 @@ import com.harmoni.pos.component.CallerScope;
 import com.harmoni.pos.menu.model.Promotion;
 import com.harmoni.pos.menu.model.PromotionStatus;
 import com.harmoni.pos.menu.model.PromotionType;
+import com.harmoni.pos.menu.model.dto.PromotionSummaryDto;
 import com.harmoni.pos.menu.model.dto.add.PromotionAddDto;
 import com.harmoni.pos.menu.model.dto.edit.PromotionEditDto;
 
@@ -130,6 +131,8 @@ public interface PromotionService {
      * @return list of promotions ordered by priority then id, each with children populated
      */
     List<Promotion> listEvaluableOn(LocalDate onDate);
+
+    List<PromotionSummaryDto> listForCatalogItem(Long productId, Long skuId, Long categoryId, CallerScope scope);
 
     /**
      * Moves a promotion to a new lifecycle state.

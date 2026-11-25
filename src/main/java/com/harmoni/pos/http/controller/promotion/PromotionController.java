@@ -131,6 +131,24 @@ public class PromotionController {
     }
 
     /**
+     * Finds active promotions targeting a product, sku or category.
+     * GET /api/v1/promotion/for-catalog-item?productId=&skuId=&categoryId=
+     */
+    @GetMapping("/for-catalog-item")
+    @PreAuthorize("hasAnyAuthority('catalog:read', 'menu:view', 'rbac:manage')")
+    public ResponseEntity<RestAPIResponse> listForCatalogItem(
+            @RequestParam(name = "productId", required = false) Long productId,
+            @RequestParam(name = "skuId", required = false) Long skuId,
+            @RequestParam(name = "categoryId", required = false) Long categoryId) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(promotionService.listForCatalogItem(
+                        productId, skuId, categoryId, CallerScopeContext.current()))
+                .build();
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    /**
      * Retrieves the promotions that may be redeemed right now.
      *
      * @return list of promotions ordered by priority

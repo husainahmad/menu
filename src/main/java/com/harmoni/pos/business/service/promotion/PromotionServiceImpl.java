@@ -10,6 +10,7 @@ import com.harmoni.pos.menu.mapper.PromotionScheduleMapper;
 import com.harmoni.pos.menu.mapper.PromotionSpecialPriceMapper;
 import com.harmoni.pos.menu.mapper.PromotionScopeMapper;
 import com.harmoni.pos.menu.model.dto.PromotionScopeDto;
+import com.harmoni.pos.menu.model.dto.PromotionSummaryDto;
 import com.harmoni.pos.menu.model.PromotionScope;
 import com.harmoni.pos.menu.mapper.PromotionTargetMapper;
 import com.harmoni.pos.menu.model.Promotion;
@@ -57,6 +58,8 @@ public class PromotionServiceImpl implements PromotionService {
 
     private static final List<PromotionStatus> REDEEMABLE_STATUSES =
             List.of(PromotionStatus.ACTIVE, PromotionStatus.SCHEDULED);
+
+    private static final int MAX_CATALOG_PROMOTIONS = 30;
 
     /**
      * The only lifecycle state a cart may be priced against.
@@ -260,6 +263,32 @@ public class PromotionServiceImpl implements PromotionService {
     @Override
     public List<Promotion> listRedeemable() {
         return promotionMapper.selectRedeemableOn(REDEEMABLE_STATUSES, LocalDate.now());
+    }
+
+    @Override
+    public List<PromotionSummaryDto> listForCatalogItem(Long productId, Long skuId, Long categoryId,
+                                                        CallerScope scope) {
+        Long product = positiveOrNull(productId);
+        Long sku = positiveOrNull(skuId);
+        Long category = positiveOrNull(categoryId);
+        if (product == null && sku == null && category == null) {
+            throw new BusinessBadRequestException("exception.promotion.catalog.badRequest.invalid", null);
+        }
+
+        CallerScope effective = scope == null ? CallerScope.global() : scope;
+        List<Integer> brandIds = null;
+        if (!effective.isGlobal()) {
+            brandIds = new ArrayList<>(effective.getBrandIds());
+            if (brandIds.isEmpty()) {
+                return List.of();
+            }
+        }
+        return promotionMapper.selectForCatalogItem(REDEEMABLE_STATUSES, LocalDate.now(),
+                product, sku, category, brandIds, MAX_CATALOG_PROMOTIONS);
+    }
+
+    private static Long positiveOrNull(Long id) {
+        return id != null && id > 0 ? id : null;
     }
 
     /**

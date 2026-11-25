@@ -92,4 +92,45 @@
         ORDER BY product_id ASC, sort_order ASC, id ASC
     </select>
 
+    <resultMap id="CustomizationProductResultMap" type="com.harmoni.pos.menu.model.dto.product.CustomizationProductDto">
+        <id column="product_id" property="id"/>
+        <result column="product_name" property="name"/>
+        <result column="product_category_id" property="categoryId"/>
+        <result column="brand_id" property="brandId"/>
+        <collection property="skus" ofType="com.harmoni.pos.menu.model.dto.product.CustomizationProductSkuDto">
+            <id column="sku_id" property="id"/>
+            <result column="sku_name" property="name"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectProductsByCustomizationId" resultMap="CustomizationProductResultMap">
+        SELECT p.id AS product_id,
+               p.name AS product_name,
+               p.category_id AS product_category_id,
+               c.brand_id AS brand_id,
+               s.id AS sku_id,
+               s.name AS sku_name
+        FROM (
+            SELECT pc.product_id
+            FROM product_customizations pc
+            JOIN products p ON p.id = pc.product_id
+            JOIN categories c ON c.id = p.category_id
+            WHERE pc.customization_id = #{customizationId}
+              AND (pc.is_deleted IS NULL OR pc.is_deleted = 0)
+              AND (p.is_deleted IS NULL OR p.is_deleted = 0)
+            <if test="brandIds != null and brandIds.size() > 0">
+              AND c.brand_id IN
+              <foreach item="brandId" collection="brandIds" open="(" separator="," close=")">
+                  #{brandId}
+              </foreach>
+            </if>
+            ORDER BY p.id DESC
+            LIMIT #{limit}
+        ) AS page_window
+        JOIN products p ON p.id = page_window.product_id
+        JOIN categories c ON c.id = p.category_id
+        LEFT JOIN skus s ON s.product_id = p.id AND (s.is_deleted IS NULL OR s.is_deleted = 0)
+        ORDER BY p.id DESC, s.id ASC
+    </select>
+
 </mapper>

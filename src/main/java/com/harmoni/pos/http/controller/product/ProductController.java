@@ -1,6 +1,7 @@
 package com.harmoni.pos.http.controller.product;
 
 import com.harmoni.pos.business.service.category.CategoryService;
+import com.harmoni.pos.business.service.product.CustomizationCatalogService;
 import com.harmoni.pos.business.service.product.ProductService;
 import com.harmoni.pos.business.service.product.ProductSkuService;
 import com.harmoni.pos.component.CallerScope;
@@ -33,6 +34,7 @@ public class ProductController {
     private final ProductService productService;
     private final ProductSkuService productSkuService;
     private final CategoryService categoryService;
+    private final CustomizationCatalogService customizationCatalogService;
 
     /**
      * Creates a new Product.
@@ -236,6 +238,23 @@ public class ProductController {
                 .error(null)
                 .build();
 
+        return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
+    }
+
+    /**
+     * Lists products linked to a customization (for AI).
+     * GET /api/v1/product/by-customization/{customizationId}?limit=30
+     */
+    @GetMapping("/by-customization/{customizationId}")
+    @PreAuthorize("hasAnyAuthority('catalog:read', 'menu:view', 'rbac:manage')")
+    public ResponseEntity<RestAPIResponse> getByCustomization(@PathVariable Integer customizationId,
+                                                              @RequestParam(value = "limit", required = false) Integer limit) {
+        RestAPIResponse restAPIResponse = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(customizationCatalogService.selectByCustomization(
+                        customizationId, limit, CallerScopeContext.current()))
+                .error(null)
+                .build();
         return new ResponseEntity<>(restAPIResponse, HttpStatus.OK);
     }
 

@@ -83,6 +83,40 @@
     order by pr.priority asc, pr.id asc
   </select>
 
+  <select id="selectForCatalogItem" resultType="com.harmoni.pos.menu.model.dto.PromotionSummaryDto">
+    select distinct pr.id as id,
+           pr.code as code,
+           pr.name as name,
+           pr.promotion_type as promotionType,
+           pr.status as status,
+           pr.priority as priority
+    from promotions pr
+    left join promotion_targets pt on pt.promotion_id = pr.id
+    left join promotion_special_prices psp on psp.promotion_id = pr.id
+    where pr.status in
+    <foreach item="status" collection="statuses" separator="," open="(" close=")">
+      #{status,jdbcType=VARCHAR}
+    </foreach>
+    <if test="onDate != null">
+      and (pr.start_date is null or pr.start_date &lt;= #{onDate,jdbcType=DATE})
+      and (pr.end_date is null or pr.end_date &gt;= #{onDate,jdbcType=DATE})
+    </if>
+    and (
+      (#{productId,jdbcType=BIGINT} is not null and pt.product_id = #{productId,jdbcType=BIGINT})
+      or (#{skuId,jdbcType=BIGINT} is not null and (pt.sku_id = #{skuId,jdbcType=BIGINT}
+          or psp.sku_id = #{skuId,jdbcType=BIGINT}))
+      or (#{categoryId,jdbcType=BIGINT} is not null and pt.category_id = #{categoryId,jdbcType=BIGINT})
+    )
+    <if test="brandIds != null and brandIds.size() > 0">
+      and pr.brand_id in
+      <foreach item="brandId" collection="brandIds" open="(" separator="," close=")">
+        #{brandId,jdbcType=INTEGER}
+      </foreach>
+    </if>
+    order by pr.priority asc, pr.id asc
+    limit #{limit}
+  </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from promotions
     where id = #{id,jdbcType=BIGINT}

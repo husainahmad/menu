@@ -3,6 +3,7 @@ package com.harmoni.pos.menu.mapper;
 import com.harmoni.pos.menu.model.Promotion;
 import com.harmoni.pos.menu.model.PromotionStatus;
 import com.harmoni.pos.menu.model.PromotionType;
+import com.harmoni.pos.menu.model.dto.PromotionSummaryDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -85,6 +86,14 @@ public interface PromotionMapper {
      */
     List<Promotion> selectRedeemableOn(@Param("statuses") List<PromotionStatus> statuses,
                                        @Param("onDate") LocalDate onDate);
+
+    List<PromotionSummaryDto> selectForCatalogItem(@Param("statuses") List<PromotionStatus> statuses,
+                                                   @Param("onDate") LocalDate onDate,
+                                                   @Param("productId") Long productId,
+                                                   @Param("skuId") Long skuId,
+                                                   @Param("categoryId") Long categoryId,
+                                                   @Param("brandIds") List<Integer> brandIds,
+                                                   @Param("limit") int limit);
 
     /**
      * Updates a Promotion by its primary key.

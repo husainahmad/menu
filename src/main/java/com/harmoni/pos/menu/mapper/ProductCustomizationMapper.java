@@ -1,7 +1,9 @@
 package com.harmoni.pos.menu.mapper;
 
 import com.harmoni.pos.menu.model.ProductCustomization;
+import com.harmoni.pos.menu.model.dto.product.CustomizationProductDto;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -84,4 +86,8 @@ public interface ProductCustomizationMapper {
      * @return list of links for the given products
      */
     List<ProductCustomization> selectByProductIds(List<Integer> productIds);
+
+    List<CustomizationProductDto> selectProductsByCustomizationId(@Param("customizationId") Integer customizationId,
+                                                                  @Param("brandIds") List<Integer> brandIds,
+                                                                  @Param("limit") int limit);
 }
