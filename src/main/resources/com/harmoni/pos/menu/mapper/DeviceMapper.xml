@@ -76,11 +76,10 @@
     limit 1
   </select>
 
-  <select id="selectByStoreIdAndAddress" resultMap="BaseResultMap">
+  <select id="selectByAddress" resultMap="BaseResultMap">
     select <include refid="Base_Column_List" />
     from devices
-    where store_id = #{storeId,jdbcType=INTEGER}
-      and address = #{address,jdbcType=VARCHAR}
+    where address = #{address,jdbcType=VARCHAR}
       and deleted_at is null
     limit 1
   </select>

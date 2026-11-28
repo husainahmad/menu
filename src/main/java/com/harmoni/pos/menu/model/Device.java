@@ -22,7 +22,7 @@ public class Device {
     private Integer storeId;
     private String name;
     /**
-     * Operator-editable code, unique within the store.
+     * Operator-editable code, unique across all live devices.
      */
     private String address;
     /**

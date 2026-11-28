@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -66,6 +67,15 @@ public class DeviceController {
                 .data(deviceService.create(storeId, dto))
                 .build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/api/v1/devices/configuration")
+    public ResponseEntity<RestAPIResponse> getConfiguration(@RequestParam("address") String address) {
+        RestAPIResponse response = RestAPIResponse.builder()
+                .httpStatus(HttpStatus.OK.value())
+                .data(deviceService.getConfigurationByAddress(address))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**

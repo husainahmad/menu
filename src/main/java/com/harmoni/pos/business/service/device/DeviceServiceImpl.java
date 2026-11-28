@@ -3,6 +3,7 @@ package com.harmoni.pos.business.service.device;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.menu.mapper.DeviceMapper;
 import com.harmoni.pos.menu.mapper.StoreMapper;
@@ -62,7 +63,7 @@ public class DeviceServiceImpl implements DeviceService {
             throw new BusinessBadRequestException("exception.device.name.duplicate", null);
         }
         String address = dto.getAddress().trim();
-        if (deviceMapper.selectByStoreIdAndAddress(storeId, address) != null) {
+        if (deviceMapper.selectByAddress(address) != null) {
             throw new BusinessBadRequestException("exception.device.address.duplicate", null);
         }
 
@@ -98,7 +99,7 @@ public class DeviceServiceImpl implements DeviceService {
             throw new BusinessBadRequestException("exception.device.name.duplicate", null);
         }
         String address = dto.getAddress().trim();
-        Device sameAddress = deviceMapper.selectByStoreIdAndAddress(existing.getStoreId(), address);
+        Device sameAddress = deviceMapper.selectByAddress(address);
         if (sameAddress != null && !Objects.equals(sameAddress.getId(), id)) {
             throw new BusinessBadRequestException("exception.device.address.duplicate", null);
         }
@@ -140,6 +141,21 @@ public class DeviceServiceImpl implements DeviceService {
             throw new BusinessBadRequestException("exception.device.id.notFound", null);
         }
         return device;
+    }
+
+    @Override
+    public JsonNode getConfigurationByAddress(String address) {
+        if (address == null || address.isBlank()) {
+            throw new BusinessBadRequestException("exception.device.address.required", null);
+        }
+        Device device = deviceMapper.selectByAddress(address.trim());
+        if (device == null) {
+            throw new BusinessBadRequestException("exception.device.address.notFound", null);
+        }
+        DeviceMode mode = parseMode(device.getDeviceMode());
+        ObjectNode response = (ObjectNode) readObject(device.getConfiguration()).deepCopy();
+        response.put("deviceMode", mode.name());
+        return response;
     }
 
     @Override

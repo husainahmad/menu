@@ -1,5 +1,6 @@
 package com.harmoni.pos.business.service.device;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.harmoni.pos.exception.BusinessBadRequestException;
 import com.harmoni.pos.menu.mapper.DeviceMapper;
 import com.harmoni.pos.menu.mapper.StoreMapper;
@@ -20,6 +21,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,7 +58,7 @@ class DeviceServiceImplTest {
         dto.setAddress("  POS-02  ");
         when(storeMapper.selectByPrimaryKey(1)).thenReturn(store);
         when(deviceMapper.selectByStoreIdAndName(1, "Front POS")).thenReturn(null);
-        when(deviceMapper.selectByStoreIdAndAddress(1, "POS-02")).thenReturn(null);
+        when(deviceMapper.selectByAddress("POS-02")).thenReturn(null);
         when(deviceMapper.insert(any(Device.class))).thenReturn(1);
 
         Device created = service.create(1, dto);
@@ -66,11 +68,11 @@ class DeviceServiceImplTest {
     }
 
     @Test
-    void createRejectsDuplicateAddress() {
+    void createRejectsDuplicateAddressAcrossStores() {
         when(storeMapper.selectByPrimaryKey(1)).thenReturn(store);
         when(deviceMapper.selectByStoreIdAndName(1, "Front POS")).thenReturn(null);
-        when(deviceMapper.selectByStoreIdAndAddress(1, "POS-01"))
-                .thenReturn(new Device().setId(99));
+        when(deviceMapper.selectByAddress("POS-01"))
+                .thenReturn(new Device().setId(99).setStoreId(99));
 
         BusinessBadRequestException error = assertThrows(BusinessBadRequestException.class,
                 () -> service.create(1, dto));
@@ -89,7 +91,7 @@ class DeviceServiceImplTest {
                 .setStatus("ACTIVE");
         when(deviceMapper.selectByPrimaryKey(5)).thenReturn(existing);
         when(deviceMapper.selectByStoreIdAndName(1, "Front POS")).thenReturn(existing);
-        when(deviceMapper.selectByStoreIdAndAddress(1, "POS-01")).thenReturn(existing);
+        when(deviceMapper.selectByAddress("POS-01")).thenReturn(existing);
         when(deviceMapper.updateByPrimaryKey(any(Device.class))).thenReturn(1);
 
         Device updated = service.update(5, dto);
@@ -107,8 +109,8 @@ class DeviceServiceImplTest {
                 .setStatus("ACTIVE");
         when(deviceMapper.selectByPrimaryKey(5)).thenReturn(existing);
         when(deviceMapper.selectByStoreIdAndName(1, "Front POS")).thenReturn(existing);
-        when(deviceMapper.selectByStoreIdAndAddress(1, "POS-01"))
-                .thenReturn(new Device().setId(99));
+        when(deviceMapper.selectByAddress("POS-01"))
+                .thenReturn(new Device().setId(99).setStoreId(99));
 
         BusinessBadRequestException error = assertThrows(BusinessBadRequestException.class,
                 () -> service.update(5, dto));
@@ -159,9 +161,42 @@ class DeviceServiceImplTest {
         assertEquals("exception.device.config.table", error.getMessage());
     }
 
+    @Test
+    void getConfigurationByAddressReturnsJson() {
+        when(deviceMapper.selectByAddress("POS-02")).thenReturn(new Device()
+                .setId(7)
+                .setAddress("POS-02")
+                .setDeviceMode("CASHIER_POS")
+                .setConfiguration("{\"payments\":[\"CASH\"]}"));
+
+        JsonNode configuration = service.getConfigurationByAddress(" POS-02 ");
+
+        assertEquals("CASH", configuration.get("payments").get(0).asText());
+        assertEquals("CASHIER_POS", configuration.get("deviceMode").asText());
+    }
+
+    @Test
+    void getConfigurationByAddressRejectsBlankAddress() {
+        BusinessBadRequestException error = assertThrows(BusinessBadRequestException.class,
+                () -> service.getConfigurationByAddress("  "));
+
+        assertEquals("exception.device.address.required", error.getMessage());
+        verify(deviceMapper, never()).selectByAddress(anyString());
+    }
+
+    @Test
+    void getConfigurationByAddressRejectsUnknownAddress() {
+        when(deviceMapper.selectByAddress("POS-99")).thenReturn(null);
+
+        BusinessBadRequestException error = assertThrows(BusinessBadRequestException.class,
+                () -> service.getConfigurationByAddress("POS-99"));
+
+        assertEquals("exception.device.address.notFound", error.getMessage());
+    }
+
     private void stubCreate() {
         when(storeMapper.selectByPrimaryKey(1)).thenReturn(store);
         when(deviceMapper.selectByStoreIdAndName(1, "Front POS")).thenReturn(null);
-        when(deviceMapper.selectByStoreIdAndAddress(1, "POS-01")).thenReturn(null);
+        when(deviceMapper.selectByAddress("POS-01")).thenReturn(null);
     }
 }

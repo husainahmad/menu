@@ -26,8 +26,7 @@ public interface DeviceMapper {
     Device selectByStoreIdAndName(@Param("storeId") Integer storeId,
                                   @Param("name") String name);
 
-    Device selectByStoreIdAndAddress(@Param("storeId") Integer storeId,
-                                     @Param("address") String address);
+    Device selectByAddress(@Param("address") String address);
 
     int countByStoreId(@Param("storeId") Integer storeId);
 }

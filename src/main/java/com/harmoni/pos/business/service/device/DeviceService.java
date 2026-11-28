@@ -1,5 +1,6 @@
 package com.harmoni.pos.business.service.device;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.harmoni.pos.menu.model.Device;
 import com.harmoni.pos.menu.model.dto.DeviceDto;
 
@@ -19,6 +20,8 @@ public interface DeviceService {
     Device get(Integer id);
 
     Device get(Integer storeId, Integer id);
+
+    JsonNode getConfigurationByAddress(String address);
 
     List<Device> listByStore(Integer storeId);
 }

@@ -77,7 +77,10 @@ The catalogue lives in `db-harmoni-master`.
 
 The `sql/` directory holds hand-applied migrations (`001`–`004`). There is no
 migration tool; run them in order against `db-harmoni-master`. `004` drops the
-retired `sku_stock` table.
+retired `sku_stock` table. Device addresses are globally unique across live
+devices; soft-deleted addresses can be reused. Apply
+`database/migrations/2026_11_25_devices_global_address.sql` after
+`2026_11_20_devices_address.sql`.
 
 ## Domain model
 
@@ -213,7 +216,13 @@ All endpoints require the gateway identity headers. The main groups:
 | `GET/POST` | `/api/v1/floor`, `/api/v1/floor/{id}`, `/api/v1/floor/store/{storeId}` | `table:view` / `table:edit` |
 | `GET/POST` | `/api/v1/table`, `/api/v1/table/{id}`, `/api/v1/table/store/{storeId}` | `table:view` / `table:edit` |
 | `GET/POST` | `/api/v1/service`, `/api/v1/service/{id}` | `terminal:view` / `terminal:edit` |
+| `GET/POST` | `/api/v1/stores/{storeId}/devices`, `/api/v1/devices/{id}` | `terminal:view` / `terminal:edit` |
+| `GET` | `/api/v1/devices/configuration?address={address}` | `terminal:view`, `operation:read`, `rbac:manage` |
 | `POST` | `/api/v1/subservice`, `/api/v1/storeservicetype` | `terminal:edit` |
+
+The device configuration response includes the mode-specific fields plus
+`deviceMode`, so clients can branch on `CASHIER_POS`, `TABLE_ORDER`,
+`SELF_ORDER_KIOSK`, or `QUICK_ORDER`.
 | `GET/POST` | `/api/v1/stores/{storeId}/kitchen-stations`, `/api/v1/kitchen-stations/{id}` | `availability:view` / `availability:edit` |
 | `GET/POST` | `/api/v1/kitchen-stations/{stationId}/printers`, `/api/v1/kitchen-printers/{id}` | `availability:view` / `availability:edit` |
 | `GET/POST` | `/api/v1/stores/{storeId}/kitchen-routings` | `availability:view` / `availability:edit` |
